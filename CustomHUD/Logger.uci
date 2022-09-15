@@ -1,0 +1,9 @@
+`define scelog(text, cond)     `log(`text, `cond, 'YetAnotherScoreboard')
+
+`define info(text)             `scelog("[INFO]"@`text, true)
+`define warning(text)          `scelog("[WARNING]"@`text, true)
+`define error(text)            `scelog("[ERROR]"@`text, true)
+
+`define debug(text)            if (`bEnableDebug)     { `scelog("[DEBUG]"@`text, `bEnableDebug); }
+`define callstack()            if (`bEnableCallstack) { `scelog("[CALLSTACK]"@`Location, `bEnableCallstack); }
+`define callstack_static(text) if (`bEnableCallstack) { `scelog("[CALLSTACK]"@`text, `bEnableCallstack); }

@@ -1,0 +1,46 @@
+`define BOX_INNERBORDER 					0
+`define	BOX_INNERBORDER_TRANSPARENT 		1
+`define	BOX_MEDIUM 							2
+`define	BOX_MEDIUM_SLIGHTTRANSPARENT 		3
+`define	BOX_MEDIUM_TRANSPARENT 				4
+`define	BOX_LARGE 							5
+`define	BOX_LARGE_SLIGHTTRANSPARENT 		6
+`define	BOX_LARGE_TRANSPARENT 				7
+`define	BOX_SMALL 							8
+`define	BOX_SMALL_SLIGHTTRANSPARENT 		9
+`define	BOX_SMALL_TRANSPARENT				10
+`define	BOX_CORNER_8						11
+`define	BOX_CORNER_16						12
+`define	BOX_CORNER_32						13
+`define	BOX_CORNER_64						14
+`define	BOX_CORNER_512						15
+
+`define ITEMBOX_NORMAL		0
+`define ITEMBOX_DISABLED	1
+`define ITEMBOX_HIGHLIGHTED	2
+
+`define CHECKMARK_NORMAL		0
+`define CHECKMARK_DISABLED		1
+`define CHECKMARK_HIGHLIGHTED	2
+
+`define	ARROW_DOWN		0
+`define	ARROW_LEFT		1
+`define	ARROW_RIGHT		2
+`define	ARROW_UP		3
+
+`define	BUTTON_NORMAL			0
+`define	BUTTON_DISABLED			1
+`define	BUTTON_HIGHLIGHTED		2
+`define	BUTTON_PRESSED			3
+
+`define	TAB_TOP			0
+`define	TAB_BOTTOM		1
+
+`define PEN_WHITE	0
+`define PEN_BLACK	1
+`define PEN_GRAY	2
+
+`define CURSOR_DEFAULT 		0
+`define CURSOR_SELECTION 	1
+`define CURSOR_RESIZEVERT	2
+`define CURSOR_RESIZEHORZ 	3
