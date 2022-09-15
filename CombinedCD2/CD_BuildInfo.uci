@@ -1,0 +1,4 @@
+`define CD_COMMIT_HASH "Controlled Difficulty - Combined Edition"
+`define CD_AUTHOR_TIMESTAMP "2021-07-24"
+`define CD_AUTHOR "Blackout, modified by Tiger, Akathiiro313, HUNTER, Asapi1020"
+`define CD_BUILD_TYPE "Combined Edition"
