@@ -5,9 +5,28 @@ var config array<string> CDRecords;
 var config int MaxStrage;
 var config int IniVer;
 
+
+public simulated function bool SafeDestroy()
+{
+	return (bPendingDelete || bDeleteMe || Destroy());
+}
+
+public event PreBeginPlay()
+{
+	if (WorldInfo.NetMode == NM_Client)
+	{
+		SafeDestroy();
+		return;
+	}
+
+	super.PreBeginPlay();
+}
+
 function PostBeginPlay()
 {
 	local int i;
+
+	if (bPendingDelete || bDeleteMe) return;
 
 	super.PostBeginPlay();
 

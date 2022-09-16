@@ -8,7 +8,7 @@ simulated event PostBeginPlay()
 
 	CDPC = CD_PlayerController( GetALocalPlayerController() );
 
-	if ( !CDPC.AlphaGlitterBool )
+	if ( CDPC != none && !CDPC.AlphaGlitterBool )
 	{
 		SpecialMoveHandler.SpecialMoveClasses[SM_Rally] = class'CD_AlphaRally_NoGlitter';
 	}

@@ -791,6 +791,10 @@ function GetSpawnListFromSquad(byte SquadIdx, out array< KFAISpawnSquad > Squads
 						TempSpawnList.AddItem(AIBossClassList[Rand(AIBossClassList.Length)]);
 					}
 				}
+				else if( bLargeLess && IsLarge(AIType) )
+				{
+					`cdlog("Skip a large zed.");
+				}
 				else
 				{
 					TempSpawnList.AddItem(AIClassList[AIType]);
@@ -1004,4 +1008,16 @@ function ReplaceZedClass( const array< class< KFPawn_Monster > > MatchClasses,
 function SummonBossMinions( array<KFAISpawnSquad> NewMinionSquad, int NewMaxBossMinions, optional bool bUseLivingPlayerScale = true ){
 	if(bDisableBossMinions) return;
 	super.SummonBossMinions(NewMinionSquad, NewMaxBossMinions, bUseLivingPlayerScale);
+}
+
+function bool IsLarge(EAIType AIType)
+{
+	switch(AIType)
+	{
+		case AT_FleshPound:
+		case AT_FleshpoundMini:
+		case AT_Scrake:
+			return true;
+	}
+	return false;
 }
