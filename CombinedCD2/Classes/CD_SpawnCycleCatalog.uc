@@ -268,14 +268,15 @@ private function InitSpawnCyclePresetList()
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_su_v1');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_poopro_v1');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_dtf_pm');
+		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_who_v1');
 
-		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_gso_v1');				
-		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_gso_v2');
+		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_gso_v1');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_aio_v1');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_aio_v2');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_gg_v1');
 		
-/*		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_chaos_v1');
+/*		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_gso_v2');
+		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_chaos_v1');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_dig_v1');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_owo_v1');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_xj9_v1');

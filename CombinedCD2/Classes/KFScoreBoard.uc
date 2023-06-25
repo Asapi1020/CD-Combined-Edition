@@ -314,28 +314,31 @@ function DrawMenu()
 	PlayersList.ChangeListSize(KFPRIArray.Length);
 
 //	Spectators Info
-	Width = Canvas.ClipX * 0.55;
-	XPos = Canvas.ClipX * 0.225;
-	YPos += YL*2 + BorderSize*4 + PlayersList.CompPos[3];
-	SetDrawColor(Canvas, Settings.Style.ListHeaderBoxColor);
-		Owner.CurrentStyle.DrawRectBox(	XPos - BorderSize * 2,
-		YPos,
-		Width + BorderSize * 4,
-		BoxH,
-		Settings.Style.EdgeSize,
-		0);
-
-	SetDrawColor(Canvas, Settings.Style.ListHeaderTextColor);
-	S = "Spectators:";
-	for(i=0; i<SpectatorsArray.length; i++)
+	if(PC.WorldInfo.NetMode != NM_Standalone)
 	{
-		if(i>0)
-			S $= ",";
-			
-		S @= SpectatorsArray[i].PlayerName;
+		Width = Canvas.ClipX * 0.55;
+		XPos = Canvas.ClipX * 0.225;
+		YPos += YL*2 + BorderSize*4 + PlayersList.CompPos[3];
+		SetDrawColor(Canvas, Settings.Style.ListHeaderBoxColor);
+			Owner.CurrentStyle.DrawRectBox(	XPos - BorderSize * 2,
+			YPos,
+			Width + BorderSize * 4,
+			BoxH,
+			Settings.Style.EdgeSize,
+			0);
+
+		SetDrawColor(Canvas, Settings.Style.ListHeaderTextColor);
+		S = "Spectators:";
+		for(i=0; i<SpectatorsArray.length; i++)
+		{
+			if(i>0)
+				S $= ",";
+				
+			S @= SpectatorsArray[i].PlayerName;
+		}
+		
+		DrawTextShadowHLeftVCenter(S, XPos, YPos, FontScalar);
 	}
-	
-	DrawTextShadowHLeftVCenter(S, XPos, YPos, FontScalar);
 }
 
 function DrawPlayerEntry(Canvas C, int Index, float YOffset, float Height, float Width, bool bFocus)

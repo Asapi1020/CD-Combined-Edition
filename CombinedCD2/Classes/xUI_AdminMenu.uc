@@ -19,6 +19,8 @@ var KFGUI_Button CloseB;
 var KFGUI_Button ListToggleB;
 var KFGUI_Button PerkSubB;
 var KFGUI_Button PerkAddB;
+var KFGUI_Button UpgradeSubB;
+var KFGUI_Button UpgradeAddB;
 
 var KFGUI_ColumnList AuthList;
 var KFGUI_RightClickMenu WeapRClicker;
@@ -27,6 +29,7 @@ var editinline export KFGUI_RightClickMenu WeapRightClick;
 var editinline export KFGUI_RightClickMenu UserRightClick;
 
 var KFGUI_CheckBox LevelRestrictionBox;
+var KFGUI_CheckBox AntiOvercapBox;
 var KFGUI_CheckBox SkillRestriction0;
 var KFGUI_CheckBox SkillRestriction1;
 var KFGUI_CheckBox SkillRestriction2;
@@ -49,6 +52,7 @@ var array<string> ColumnText;
 const LevelRestrictionToolTip = "Do you require players to reach Lv25?";
 const SkillRestrictionToolTip = "Do you ban this skill?";
 const ListToggleToolTip = "Toggle list contents between weapons and user authorities.";
+const AntiOvercapToolTip = "Do you disable overcap and reset ammo count?";
 
 function SetWindowDrag(bool bDrag)
 {
@@ -64,7 +68,7 @@ function DrawMenu()
 
 	Super.DrawMenu();
 
-	WindowTitle="Admin Menu v1.0";
+	WindowTitle="Admin Menu v1.1";
 	Canvas.Font = Owner.CurrentStyle.PickFont(FontScalar);
 	Canvas.TextSize("ABC", XL, YL, FontScalar, FontScalar);
 
@@ -125,6 +129,13 @@ function DrawMenu()
 
 	DrawControllerInfo("Perk Authority Level", S, PerkSubB, PerkAddB, YL, FontScalar, Owner.HUDOwner.ScaledBorderSize, 30);
 
+	UpgradeSubB = KFGUI_Button(FindComponentID('UpgradeSub'));
+	UpgradeSubB.ButtonText = "-";
+	UpgradeAddB = KFGUI_Button(FindComponentID('UpgradeAdd'));
+	UpgradeAddB.ButtonText = "+";
+	S = string(GetCDGRI().MaxUpgrade);
+	DrawControllerInfo("Max Upgrade Count", S, UpgradeSubB, UpgradeAddB, YL, FontScalar, Owner.HUDOwner.ScaledBorderSize, 30);
+
 //	List
 	if(!bListUpdate)
 	{
@@ -141,6 +152,10 @@ function DrawMenu()
 	LevelRestrictionBox.ToolTip=LevelRestrictionToolTip;
 	DrawBoxDescription("Require Lv25", LevelRestrictionBox, 0.3);
 
+	AntiOvercapBox = KFGUI_CheckBox(FindComponentID('AntiOvercap'));
+	AntiOvercapBox.bChecked = GetCDPC().bAntiOvercap;
+	AntiOvercapBox.ToolTip=AntiOvercapToolTip;
+	DrawBoxDescription("Anti Overcap", AntiOvercapBox, 0.3);
 
 	SkillRestriction0 = KFGUI_CheckBox(FindComponentID('SR0'));
 	SkillRestriction0.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 0);
@@ -340,6 +355,12 @@ function ButtonClicked(KFGUI_Button Sender)
 		case 'PerkAdd':
 			GetCDPC().ChangePerkRestriction(GetCDPC().WeapUIInfo.Perk, 1);
 			break;
+		case 'UpgradeSub':
+			GetCDPC().ChangeMaxUpgradeCount(-1);
+			break;
+		case 'UpgradeAdd':
+			GetCDPC().ChangeMaxUpgradeCount(1);
+			break;
 	}
 }
 
@@ -425,6 +446,9 @@ function ToggleCheckBox(KFGUI_CheckBox Sender)
 	{
 		case 'LevelRestriction':
 			CDPC.ChangeLevelRestriction(Sender.bChecked);
+			break;
+		case 'AntiOvercap':
+			CDPC.ServerSetAntiOvercap(Sender.bChecked);
 			break;
 		case 'SR0':
 			CDPC.SaveSkillRestriction(GetCDPC().WeapUIInfo.Perk, 0, Sender.bChecked);
@@ -717,6 +741,33 @@ defaultproperties
 		OnCheckChange=ToggleCheckBox
 	End Object
 
+	Begin Object Class=KFGUI_Button Name=UpgradeSub
+		XPosition=0.055
+		YPosition=0.700
+		XSize=0.05
+		YSize=0.05
+		ID="UpgradeSub"
+		OnClickLeft=ButtonClicked
+		TextColor=(R=255, G=255, B=255, A=255)
+	End Object
+
+	Begin Object Class=KFGUI_Button Name=UpgradeAdd
+		XPosition=0.250
+		YPosition=0.700
+		XSize=0.05
+		YSize=0.05
+		ID="UpgradeAdd"
+		OnClickLeft=ButtonClicked
+		TextColor=(R=255, G=255, B=255, A=255)
+	End Object
+
+	Begin Object Class=KFGUI_CheckBox Name=AntiOvercap
+		XPosition=0.055
+		YPosition=0.800
+		ID="AntiOvercap"
+		OnCheckChange=ToggleCheckBox
+	End Object
+
 	Components.Add(LevelRestriction)
 	Components.Add(SkillRestriction0)
 	Components.Add(SkillRestriction1)
@@ -728,4 +779,7 @@ defaultproperties
 	Components.Add(SkillRestriction7)
 	Components.Add(SkillRestriction8)
 	Components.Add(SkillRestriction9)
+	Components.Add(UpgradeSub)
+	Components.Add(UpgradeAdd)
+	Components.Add(AntiOvercap)
 }
