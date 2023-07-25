@@ -86,11 +86,25 @@ var byte NewWaveNum;
 
 struct ZedCombo
 {
-	var string FName;
+	var class<KFPawn_Monster> ZedClass;
 	var string Code;
 };
 
 var array<ZedCombo> ZedsCombo;
+
+var localized string SpawnZedString;
+var localized string WeaponSkinButtonText;
+var localized string DisplaySettingString;
+var localized string DamageMessageString, DamagePopupString, ZedHealthBarString, HideTraderPathString, ResetAccButtonText, HitZonesButtonText, ClearCorpsesButtonText;
+var localized string PlayerSettingString;
+var localized string AutoFillString, AutoNadeString, DemiGodString, GodString, UltraSyringeString, MedicBuffString;
+var localized string WaveSettingString;
+var localized string DisableRobotsString, LargeLessString, EndWaveButtonText, SetWaveButtonText, NewWaveString;
+var localized string HPControlString;
+var localized string SpawnSCButtonText, SpawnFPButtonText, SpawnBothButtonText, DistanceString, KillZedsButtonText, OpenTraderButtonText, LargeChallengeButtonText, TrashChallengeButtonText;
+var localized string GameSettingString;
+var localized string DisableZTString, RageSpawnString, AutoSpawnString, BrainDeadString, HSOnlyString, ZTButtonText, StopSpawnButtonText, SpawnRateString;
+var localized string LargeChallengeMsg;
 
 function SetWindowDrag(bool bDrag)
 {
@@ -117,7 +131,7 @@ function InitMenu()
 	super.InitMenu();
 
 	ZedList = KFGUI_ColumnList(FindComponentID('Zeds'));
-	ZedList.Columns.AddItem(newFColumnItem("Spawn Zed",1.f));
+	ZedList.Columns.AddItem(newFColumnItem(SpawnZedString,1.f));
 }
 
 function DrawMenu()
@@ -144,7 +158,7 @@ function DrawMenu()
 	{
 		ZedList.EmptyList();
 		for(i=0; i<ZedsCombo.length; i++)
-			ZedList.AddLine(ZedsCombo[i].FName);
+			ZedList.AddLine(ZedsCombo[i].ZedClass.static.GetLocalizedName());
 	}
 
 //	Player Settings
@@ -167,111 +181,111 @@ function DrawMenu()
 
 //	Close Button (bottom)
 	CloseButton = KFGUI_Button(FindComponentID('Close'));
-	CloseButton.ButtonText="Close";
+	CloseButton.ButtonText=CloseButtonText;
 
 	MapVoteButton = KFGUI_Button(FindComponentID('MapVote'));
-	MapVoteButton.ButtonText="Map Vote";
+	MapVoteButton.ButtonText=class'CombinedCD2.xUI_ResultMenu'.default.MapVoteButtonText;
 
 	WeapSkinButton = KFGUI_Button(FindComponentID('WeapSkin'));
-	WeapSkinButton.ButtonText="Weapon Skin";
+	WeapSkinButton.ButtonText=WeaponSkinButtonText;
 
 	GetSTMPC().SaveSTMSettings();
-	WindowTitle="Ultimate Test Mode for CD";
+	WindowTitle=Title;
 }
 
 function DrawDisplaySettings(float XPos, float YPos, float BoxW, float YL, float FontScalar, float BorderSize)
 {
-	DrawCategolyZone("Display Settings", XPos, YPos, BoxW, YL*15, FontScalar, BorderSize, YL);
+	DrawCategolyZone(DisplaySettingString, XPos, YPos, BoxW, YL*15, FontScalar, BorderSize, YL);
 
 	DamageMessageBox = KFGUI_CheckBox(FindComponentID('DamageMessage'));
 	DamageMessageBox.bChecked=GetSTMPC().bShowDamageMsg;
-	DrawBoxDescription("Damage Message", DamageMessageBox, 0.25);
+	DrawBoxDescription(DamageMessageString, DamageMessageBox, 0.25);
 
 	DamagePopupBox = KFGUI_CheckBox(FindComponentID('DamagePopup'));
 	DamagePopupBox.bChecked=GetSTMPC().bShowDamagePopup;
-	DrawBoxDescription("Damage Popup", DamagePopupBox, 0.25);
+	DrawBoxDescription(DamagePopupString, DamagePopupBox, 0.25);
 
 	HealthBarBox = KFGUI_CheckBox(FindComponentID('HealthBar'));
 	HealthBarBox.bChecked=GetSTMPC().bShowZedHealth;
-	DrawBoxDescription("Zed Health Bar", HealthBarBox, 0.25);
+	DrawBoxDescription(ZedHealthBarString, HealthBarBox, 0.25);
 
 	AccBox = KFGUI_CheckBox(FindComponentID('Acc'));
 	AccBox.bChecked=GetSTMPC().bShowAcc;
-	DrawBoxDescription("Accuracy", AccBox, 0.25);
+	DrawBoxDescription(class'CombinedCD2.CD_StatsSystem'.default.AccuracyString, AccBox, 0.25);
 
 	HideTraderPathsBox = KFGUI_CheckBox(FindComponentID('HideTraderPaths'));
 	HideTraderPathsBox.bChecked = GetSTMPC().bHideTraderPaths;
-	DrawBoxDescription("Hide Trader Paths", HideTraderPathsBox, 0.25);
+	DrawBoxDescription(HideTraderPathString, HideTraderPathsBox, 0.25);
 
 	ResetAccButton = KFGUI_Button(FindComponentID('ResetAcc'));
-	ResetAccButton.ButtonText="Reset Accuracy";
+	ResetAccButton.ButtonText=ResetAccButtonText;
 
 	HitZoneButton = KFGUI_Button(FindComponentID('HitZone'));
-	HitZoneButton.ButtonText="Hit Zones";
+	HitZoneButton.ButtonText=HitZonesButtonText;
 	if(GetSTMPC().WorldInfo.NetMode != NM_StandAlone)
 		HitZoneButton.bDisabled = true;
 
 	ClearCorpsesButton = KFGUI_Button(FindComponentID('ClearCorpses'));
-	ClearCorpsesButton.ButtonText = "Clear Corpses";
+	ClearCorpsesButton.ButtonText = ClearCorpsesButtonText;
 }
 
 function DrawPlayerSettings(float XPos, float YPos, float BoxW, float YL, float FontScalar, float BorderSize)
 {
-	DrawCategolyZone("Player Settings", XPos, YPos, BoxW, YL*13, FontScalar, BorderSize, YL);
+	DrawCategolyZone(PlayerSettingString, XPos, YPos, BoxW, YL*13, FontScalar, BorderSize, YL);
 
 	AutoFillBox = KFGUI_CheckBox(FindComponentID('AutoFill'));
 	AutoFillBox.bChecked=GetSTMPC().bAutoFillMag;
-	DrawBoxDescription("Auto Fill Magazine", AutoFillBox, 0.95);
+	DrawBoxDescription(AutoFillString, AutoFillBox, 0.95);
 
 	AutoNadeBox = KFGUI_CheckBox(FindComponentID('AutoNade'));
 	AutoNadeBox.bChecked=GetSTMPC().bAutoFillNade;
-	DrawBoxDescription("Auto Fill Grenade", AutoNadeBox, 0.95);
+	DrawBoxDescription(AutoNadeString, AutoNadeBox, 0.95);
 
 	DemiGodBox = KFGUI_CheckBox(FindComponentID('DemiGod'));
 	DemiGodBox.bChecked=GetSTMPC().bDemiGodMode;
-	DrawBoxDescription("DemiGod", DemiGodBox, 0.95);
+	DrawBoxDescription(DemiGodString, DemiGodBox, 0.95);
 
 	GodBox = KFGUI_CheckBox(FindComponentID('God'));
 	GodBox.bChecked=GetSTMPC().bGodMode;
-	DrawBoxDescription("God", GodBox, 0.95);
+	DrawBoxDescription(GodString, GodBox, 0.95);
 
 	SyringeBox = KFGUI_CheckBox(FindComponentID('Syringe'));
 	SyringeBox.bChecked=GetSTMPC().bUltraSyringe;
-	DrawBoxDescription("Ultra Syringe", SyringeBox, 0.95);
+	DrawBoxDescription(UltraSyringeString, SyringeBox, 0.95);
 
 	MBSubButton = KFGUI_Button(FindComponentID('MBSub'));
 	MBSubButton.ButtonText="-";
 	MBAddButton = KFGUI_Button(FindComponentID('MBAdd'));
 	MBAddButton.ButtonText="+";
-	DrawControllerInfo("Medic Buff", string(MedBuffLevel), MBSubButton, MBAddButton, YL, FontScalar, BorderSize, 10);
+	DrawControllerInfo(MedicBuffString, string(MedBuffLevel), MBSubButton, MBAddButton, YL, FontScalar, BorderSize, 10);
 
 	HellishRageButton = KFGUI_Button(FindComponentID('HellishRage'));
-	HellishRageButton.ButtonText = "Hellish Rage";
+	HellishRageButton.ButtonText = class'KFGame.KFPowerUp_HellishRage'.default.PowerUpName;
 }
 
 function DrawWaveSettings(float XPos, float YPos, float BoxW, float YL, float FontScalar, float BorderSize)
 {
-	DrawCategolyZone("Wave Settings", XPos, YPos, BoxW, YL*18, FontScalar, BorderSize, YL);
+	DrawCategolyZone(WaveSettingString, XPos, YPos, BoxW, YL*18, FontScalar, BorderSize, YL);
 
 	DisableRobotsBox = KFGUI_CheckBox(FindComponentID('DisableRobots'));
 	DisableRobotsBox.bChecked = GetSTMGRI().bDisableRobots;
-	DrawBoxDescription("Disable Robots", DisableRobotsBox, 0.95);
+	DrawBoxDescription(DisableRobotsString, DisableRobotsBox, 0.95);
 
 	LargeLessBox = KFGUI_CheckBox(FindComponentID('LargeLess'));
 	LargeLessBox.bChecked = GetSTMGRI().bLargeLess;
-	DrawBoxDescription("Large Less", LargeLessBox, 0.95);
+	DrawBoxDescription(LargeLessString, LargeLessBox, 0.95);
 
 	EndWaveButton = KFGUI_Button(FindComponentID('EndWave'));
-	EndWaveButton.ButtonText = "End Wave";
+	EndWaveButton.ButtonText = EndWaveButtonText;
 
 	SetWaveButton = KFGUI_Button(FindComponentID('SetWave'));
-	SetWaveButton.ButtonText = "Set Wave";
+	SetWaveButton.ButtonText = SetWaveButtonText;
 
 	NWSubButton = KFGUI_Button(FindComponentID('NWSub'));
 	NWSubButton.ButtonText = "-";
 	NWAddButton = KFGUI_Button(FindComponentID('NWAdd'));
 	NWAddButton.ButtonText = "+";
-	DrawControllerInfo("New Wave", string(NewWaveNum), NWSubButton, NWAddButton, YL, FontScalar, BorderSize, 10);
+	DrawControllerInfo(NewWaveString, string(NewWaveNum), NWSubButton, NWAddButton, YL, FontScalar, BorderSize, 10);
 
 	MMDoubleSubButton = KFGUI_Button(FindComponentID('MMDoubleSub'));
 	MMDoubleSubButton.ButtonText = "-4";
@@ -343,14 +357,14 @@ function DrawCentralButtons(float YL, float FontScalar, float BorderSize)
 	SubtractButton.ButtonText="-";
 	AddButton = KFGUI_Button(FindComponentID('Add'));
 	AddButton.ButtonText="+";
-	DrawControllerInfo("HP Control", GetSTMGRI().nFakedPlayers$"P HP", SubtractButton, AddButton, YL, FontScalar, BorderSize, 30, 1.5);
+	DrawControllerInfo(HPControlString, GetSTMGRI().nFakedPlayers$"P HP", SubtractButton, AddButton, YL, FontScalar, BorderSize, 30, 1.5);
 
 	SpawnSCButton = KFGUI_Button(FindComponentID('SC'));
-	SpawnSCButton.ButtonText="Spawn SC";
+	SpawnSCButton.ButtonText=SpawnSCButtonText;
 	SpawnFPButton = KFGUI_Button(FindComponentID('FP'));
-	SpawnFPButton.ButtonText="Spawn FP";
+	SpawnFPButton.ButtonText=SpawnFPButtonText;
 	SpawnBothButton = KFGUI_Button(FindComponentID('Both'));
-	SpawnBothButton.ButtonText="Multi Spawn";
+	SpawnBothButton.ButtonText=SpawnBothButtonText;
 
 	SCSubButton = KFGUI_Button(FindComponentID('SCSub'));
 	SCSubButton.ButtonText="-";
@@ -368,72 +382,72 @@ function DrawCentralButtons(float YL, float FontScalar, float BorderSize)
 	DisSubButton.ButtonText="-";
 	DisAddButton = KFGUI_Button(FindComponentID('DisAdd'));
 	DisAddButton.ButtonText="+";
-	DrawControllerInfo("Distance", string(GetSTMPC().SpawnDistance) $ "m", DisSubButton, DisAddButton, YL, FontScalar, BorderSize, 30);
+	DrawControllerInfo(DistanceString, string(GetSTMPC().SpawnDistance) $ "m", DisSubButton, DisAddButton, YL, FontScalar, BorderSize, 30);
 
 	KillZedButton = KFGUI_Button(FindComponentID('KillZed'));
-	KillZedButton.ButtonText="Kill Zeds";
+	KillZedButton.ButtonText=KillZedsButtonText;
 
 	TraderButton = KFGUI_Button(FindComponentID('Trader'));
-	TraderButton.ButtonText = "Open Trader";
+	TraderButton.ButtonText = OpenTraderButtonText;
 
 	LargeChallengeButton = KFGUI_Button(FindComponentID('LargeChallenge'));
-	LargeChallengeButton.ButtonText = "Large Challenge";
+	LargeChallengeButton.ButtonText = LargeChallengeButtonText;
 
 	TrashChallengeButton = KFGUI_Button(FindComponentID('TrashChallenge'));
-	TrashChallengeButton.ButtonText = "Trash Challenge";
+	TrashChallengeButton.ButtonText = TrashChallengeButtonText;
 	if(GetSTMPC().WorldInfo.NetMode != NM_StandAlone)
 		TrashChallengeButton.bDisabled = true;
 }
 
 function DrawGameSettings(float XPos, float YPos, float BoxW, float YL, float FontScalar, float BorderSize)
 {
-	DrawCategolyZone("Game Settings", XPos, YPos, BoxW, YL*16, FontScalar, BorderSize, YL);
+	DrawCategolyZone(GameSettingString, XPos, YPos, BoxW, YL*16, FontScalar, BorderSize, YL);
 
 	ZedtimeBox = KFGUI_CheckBox(FindComponentID('DisableZedtime'));
 	ZedtimeBox.bChecked=GetSTMGRI().bDisableZedTime;
-	DrawBoxDescription("Disable Zedtime", ZedtimeBox, 0.25);
+	DrawBoxDescription(DisableZTString, ZedtimeBox, 0.25);
 
 	RageSpawnBox = KFGUI_CheckBox(FindComponentID('RageSpawn'));
 	RageSpawnBox.bChecked=GetSTMGRI().bSpawnRaged;
-	DrawBoxDescription("Rage Spawn", RageSpawnBox, 0.25);
+	DrawBoxDescription(RageSpawnString, RageSpawnBox, 0.25);
 
 	AutoSpawnBox = KFGUI_CheckBox(FindComponentID('AutoSpawn'));
 	AutoSpawnBox.bChecked=GetSTMPC().bAutoSpawn;
-	DrawBoxDescription("Auto Spawn", AutoSpawnBox, 0.25);
+	DrawBoxDescription(AutoSpawnString, AutoSpawnBox, 0.25);
 
 	BrainDeadBox = KFGUI_CheckBox(FindComponentID('BrainDead'));
 	BrainDeadBox.bChecked=GetSTMPC().bSpawnBrainDead;
-	DrawBoxDescription("Spawn Brain Dead", BrainDeadBox, 0.25);
+	DrawBoxDescription(BrainDeadString, BrainDeadBox, 0.25);
 
 	HSOnlyBox = KFGUI_CheckBox(FindComponentID('HSOnly'));
 	HSOnlyBox.bChecked=GetSTMGRI().bHSOnly;
-	DrawBoxDescription("Headshots Only", HSOnlyBox, 0.25);
+	DrawBoxDescription(HSOnlyString, HSOnlyBox, 0.25);
 
 	if(ZTDilation < 1.f || 20.f < ZTDilation)
 		ZTDilation = 3.f;
 	ZedtimeButton = KFGUI_Button(FindComponentID('Zedtime'));
-	ZedtimeButton.ButtonText="Zedtime";
+	ZedtimeButton.ButtonText=ZTButtonText;
 	ZTSubButton = KFGUI_Button(FindComponentID('ZTSub'));
 	ZTSubButton.ButtonText="-";
 	ZTAddButton = KFGUI_Button(FindComponentID('ZTAdd'));
 	ZTAddButton.ButtonText="+";
-	DrawControllerInfo("Duration", string((round(ZTDilation)))$"sec", ZTSubButton, ZTAddButton, YL, FontScalar, BorderSize, 10);
+	DrawControllerInfo(class'CombinedCDContent.UTM_GFxHudWrapper'.default.DurationString, string((round(ZTDilation))) $ class'CombinedCDContent.UTM_GFxHudWrapper'.default.SecondString, ZTSubButton, ZTAddButton, YL, FontScalar, BorderSize, 10);
 
 	StopSpawnButton = KFGUI_Button(FindComponentID('StopSpawn'));
-	StopSpawnButton.ButtonText="Stop Spawn";
+	StopSpawnButton.ButtonText=StopSpawnButtonText;
 	SRSubButton = KFGUI_Button(FindComponentID('SRSub'));
 	SRSubButton.ButtonText="-";
 	SRAddButton = KFGUI_Button(FindComponentID('SRAdd'));
 	SRAddButton.ButtonText="+";
-	DrawControllerInfo("Spawn Rate", string((round(GetSTMPC().ForceSpawnRate)))$"sec", SRSubButton, SRAddButton, YL, FontScalar, BorderSize, 10);
+	DrawControllerInfo(SpawnRateString, string((round(GetSTMPC().ForceSpawnRate))) $ class'CombinedCDContent.UTM_GFxHudWrapper'.default.SecondString, SRSubButton, SRAddButton, YL, FontScalar, BorderSize, 10);
 }
 
-function DrawCategolyZone(string Title, float XPos, float YPos, float ZoneWidth, float ZoneHight, float FontScalar, float BorderSize, float YL)
+function DrawCategolyZone(string ZoneTitle, float XPos, float YPos, float ZoneWidth, float ZoneHight, float FontScalar, float BorderSize, float YL)
 {
 	Canvas.SetDrawColor(75, 0, 0, 200);
 	Owner.CurrentStyle.DrawRectBox(XPos, YPos, ZoneWidth, YL+BorderSize, 8.f, 0);
 	Canvas.SetDrawColor(250, 250, 250, 255);
-	DrawTextShadowHVCenter(Title, XPos, YPos, ZoneWidth, FontScalar);
+	DrawTextShadowHVCenter(ZoneTitle, XPos, YPos, ZoneWidth, FontScalar);
 	Canvas.SetDrawColor(30, 30, 30, 200);
 	Owner.CurrentStyle.DrawRectBox(XPos, YPos+YL+BorderSize, ZoneWidth, ZoneHight+BorderSize, 8.f, 152);
 }
@@ -577,7 +591,7 @@ function ButtonClicked(KFGUI_Button Sender)
 			break;
 		case 'LargeChallenge':
 			GetSTMPC().SpawnSTMZed("Large", none, false);
-    		GetSTMPC().ShowMessageBar('Priority', "Large Challenge", "50 larges are coming!");
+    		GetSTMPC().ShowMessageBar('Priority', LargeChallengeButtonText, LargeChallengeMsg);
 			DoClose();
 			break;
 		case 'TrashChallenge':
@@ -1420,26 +1434,26 @@ defaultproperties
 	Components.Add(ZedList)
 
 //	ZedsCombo
-	ZedsCombo.Add((FName="Cyst", Code="Cy"))
-	ZedsCombo.Add((FName="Alpha Clot", Code="Al"))
-	ZedsCombo.Add((FName="Slasher", Code="Sl"))
-	ZedsCombo.Add((FName="Rioter", Code="Al*"))
-	ZedsCombo.Add((FName="Gorefast", Code="Gf"))
-	ZedsCombo.Add((FName="Gorefiend", Code="Gf*"))
-	ZedsCombo.Add((FName="Crawler", Code="Cr"))
-	ZedsCombo.Add((FName="Elite Crawler", Code="Cr*"))
-	ZedsCombo.Add((FName="Stalker", Code="St"))
-	ZedsCombo.Add((FName="Bloat", Code="Bl"))
-	ZedsCombo.Add((FName="Siren", Code="Si"))
-	ZedsCombo.Add((FName="Husk", Code="Hu"))
-	ZedsCombo.Add((FName="EDAR Trapper", Code="DE"))
-	ZedsCombo.Add((FName="EDAR Blaster", Code="DL"))
-	ZedsCombo.Add((FName="EDAR Bomber", Code="DR"))
-	ZedsCombo.Add((FName="Quarterpound", Code="QP"))
-	ZedsCombo.Add((FName="Dr.Hans Volter", Code="Hans"))
-	ZedsCombo.Add((FName="Patriarch", Code="Pat"))
-	ZedsCombo.Add((FName="King Fleshpound", Code="KFP"))
-	ZedsCombo.Add((FName="Abomination", Code="Abom"))
-	ZedsCombo.Add((FName="Matriarch", Code="Mat"))
-	ZedsCombo.Add((FName="Abomination Spawn", Code="As"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedClot_Cyst', Code="Cy"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedClot_Alpha', Code="Al"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedClot_Slasher', Code="Sl"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedClot_AlphaKing', Code="Al*"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedGorefast', Code="Gf"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedGorefastDualBlade', Code="Gf*"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedCrawler', Code="Cr"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedCrawlerKing', Code="Cr*"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedStalker', Code="St"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedBloat', Code="Bl"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedSiren', Code="Si"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedHusk', Code="Hu"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedDAR_EMP', Code="DE"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedDAR_Laser', Code="DL"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedDAR_Rocket', Code="DR"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedFleshpoundMini', Code="QP"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedHans', Code="Hans"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedPatriarch', Code="Pat"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedFleshpoundKing', Code="KFP"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedBloatKing', Code="Abom"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedMatriarch', Code="Mat"))
+	ZedsCombo.Add((ZedClass=class'KFGameContent.KFPawn_ZedBloatKingSubspawn', Code="As"))
 }

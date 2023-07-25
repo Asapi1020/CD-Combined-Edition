@@ -248,4 +248,5 @@ defaultproperties
 	TraderModList.Add((NewWeapDef=class'CombinedCD2.CustomWeapDef_Minigun', ReplWeapDef=class'KFGame.KFWeapDef_Minigun'))
 	TraderModList.Add((NewWeapDef=class'CombinedCD2.CustomWeapDef_Mac10', ReplWeapDef=class'KFGame.KFWeapDef_Mac10'))
 	TraderModList.Add((NewWeapDef=class'CombinedCD2.CustomWeapDef_HRG_Energy', ReplWeapDef=class'KFGame.KFWeapDef_HRG_Energy'))
+	TraderModList.Add((NewWeapDef=class'CombinedCD2.CustomWeapDef_Hemogoblin', ReplWeapDef=class'KFGame.KFWeapDef_Hemogoblin'))
 }

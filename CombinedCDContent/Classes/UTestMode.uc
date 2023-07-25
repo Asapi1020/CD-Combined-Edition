@@ -33,6 +33,7 @@ var config bool bHSOnly;
 var array<SpawnCombo> AutoSpawnInfo;
 var string OldSC;
 var int OldMM;
+var bool bDisableRespawn;
 
 /** ================================================================
  *   General
@@ -74,8 +75,8 @@ event PostBeginPlay()
     FleshpoundHPFakes = string(ZedHPFakes);
     QuarterpoundHPFakes = string(ZedHPFakes);
     TrashHPFakes = string(ZedHPFakes);
-    bTraderDash = false;
-    TraderDash = string(bTraderDash);
+    //bTraderDash = false;
+    //TraderDash = string(bTraderDash);
 
     //  Setup GRI Variables
     MySTMGRI.bDisableZedTime = bDisableZedTime;
@@ -143,6 +144,11 @@ state TraderOpen
         return;      
     }
     stop;    
+}
+
+function bool ShouldRecord()
+{
+    return false;
 }
 
 /** ================================================================
@@ -264,6 +270,9 @@ function RespawnPlayers()
     local int I;
     local Controller PC;
     local bool bSpawned;
+
+    if(bDisableRespawn)
+        return;
 
     I = 0;
     J0x0B:
@@ -451,6 +460,11 @@ exec function EndCurrentWave()
     }
 }
 
+exec function DisableRespawn(bool bDisable)
+{
+    bDisableRespawn = bDisable;
+}
+
 function RefleshWebInfo()
 {
     MySTMGRI.CDInfoParams.SC = SpawnCycle;
@@ -471,6 +485,8 @@ function SetParams(CD_PlayerController CDPC, string S)
     SaveConfig();
     RefleshWebInfo();
 }
+
+function ModTraderDash(bool bDash){ return; }
 
 defaultproperties
 {

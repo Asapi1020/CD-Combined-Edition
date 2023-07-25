@@ -30,8 +30,8 @@ defaultproperties
 {
 	IniDefsArrayName="BossHPFakesDefs"
 	OptionName="BossHPFakes"
-	DefaultSettingValue=0
-	MinSettingValue=0
+	DefaultSettingValue=1
+	MinSettingValue=1
 	MaxSettingValue=32
 
 	ChatCommandNames=("!cdbosshpfakes","!cdbhpf")

@@ -259,6 +259,7 @@ private function InitSpawnCyclePresetList()
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_doom_v2_plus_rmk');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_asp_v1');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_asp_v2');
+		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_asp_v3');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_asp_fp_v1');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_asp_fp_v2');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_osffi_v1_ms');
@@ -269,6 +270,7 @@ private function InitSpawnCyclePresetList()
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_poopro_v1');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_dtf_pm');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_who_v1');
+		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_ebr_hh_v1');
 
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_gso_v1');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_aio_v1');

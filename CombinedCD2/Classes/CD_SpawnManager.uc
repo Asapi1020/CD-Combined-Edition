@@ -28,6 +28,13 @@ var float FinalSpawnTimestamp;
 var float LatestSpawnTimestamp;
 var float WaveEndTimestamp;
 
+var localized string ZedSpawnedString;
+var localized string SingleCohortString;
+var localized string SpawnRateString;
+var localized string CohortString;
+var localized string SquadString;
+var localized string ZedString;
+
 /** We override this because of TimeUntilNextSpawn.
 	The standard implementation assumes that this
 	method is invoked on a 1-second timer.	It always
@@ -137,9 +144,9 @@ function bool ShouldAddAI()
 
 function string GetWaveAverageSpawnrate()
 {
-	local string SpawnrateString;
+	local string SpawnrateMsg;
 	local string ZedCountString, GroupName;
-	local string DelayString, SpawnDurationString, LingerString;
+//	local string DelayString, SpawnDurationString, LingerString;
 
 	// There are a bunch of edge cases in here
 
@@ -163,33 +170,33 @@ function string GetWaveAverageSpawnrate()
 
 	if ( 0 > FirstSpawnTimestamp || 0 > FinalSpawnTimestamp || 0 == SpawnEventsThisWave)
 	{
-		return "0/" $ WaveTotalAI $ " zeds spawned";
+		return "0/" $ WaveTotalAI $ ZedSpawnedString;
 	}
 
 	if ( FinalSpawnTimestamp == FirstSpawnTimestamp )
 	{
-		SpawnrateString = "infinite (single-cohort wave)";
+		SpawnrateMsg = SingleCohortString;
 	}
 	else
 	{
-		SpawnrateString = FormatFloatToTwoDecimalPlaces( NumAISpawnsQueued / ( FinalSpawnTimestamp - FirstSpawnTimestamp) ) $ " avg zed/s spawnrate";
+		SpawnrateMsg = FormatFloatToTwoDecimalPlaces( NumAISpawnsQueued / ( FinalSpawnTimestamp - FirstSpawnTimestamp) ) $ SpawnRateString;
 	}
 
-
+/*
 	DelayString = FormatFloatToOneDecimalPlace( FirstSpawnTimestamp - WaveSetupTimestamp );
 	SpawnDurationString = FormatFloatToOneDecimalPlace( FinalSpawnTimestamp - FirstSpawnTimestamp );
 	LingerString = FormatFloatToOneDecimalPlace( WaveEndTimestamp - FinalSpawnTimestamp );
-
-	GroupName = 0 < Outer.CohortSizeInt ? "cohorts" : "squads" ;
+*/
+	GroupName = 0 < Outer.CohortSizeInt ? CohortString : SquadString ;
 	ZedCountString = NumAISpawnsQueued < WaveTotalAI ?
 		(NumAISpawnsQueued $"/"$ WaveTotalAI) :
 		string(WaveTotalAI);
 
-	return
-		ZedCountString $ " zeds, " $ SpawnEventsThisWave $ " " $ GroupName $ "\n" $
-		SpawnrateString $ "\n" $
+	return ZedCountString @ ZedString $ ", " $ SpawnEventsThisWave $ " " $ GroupName $ "\n" $ SpawnrateMsg;
+		/*
 		"  (timed first spawn to last)\n" $
 		DelayString $ " s pre, " $ SpawnDurationString $ " s spawning, " $ LingerString $ " s post";
+		*/
 }
 
 private function string FormatFloatToOneDecimalPlace( const float f )
@@ -208,7 +215,7 @@ private function string FormatFloatToOneDecimalPlace( const float f )
 	return s;
 }
 
-private function string FormatFloatToTwoDecimalPlaces( const float f )
+static function string FormatFloatToTwoDecimalPlaces( const float f )
 {
 	local int l;
 	local string s;	

@@ -57,6 +57,11 @@ var const string ChatReadDescription;
 var const string ChatWriteDescription;
 var const string ChatWriteParamHintFragment;
 
+var localized string AlreadyMsg;
+var localized string StagedMsg;
+var localized string PendingMsg;
+var localized string OldMsg;
+
 function bool StageIndicator( const out string Raw, out string StatusMsg, const optional bool ForceOverwrite = false )
 {
 	// takes unsanitized string "Raw", attempts to interpret it as
@@ -67,7 +72,7 @@ function bool StageIndicator( const out string Raw, out string StatusMsg, const 
 
 	if ( Raw != "" && Raw == StagedIndicator && !ForceOverwrite )
 	{
-		StatusMsg = OptionName $" is already "$ Raw;
+		StatusMsg = OptionName $ AlreadyMsg $ Raw;
 		return false;
 	}
 
@@ -114,14 +119,13 @@ function bool StageIndicator( const out string Raw, out string StatusMsg, const 
 		       " (indicator: "$ StagedIndicator $")", bLogControlledDifficulty);
 		if ( StagedIndicator == ReadIndicator() )
 		{
-			StatusMsg = OptionName $" is already "$ StagedIndicator;
+			StatusMsg = OptionName $ AlreadyMsg $ StagedIndicator;
 		}
 	}
 
 	if ( StatusMsg == "" )
 	{
-		StatusMsg = "Staged: "$ OptionName $"="$ StagedIndicator $
-			"\nEffective after current wave"; 
+		StatusMsg = StagedMsg $ OptionName $"="$ StagedIndicator $ "\n" $ PendingMsg; 
 		return true;
 	}
 	
@@ -236,7 +240,7 @@ private final function string GetChatLineInternal( bool BriefFormat )
 	// Append the staged value, if any
 	if ( HasStagedChanges() )
 	{
-		Result $= " (staged: " $ StagedIndicator $ ")";
+		Result $= " (" $ StagedMsg $ StagedIndicator $ ")";
 	}
 
 	return Result;
@@ -305,7 +309,7 @@ function string CommitStagedChanges( const int OverrideWaveNum, const optional b
 		WriteValue( StagedValue );
 	}
 
-	return OptionName $"="$ StagedIndicator $" (old: "$ OldIndicator $")";
+	return OptionName $"="$ StagedIndicator $" (" $ OldMsg $ OldIndicator $")";
 }
 
 function string RegulateValue( const int OverrideWaveNum )
@@ -330,7 +334,7 @@ function string RegulateValue( const int OverrideWaveNum )
 		PrettyNewValue = PrettyValue( NewValue );
 		if ( PrettyOldValue != PrettyNewValue )
 		{
-			StatusMsg = OptionName $"="$ PrettyNewValue $" (old: "$ PrettyOldValue $ ")";
+			StatusMsg = OptionName $"="$ PrettyNewValue $" (" $ OldMsg $ PrettyOldValue $ ")";
 			`cdlog( "Regulated "$ StatusMsg, bLogControlledDifficulty ); 
 		}
 		else

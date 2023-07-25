@@ -3,12 +3,7 @@ class CustomWeapDef_Mac10 extends KFWeapDef_Mac10
 
 static function string GetItemLocalization(string KeyName)
 {
-	return "Mac9";
-}
-
-static function string GetItemName()
-{
-	return "Mac9";
+	return class'CD_TraderItemsHelper'.static.GetWeaponLocalization(KeyName, default.class, class'KFGame.KFWeapDef_Mac10');
 }
 
 defaultproperties

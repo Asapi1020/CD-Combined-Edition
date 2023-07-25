@@ -3,12 +3,7 @@ class CustomWeapDef_HRG_Energy extends KFWeapDef_HRG_Energy
 
 static function string GetItemLocalization(string KeyName)
 {
-	return "Beta1 Disrupter";
-}
-
-static function string GetItemName()
-{
-	return "Beta1 Disrupter";
+	return class'CD_TraderItemsHelper'.static.GetWeaponLocalization(KeyName, default.class, class'KFGame.KFWeapDef_HRG_Energy');
 }
 
 defaultproperties

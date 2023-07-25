@@ -8,6 +8,7 @@ function Callback_ReadyClicked( bool bReady )
 	CDPC = CD_PlayerController(GetPC());
 	CD_GFxManager(CDPC.MyGFxManager).ReadyFilter(CDPC, bReady);
 }
+
 defaultproperties
 {
 	SubWidgetBindings.(3)=(WidgetName="overviewContainer",WidgetClass=class'CD_GFxStartContainer_InGameOverview')

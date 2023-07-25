@@ -5,6 +5,7 @@ var int AuthorityLevel;
 var bool bIsReadyForNextWave;
 var bool bAllReceived;
 var array<string> CycleNames;
+var float PlayTimeSeconds;
 
 replication
 {

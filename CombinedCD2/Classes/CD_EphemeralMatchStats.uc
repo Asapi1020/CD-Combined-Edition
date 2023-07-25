@@ -13,6 +13,8 @@ class CD_EphemeralMatchStats extends EphemeralMatchStats;
 
 `include(CD_Log.uci)
 
+var array<PerkUseNum> PerkUseNums;
+
 function RecordZedKill(Class<Pawn> PawnClass, class<DamageType> DT)
 {
 	local CD_Survival CDGameInfo;

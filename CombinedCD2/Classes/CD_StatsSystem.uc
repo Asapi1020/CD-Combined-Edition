@@ -37,6 +37,34 @@ var array<StructCDPlayerStats> CDPlayerStats;
 
 var int StatsCount;
 
+var localized string BeforeStartError;
+var localized string AccuracyHeader;
+var localized string DamageDealtHeader;
+var localized string DamageTakenHeader;
+var localized string DoshEarnedHeader;
+var localized string HSAccuracyHeader;
+var localized string HSHeader;
+var localized string HealsGivenHeader;
+var localized string HealsReceivedHeader;
+var localized string LargeKillsHeader;
+var localized string ShotsFiredHeader;
+var localized string ShotsHitHeader;
+var localized string HuskKillsHeader;
+var localized string InputErrorMsg;
+var localized string InputExampleMsg;
+var localized string StatsForString;
+var localized string LargeKillsString;
+var localized string HuskKillsString;
+var localized string HealsString;
+var localized string GivenString;
+var localized string ReceivedString;
+var localized string DamageString;
+var localized string DealtString;
+var localized string TakenString;
+var localized string AccuracyString;
+var localized string HitString;
+var localized string HSString;
+var localized string SpectatorsMsg;
 
 // Called when !cdstats <stat> chat command is used
 function string CDStatsCommand(string CommandString)
@@ -57,14 +85,14 @@ function string CDStatsCommand(string CommandString)
 	
 	if ( WaveNum < 1 )
 	{
-		return ("The crystal ball is broken. Try again after the first wave has started.");
+		return (BeforeStartError);
 	}
 	
 	if (Left( Stat, 3 ) == "acc")
 	{
 		CDPlayerStats.Sort(ByAccuracy);
 		
-		Output = "--- Accuracy ------------------------------------------";
+		Output = AccuracyHeader;
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -76,7 +104,7 @@ function string CDStatsCommand(string CommandString)
 	{		
 		CDPlayerStats.Sort(ByDamageDealt);
 		
-		Output = "--- Damage Dealt ----------------------------------";
+		Output = DamageDealtHeader;
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -87,7 +115,7 @@ function string CDStatsCommand(string CommandString)
 	{		
 		CDPlayerStats.Sort(ByDamageTaken);
 		
-		Output = "--- Damage Taken ----------------------------------";
+		Output = DamageTakenHeader;
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -98,7 +126,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByDoshEarned);
 		
-		Output = "-- Dosh Earned ---------------------------------------";
+		Output = DoshEarnedHeader;
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{		
@@ -109,7 +137,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByHeadshotAccuracy);
 		
-		Output = "-- Headshot Accuracy ----------------------------";
+		Output = HSAccuracyHeader;
 
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -120,7 +148,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByHeadshots);
 		
-		Output = "-- Headshots ------------------------------------------";
+		Output = HSHeader;
 
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -131,7 +159,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByHealsGiven);
 		
-		Output = "-- Heals Given ----------------------------------------";
+		Output = HealsGivenHeader;
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -142,7 +170,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByHealsReceived);
 		
-		Output = "-- Heals Received -----------------------------------";
+		Output = HealsReceivedHeader;
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -153,7 +181,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByLargeKills);
 		
-		Output = "-- Large Kills -------------------------------------------";
+		Output = LargeKillsHeader;
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -164,7 +192,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByShotsFired);
 		
-		Output = "-- Shots Fired ------------------------------------------";
+		Output = ShotsFiredHeader;
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -175,7 +203,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByShotsHit);
 		
-		Output = "-- Shots Hit ---------------------------------------------";
+		Output = ShotsHitHeader;
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -186,7 +214,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByHUKills);
 		
-		Output = "-- Husk Kills ---------------------------------------------";
+		Output = HuskKillsHeader;
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -196,7 +224,7 @@ function string CDStatsCommand(string CommandString)
 	
 	else
 	{
-		Output = "PEBCAK! Available stats are:\nAccuracy, DamageDealt, DamageTaken, DoshEarned, Headshots, HeadshotAccuracy, HealsGiven, HealsReceived, Large Kills, Husk Kills, ShotsFired, and ShotsHit.";
+		Output = InputErrorMsg $ "\n" $ InputExampleMsg;
 	}
 	
 	return Output;
@@ -276,22 +304,22 @@ function string GetIndividualPlayerStats(KFPlayerController KFPC)
 			}
 		}
 		
-		PlayerStats = "Stats for " $ KFPC.PlayerReplicationInfo.PlayerName $ ": \n" $
-					"Large Kills: " $ LargeKills $ " (SC:" $ SCKills $ " FP:" $ FPKills $ " QP:" $ QPKills $ ")\n" $
-					"Husk Kills: " $ HUKills $ "\n" $
-					"Heals - Given: " $ HealsGiven $ " Received: " $ HealsRecv $ "\n" $
-					"Damage - Dealt: " $ DamageDealt $ " Taken: " $ DamageTaken $ "\n" $
+		PlayerStats = StatsForString $ KFPC.PlayerReplicationInfo.PlayerName $ ": \n" $
+					LargeKillsString $ LargeKills $ " (SC:" $ SCKills $ " FP:" $ FPKills $ " QP:" $ QPKills $ ")\n" $
+					HuskKillsString $ HUKills $ "\n" $
+					HealsString @ "-" @ GivenString $ HealsGiven @ ReceivedString $ HealsRecv $ "\n" $
+					DamageString @ "-" @ DealtString $ DamageDealt @ TakenString $ DamageTaken $ "\n" $
 //					"Shots - Fired: " $ ShotsFired $ " Hit: " $ ShotsHit $ "HS: " $ HeadShots $ "\n" $
-					"Accuracy - Hit: ";
+					AccuracyString @ "-" @ HitString;
 		
 		// make sure we return a positive value or 0 for accuracy rather than attempting to divide with zero.
 		if (ShotsHit < 1 || ShotsFired == 0)
 		{
-			PlayerStats = PlayerStats $ "0% HeadShots: ";
+			PlayerStats = PlayerStats $ "0%" @ HSString;
 		}
 		else
 		{
-			PlayerStats = PlayerStats $ round(Float(ShotsHit)/Float(ShotsFired) * 100.0) $ "% HeadShots: ";
+			PlayerStats = PlayerStats $ round(Float(ShotsHit)/Float(ShotsFired) * 100.0) $ "%" @ HSString;
 		}
 		// make sure we return a positive value or 0 for headshot accuracy rather than attempting to divide with zero.
 		if (ShotsHit < 1 || ShotsFired == 0 || HeadShots < 1)
@@ -307,7 +335,7 @@ function string GetIndividualPlayerStats(KFPlayerController KFPC)
 	}
 	else
 	{	// Provide obligatory sass to people using this command when they shouldn't.
-		return "You've spectated really hard, but that doesn't count for anything.";
+		return SpectatorsMsg;
 	}
 }
 

@@ -17,13 +17,13 @@ function Callback_PerkChanged(int PerkIndex)
 			Perk = MyKFPC.PerkList[PerkIndex].PerkClass;
 
 			if( CDPC.IsRestrictedLevel(MyKFPC.PerkList[PerkIndex].PerkLevel) )
-				MyKFPC.ShowConnectionProgressPopup(PMT_AdminMessage,"Level Restriction", "Required level 25");
+				MyKFPC.ShowConnectionProgressPopup(PMT_AdminMessage, class'CombinedCD2.CD_PlayerController'.default.LevelRestrictionMsg, class'CombinedCD2.CD_PlayerController'.default.LevelRequirementMsg);
 
 			else if( CDPC.IsRestrictedPerk(Perk) )
-				MyKFPC.ShowConnectionProgressPopup(PMT_AdminMessage,"PERK Restriction", "You are not authorized to use " $ Mid(string(Perk), 7));
+				MyKFPC.ShowConnectionProgressPopup(PMT_AdminMessage, class'CombinedCD2.CD_PlayerController'.default.PerkRestrictionMsg, class'CombinedCD2.CD_PlayerController'.default.AuthorityErrorMsg $ Mid(string(Perk), 7));
 
 			else if(CDGRI.bMatchHasBegun && CDGRI.bEnableSolePerksSystem && !CDGRI.ControlSolePerks(MyKFPC, Perk))
-				MyKFPC.ShowConnectionProgressPopup(PMT_AdminMessage,"Perk Restriction", "The second" @ Mid(string(Perk), 7) @ "is not allowed!");
+				MyKFPC.ShowConnectionProgressPopup(PMT_AdminMessage, class'CombinedCD2.CD_PlayerController'.default.PerkRestrictionMsg, class'CombinedCD2.CD_PlayerController'.default.SecondString @ Mid(string(Perk), 7) @ class'CombinedCD2.CD_PlayerController'.default.NotAllowedString);
 
 			else
 				super.Callback_PerkChanged(PerkIndex);				

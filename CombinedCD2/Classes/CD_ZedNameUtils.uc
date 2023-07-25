@@ -34,6 +34,31 @@ enum ECDZedNameResolv
 	ZNR_INVALID_RAGE
 };
 
+enum ECDZedGroup
+{
+	ZG_Clots,
+	ZG_Gorefasts,
+	ZG_CR_ST,
+	ZG_SC,
+	ZG_Pounds,
+	ZG_Robots,
+	ZG_Others
+};
+
+struct ZedInfo
+{
+	var class<KFPawn_Monster> 		   OG_ZedClass;
+	var array< class<KFPawn_Monster> > CD_ZedClasses;
+	var EAIType						   ZedType;
+	var EBossAIType					   BossType;
+	var array<string>				   ZedName_Cycle;
+	var array<string>				   ZedName_Wave;
+	var ECDZedGroup					   ZedGroup;
+	var bool						   bAlbino;
+};
+
+var array<ZedInfo> ZedInfoArray;
+
 static function ECDZedNameResolv GetZedType(
 	/* Input parameters */
 	const out string ZedName, const bool IsSpecial, const bool IsRagedOnSpawn,
@@ -746,4 +771,9 @@ static function class<KFPawn_Monster> CheckMonsterClassRemap( const class<KFPawn
 	}
 
 	return NewClass;
+}
+
+defaultproperties
+{
+	ZedInfoArray.Add((OG_ZedClass=class'KFPawn_ZedClot_Cyst', ZedType=AT_Clot, ZedName_Cycle=("CLOTC", "CC", "CY", "CYS", "CYST")))
 }

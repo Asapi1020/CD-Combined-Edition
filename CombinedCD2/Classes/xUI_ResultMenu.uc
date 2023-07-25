@@ -7,6 +7,34 @@ var KFGUI_Button Close;
 
 var name CurState;
 
+//var localized string Title;
+var localized string TeamAwardButtonText;
+var localized string PlayerStatsButtonText;
+var localized string MapVoteButtonText;
+var localized string DamageDealtString;
+var localized string HitAccuracyString;
+var localized string KillsString;
+var localized string HuskKillsString;
+var localized string HealthString;
+var localized string HSAccuracyString;
+var localized string LargeKillsString;
+var localized string DamageTakenString;
+var localized string DamageDealerString;
+var localized string PrecisionString;
+var localized string ZedSlayerString;
+var localized string HuskSlayerString;
+var localized string MedicineMasterString;
+var localized string HeadPopperString;
+var localized string GiantSlayerString;
+var localized string GuardianString;
+var localized string HealsGivenString;
+var localized string HealsReceivedString;
+var localized string RobotKillsString;
+var localized string BossKillsString;
+var localized string TotalKillsString;
+var localized string MediumKillsString;
+var localized string TrashKillsString;
+
 function SetWindowDrag(bool bDrag)
 {
 	bDragWindow = false;
@@ -27,7 +55,7 @@ function DrawMenu()
 
 	Super.DrawMenu();
 
-	WindowTitle="Match Result v1.2";
+	WindowTitle=Title @ "v1.2";
 	Canvas.Font = Owner.CurrentStyle.PickFont(FontScalar);
 	Canvas.TextSize("ABC", XL, YL, FontScalar, FontScalar);
 	BorderSize = Owner.HUDOwner.ScaledBorderSize;
@@ -42,17 +70,17 @@ function DrawMenu()
 	
 //	Buttom button
 	TeamAward = KFGUI_Button(FindComponentID('TeamAward'));
-	TeamAward.ButtonText = "Team Award";
+	TeamAward.ButtonText = TeamAwardButtonText;
 	TeamAward.bDisabled = (CurState == 'TeamAward') ? true : false;
 
 	PlayerStats = KFGUI_Button(FindComponentID('PlayerStats'));
-	PlayerStats.ButtonText = "Player Stats";
+	PlayerStats.ButtonText = PlayerStatsButtonText;
 	PlayerStats.bDisabled = (CurState == 'PlayerStats') ? true : false;
 
 	MapVote = KFGUI_Button(FindComponentID('MapVote'));
-	MapVote.ButtonText = "Map Vote";
+	MapVote.ButtonText = MapVoteButtonText;
 	Close = KFGUI_Button(FindComponentID('Close'));
-	Close.ButtonText = "Close";
+	Close.ButtonText = CloseButtonText;
 
 //	Header General Information
 	X = 0.05*CompPos[2];
@@ -63,7 +91,7 @@ function DrawMenu()
 	Owner.CurrentStyle.DrawRectBox(X, Y, Width, Height+BorderSize, 8.f, 151);
 	Canvas.SetDrawColor(250, 250, 250, 255);
 	S = class'KFCommon_LocalizedStrings'.static.GetFriendlyMapName(GetCDPC().WorldInfo.GetMapName(true));
-	if(Left(S, 3) ~= "KF-") S = Mid(S, 3);
+	S = class'CD_Object'.static.GetCustomMapName(S);
 	DrawTextShadowHLeftVCenter(S, X+YL, Y+(BorderSize/2), FontScalar);
 	DrawTextShadowHLeftVCenter(CDGRI.CDFinalParams.SC, X+YL, Y+(BorderSize/2)+YL, FontScalar);
 	DrawTextShadowHLeftVCenter("MaxMonsters -" @ CDGRI.CDFinalParams.MM, X+YL, Y+(BorderSize/2)+(YL*2), FontScalar);
@@ -75,8 +103,27 @@ function DrawMenu()
 	Canvas.SetDrawColor(0, 0, 0, 200);
 	Owner.CurrentStyle.DrawRectBox(X, Y, Width, Height+BorderSize, 8.f, 0);
 	Canvas.SetDrawColor(250, 250, 250, 255);
-	S = (CDGRI.bMatchVictory) ? "Victory" : "Defeat";
-	DrawTextShadowBoxCenter(S, X+BorderSize, Y+(BorderSize/2), Width, Height, FontScalar*1.5);
+	if(CDGRI.bMatchVictory)
+	{
+		S = class'KFGame.KFGFxMenu_PostGameReport'.default.VictoryString;
+		DrawTextShadowBoxCenter(S, X+BorderSize, Y+(BorderSize/2), Width, Height, FontScalar*1.5);
+	}
+	else
+	{
+		S = class'KFGame.KFGFxMenu_PostGameReport'.default.DefeatString;
+		if(CDGRI.IsBossWave())
+		{
+			DrawTextShadowBoxCenter(S, X+BorderSize, Y+(BorderSize/2), Width, Height, FontScalar*1.5);
+		}
+		else
+		{
+			DrawTextShadowBoxCenter(S, X+BorderSize, Y-YL/2, Width, Height, FontScalar*1.5);
+			S = class'KFGame.KFGFxMenu_PostGameReport'.default.WaveString @ CDGRI.WaveNum $ ": " $
+				class'CD_SpawnManager'.static.FormatFloatToTwoDecimalPlaces(100*(1.f - ( float(CDGRI.AIRemaining)/float(CDGRI.WaveTotalAICount ) )) ) $ "%";
+			DrawTextShadowBoxCenter(S, X+BorderSize, Y+YL, Width, Height, FontScalar);
+		}
+	}
+	
 
 //	Current State
 	X = 0.05*CompPos[2];
@@ -91,8 +138,8 @@ function DrawMenu()
 	Owner.CurrentStyle.DrawRectBox(X, Y, Width, Height+BorderSize, 8.f, 0);
 	X += YL;
 	Y += YL;
-	if(CurState == 'TeamAward') S = "Team Award";
-	else if(CurState == 'PlayerStats') S = "Player Stats";
+	if(CurState == 'TeamAward') S = TeamAwardButtonText;
+	else if(CurState == 'PlayerStats') S = PlayerStatsButtonText;
 	Canvas.SetDrawColor(250, 250, 250, 255);
 	DrawTextShadowHLeftVCenter(S, X, Y, FontScalar*1.5);
 
@@ -111,20 +158,20 @@ function DrawMenu()
 		DrawTeamAwardIcon("UI_Award_Team.UI_Award_Team-Headshots", X, Y+gap, YL);
 		DrawTeamAwardIcon("UI_Award_Team.UI_Award_Team-Kills", X, Y+2*gap, YL);
 		DrawTeamAwardIcon("UI_Endless_TEX.ZEDs.UI_ZED_Endless_Husk", X, Y+3*gap, YL);
-		X += YL*ratio*5;
+		X += YL*5; //YL*ratio*5;
 		DrawTextShadowHLeftVCenter(CDGRI.DamageDealer.PlayerName, X, Y+YL*2, FontScalar);
-		DrawTextShadowHLeftVCenter(string(CDGRI.DamageDealer.Value)@"Damage Dealt", X, Y+YL*3, FontScalar);
+		DrawTextShadowHLeftVCenter(string(CDGRI.DamageDealer.Value)@DamageDealtString, X, Y+YL*3, FontScalar);
 		DrawTextShadowHLeftVCenter(CDGRI.Precision.PlayerName, X, Y+YL*2+gap, FontScalar);
-		DrawTextShadowHLeftVCenter("Hit Accuracy:"@string(CDGRI.Precision.Value)$"%", X, Y+YL*3+gap, FontScalar);
+		DrawTextShadowHLeftVCenter(HitAccuracyString$":"@string(CDGRI.Precision.Value)$"%", X, Y+YL*3+gap, FontScalar);
 		DrawTextShadowHLeftVCenter(CDGRI.ZedSlayer.PlayerName, X, Y+YL*2+2*gap, FontScalar);
-		DrawTextShadowHLeftVCenter(string(CDGRI.ZedSlayer.Value)@"Kills", X, Y+YL*3+2*gap, FontScalar);
+		DrawTextShadowHLeftVCenter(string(CDGRI.ZedSlayer.Value)@KillsString, X, Y+YL*3+2*gap, FontScalar);
 		DrawTextShadowHLeftVCenter(CDGRI.HuskKiller.PlayerName, X, Y+YL*2+3*gap, FontScalar);
-		DrawTextShadowHLeftVCenter(string(CDGRI.HuskKiller.Value)@"Husk kills", X, Y+YL*3+3*gap, FontScalar);
+		DrawTextShadowHLeftVCenter(string(CDGRI.HuskKiller.Value)@HuskKillsString, X, Y+YL*3+3*gap, FontScalar);
 		Canvas.SetDrawColor(255, 213, 0, 255);
-		DrawTextShadowBoxLeft("Damage Dealer", X, Y, YL*2, FontScalar*1.5);
-		DrawTextShadowBoxLeft("The Precision", X, Y+gap, YL*2, FontScalar*1.5);
-		DrawTextShadowBoxLeft("Zed Slayer", X, Y+2*gap, YL*2, FontScalar*1.5);
-		DrawTextShadowBoxLeft("Husk Slayer", X, Y+3*gap, YL*2, FontScalar*1.5);
+		DrawTextShadowBoxLeft(DamageDealerString, X, Y, YL*2, FontScalar*1.5);
+		DrawTextShadowBoxLeft(PrecisionString, X, Y+gap, YL*2, FontScalar*1.5);
+		DrawTextShadowBoxLeft(ZedSlayerString, X, Y+2*gap, YL*2, FontScalar*1.5);
+		DrawTextShadowBoxLeft(HuskSlayerString, X, Y+3*gap, YL*2, FontScalar*1.5);
 		
 		X = 0.5*CompPos[2] + YL;
 		DrawAwardFrame(X, Y, YL);
@@ -138,18 +185,18 @@ function DrawMenu()
 		DrawTeamAwardIcon("UI_Award_ZEDs.UI_Award_ZED_RawDmg", X, Y+18*YL, YL);
 		X += YL*5;
 		DrawTextShadowHLeftVCenter(CDGRI.Healer.PlayerName, X, Y+YL*2, FontScalar);
-		DrawTextShadowHLeftVCenter(string(CDGRI.Healer.Value)@"Health", X, Y+YL*3, FontScalar);
+		DrawTextShadowHLeftVCenter(string(CDGRI.Healer.Value)@HealthString, X, Y+YL*3, FontScalar);
 		DrawTextShadowHLeftVCenter(CDGRI.HeadPopper.PlayerName, X, Y+YL*8, FontScalar);
-		DrawTextShadowHLeftVCenter("HS Accuracy:"@string(CDGRI.HeadPopper.Value)$"%", X, Y+YL*9, FontScalar);
+		DrawTextShadowHLeftVCenter(HSAccuracyString$":"@string(CDGRI.HeadPopper.Value)$"%", X, Y+YL*9, FontScalar);
 		DrawTextShadowHLeftVCenter(CDGRI.LargeKiller.PlayerName, X, Y+YL*14, FontScalar);
-		DrawTextShadowHLeftVCenter(string(CDGRI.LargeKiller.Value)@"Large Kills", X, Y+YL*15, FontScalar);
+		DrawTextShadowHLeftVCenter(string(CDGRI.LargeKiller.Value)@LargeKillsString, X, Y+YL*15, FontScalar);
 		DrawTextShadowHLeftVCenter(CDGRI.Guardian.PlayerName, X, Y+YL*20, FontScalar);
-		DrawTextShadowHLeftVCenter(string(CDGRI.Guardian.Value)@"Damage Taken", X, Y+YL*21, FontScalar);
+		DrawTextShadowHLeftVCenter(string(CDGRI.Guardian.Value)@DamageTakenString, X, Y+YL*21, FontScalar);
 		Canvas.SetDrawColor(255, 213, 0, 255);
-		DrawTextShadowBoxLeft("Medicine Master", X, Y, YL*2, FontScalar*1.5);
-		DrawTextShadowBoxLeft("Head Popper", X, Y+6*YL, YL*2, FontScalar*1.5);
-		DrawTextShadowBoxLeft("Giant Slayer", X, Y+12*YL, YL*2, FontScalar*1.5);
-		DrawTextShadowBoxLeft("Guardian", X, Y+18*YL, YL*2, FontScalar*1.5);
+		DrawTextShadowBoxLeft(MedicineMasterString, X, Y, YL*2, FontScalar*1.5);
+		DrawTextShadowBoxLeft(HeadPopperString, X, Y+6*YL, YL*2, FontScalar*1.5);
+		DrawTextShadowBoxLeft(GiantSlayerString, X, Y+12*YL, YL*2, FontScalar*1.5);
+		DrawTextShadowBoxLeft(GuardianString, X, Y+18*YL, YL*2, FontScalar*1.5);
 	}
 //	PlayerStats
 	else if(CurState == 'PlayerStats')
@@ -158,7 +205,7 @@ function DrawMenu()
 		X += YL;
 		Width = 0.3*CompPos[2];
 
-		DrawTextShadowHLeftVCenter("Hit Accuracy:", X, Y, FontScalar);
+		DrawTextShadowHLeftVCenter(HitAccuracyString $ ":", X, Y, FontScalar);
 		if(KFPC.ShotsFired == 0)
 		{
 			f = 0;
@@ -169,24 +216,24 @@ function DrawMenu()
 		}
 		DrawTextShadowHRightVCenter(string(round(f*100))$"% ("$string(KFPC.ShotsHit)$"/"$string(KFPC.ShotsFired)$")", X, Y, Width, FontScalar);
 
-		DrawTextShadowHLeftVCenter("HS Accuracy:", X, Y+YL, FontScalar);
+		DrawTextShadowHLeftVCenter(HSAccuracyString $ ":", X, Y+YL, FontScalar);
 		if(CDGRI.CDFinalParams.CHSPP) i = KFPC.ShotsHitHeadshot;
 		else i = CDPC.MatchStats.TotalHeadShots + CDPC.MatchStats.GetHeadShotsInWave();
 		if(KFPC.ShotsHit == 0) f = 0;
 		else f = float(i)/float(KFPC.ShotsHit);
 		DrawTextShadowHRightVCenter(string(round(f*100))$"% ("$string(i)$"/"$string(KFPC.ShotsHit)$")", X, Y+YL, Width, FontScalar);
 		
-		DrawTextShadowHLeftVCenter("Damage Dealt:", X, Y+YL*3, FontScalar);
+		DrawTextShadowHLeftVCenter(DamageDealtString $ ":", X, Y+YL*3, FontScalar);
 		i = CDPC.MatchStats.TotalDamageDealt + CDPC.MatchStats.GetDamageDealtInWave();
 		DrawTextShadowHRightVCenter(string(i), X, Y+YL*3, Width, FontScalar);
-		DrawTextShadowHLeftVCenter("Damage Taken:", X, Y+YL*4, FontScalar);
+		DrawTextShadowHLeftVCenter(DamageTakenString $ ":", X, Y+YL*4, FontScalar);
 		i = CDPC.MatchStats.TotalDamageTaken + CDPC.MatchStats.GetDamageTakenInWave();
 		DrawTextShadowHRightVCenter(string(i), X, Y+YL*4, Width, FontScalar);
 
-		DrawTextShadowHLeftVCenter("Heals Given:", X, Y+YL*6, FontScalar);
+		DrawTextShadowHLeftVCenter(HealsGivenString $ ":", X, Y+YL*6, FontScalar);
 		i = CDPC.MatchStats.TotalAmountHealGiven + CDPC.MatchStats.GetHealGivenInWave();
 		DrawTextShadowHRightVCenter(string(i), X, Y+YL*6, Width, FontScalar);
-		DrawTextShadowHLeftVCenter("Heals Received:", X, Y+YL*7, FontScalar);
+		DrawTextShadowHLeftVCenter(HealsReceivedString $ ":", X, Y+YL*7, FontScalar);
 		i = CDPC.MatchStats.TotalAmountHealReceived + CDPC.MatchStats.GetHealReceivedInWave();
 		DrawTextShadowHRightVCenter(string(i), X, Y+YL*7, Width, FontScalar);
 
@@ -278,24 +325,24 @@ function DrawMenu()
 		if(de+dr+dl > 0)
 		{
 			i += 1;
-			DrawTextShadowHLeftVCenter("Robot Kills:", X, Y+YL*(8+i), FontScalar);
+			DrawTextShadowHLeftVCenter(RobotKillsString $ ":", X, Y+YL*(8+i), FontScalar);
 			DrawTextShadowHRightVCenter(string(de+dr+dl), X, Y+YL*(8+i), Width, FontScalar);
 			if(de > 0)
 			{
 				i += 1;
-				DrawTextShadowHLeftVCenter("  EDAR Trapper:", X, Y+YL*(8+i), FontScalar);
+				DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedDAR_EMP'.static.GetLocalizedName() $ ":", X, Y+YL*(8+i), FontScalar);
 				DrawTextShadowHRightVCenter(string(de), X, Y+YL*(8+i), Width, FontScalar);
 			}
 			if(dr > 0)
 			{
 				i += 1;
-				DrawTextShadowHLeftVCenter("  EDAR Bomber:", X, Y+YL*(8+i), FontScalar);
+				DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedDAR_Rocket'.static.GetLocalizedName() $ ":", X, Y+YL*(8+i), FontScalar);
 				DrawTextShadowHRightVCenter(string(dr), X, Y+YL*(8+i), Width, FontScalar);
 			}
 			if(dl > 0)
 			{
 				i += 1;
-				DrawTextShadowHLeftVCenter("  EDAR Blaster:", X, Y+YL*(8+i), FontScalar);
+				DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedDAR_Laser'.static.GetLocalizedName() $ ":", X, Y+YL*(8+i), FontScalar);
 				DrawTextShadowHRightVCenter(string(dl), X, Y+YL*(8+i), Width, FontScalar);
 			}
 			i += 1;
@@ -303,87 +350,87 @@ function DrawMenu()
 		if(as+hans+pat+kfp+abom+mat > 0)
 		{
 			i += 1;
-			DrawTextShadowHLeftVCenter("Boss Kills:", X, Y+YL*(8+i), FontScalar);
+			DrawTextShadowHLeftVCenter(BossKillsString $ ":", X, Y+YL*(8+i), FontScalar);
 			DrawTextShadowHRightVCenter(string(as+hans+pat+kfp+abom+mat), X, Y+YL*(8+i), Width, FontScalar);
 			if(as > 0)
 			{
 				i += 1;
-				DrawTextShadowHLeftVCenter("  Abomination Spawn:", X, Y+YL*(8+i), FontScalar);
+				DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedBloatKingSubspawn'.static.GetLocalizedName() $ ":", X, Y+YL*(8+i), FontScalar);
 				DrawTextShadowHRightVCenter(string(as), X, Y+YL*(8+i), Width, FontScalar);
 			}
 			if(hans > 0)
 			{
 				i += 1;
-				DrawTextShadowHLeftVCenter("  Dr.Hans Volter:", X, Y+YL*(8+i), FontScalar);
+				DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedHans'.static.GetLocalizedName() $ ":", X, Y+YL*(8+i), FontScalar);
 				DrawTextShadowHRightVCenter(string(hans), X, Y+YL*(8+i), Width, FontScalar);
 			}
 			if(pat > 0)
 			{
 				i += 1;
-				DrawTextShadowHLeftVCenter("  Patriarch:", X, Y+YL*(8+i), FontScalar);
+				DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedPatriarch'.static.GetLocalizedName() $ ":", X, Y+YL*(8+i), FontScalar);
 				DrawTextShadowHRightVCenter(string(pat), X, Y+YL*(8+i), Width, FontScalar);
 			}
 			if(kfp > 0)
 			{
 				i += 1;
-				DrawTextShadowHLeftVCenter("  King Fleshpound:", X, Y+YL*(8+i), FontScalar);
+				DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedFleshpoundKing'.static.GetLocalizedName() $ ":", X, Y+YL*(8+i), FontScalar);
 				DrawTextShadowHRightVCenter(string(kfp), X, Y+YL*(8+i), Width, FontScalar);
 			}
 			if(abom > 0)
 			{
 				i += 1;
-				DrawTextShadowHLeftVCenter("  Abomination:", X, Y+YL*(8+i), FontScalar);
+				DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedBloatKing'.static.GetLocalizedName() $ ":", X, Y+YL*(8+i), FontScalar);
 				DrawTextShadowHRightVCenter(string(abom), X, Y+YL*(8+i), Width, FontScalar);
 			}
 			if(mat > 0)
 			{
 				i += 1;
-				DrawTextShadowHLeftVCenter("  Matriarch:", X, Y+YL*(8+i), FontScalar);
+				DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedMatriarch'.static.GetLocalizedName() $ ":", X, Y+YL*(8+i), FontScalar);
 				DrawTextShadowHRightVCenter(string(mat), X, Y+YL*(8+i), Width, FontScalar);
 			}
 		}
 
 		X = 0.5*CompPos[2] + YL;
-		DrawTextShadowHLeftVCenter("Total Kills:", X, Y, FontScalar);
+		DrawTextShadowHLeftVCenter(TotalKillsString $ ":", X, Y, FontScalar);
 		DrawTextShadowHRightVCenter(string(CDPC.PlayerReplicationInfo.Kills), X, Y, Width, FontScalar);
 
-		DrawTextShadowHLeftVCenter("Large Kills:", X, Y+YL*2, FontScalar);
+		DrawTextShadowHLeftVCenter(LargeKillsString $ ":", X, Y+YL*2, FontScalar);
 		DrawTextShadowHRightVCenter(string(sc+fp+qp), X, Y+YL*2, Width, FontScalar);
-		DrawTextShadowHLeftVCenter("  Scrake:", X, Y+YL*3, FontScalar);
+		DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedScrake'.static.GetLocalizedName() $ ":", X, Y+YL*3, FontScalar);
 		DrawTextShadowHRightVCenter(string(sc), X, Y+YL*3, Width, FontScalar);
-		DrawTextShadowHLeftVCenter("  Fleshpound:", X, Y+YL*4, FontScalar);
+		DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedFleshpound'.static.GetLocalizedName() $ ":", X, Y+YL*4, FontScalar);
 		DrawTextShadowHRightVCenter(string(fp), X, Y+YL*4, Width, FontScalar);
-		DrawTextShadowHLeftVCenter("  Quarterpound:", X, Y+YL*5, FontScalar);
+		DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedFleshpoundMini'.static.GetLocalizedName() $ ":", X, Y+YL*5, FontScalar);
 		DrawTextShadowHRightVCenter(string(qp), X, Y+YL*5, Width, FontScalar);
 
-		DrawTextShadowHLeftVCenter("Medium Kills:", X, Y+YL*7, FontScalar);
+		DrawTextShadowHLeftVCenter(MediumKillsString $ ":", X, Y+YL*7, FontScalar);
 		DrawTextShadowHRightVCenter(string(hu+si+bl), X, Y+YL*7, Width, FontScalar);
-		DrawTextShadowHLeftVCenter("  Husk:", X, Y+YL*8, FontScalar);
+		DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedHusk'.static.GetLocalizedName() $ ":", X, Y+YL*8, FontScalar);
 		DrawTextShadowHRightVCenter(string(hu), X, Y+YL*8, Width, FontScalar);
-		DrawTextShadowHLeftVCenter("  Siren:", X, Y+YL*9, FontScalar);
+		DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedSiren'.static.GetLocalizedName() $ ":", X, Y+YL*9, FontScalar);
 		DrawTextShadowHRightVCenter(string(si), X, Y+YL*9, Width, FontScalar);
-		DrawTextShadowHLeftVCenter("  Bloat:", X, Y+YL*10, FontScalar);
+		DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedBloat'.static.GetLocalizedName() $ ":", X, Y+YL*10, FontScalar);
 		DrawTextShadowHRightVCenter(string(bl), X, Y+YL*10, Width, FontScalar);
 				
-		DrawTextShadowHLeftVCenter("Trash Kills:", X, Y+YL*(12), FontScalar);
+		DrawTextShadowHLeftVCenter(TrashKillsString $ ":", X, Y+YL*(12), FontScalar);
 		DrawTextShadowHRightVCenter(string(gf+gf2+st+cr+ecr+ri+sl+al+cy), X, Y+YL*(12), Width, FontScalar);
-		DrawTextShadowHLeftVCenter("  Stalker:", X, Y+YL*(13), FontScalar);
+		DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedStalker'.static.GetLocalizedName() $ ":", X, Y+YL*(13), FontScalar);
 		DrawTextShadowHRightVCenter(string(st), X, Y+YL*(13), Width, FontScalar);
-		DrawTextShadowHLeftVCenter("  Crawler:", X, Y+YL*(14), FontScalar);
+		DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedCrawler'.static.GetLocalizedName() $ ":", X, Y+YL*(14), FontScalar);
 		DrawTextShadowHRightVCenter(string(cr), X, Y+YL*(14), Width, FontScalar);
-		DrawTextShadowHLeftVCenter("  Elite Crawler:", X, Y+YL*(15), FontScalar);
+		DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedCrawlerKing'.static.GetLocalizedName() $ ":", X, Y+YL*(15), FontScalar);
 		DrawTextShadowHRightVCenter(string(ecr), X, Y+YL*(15), Width, FontScalar);
-		DrawTextShadowHLeftVCenter("  Gorefast:", X, Y+YL*(16), FontScalar);
+		DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedGorefast'.static.GetLocalizedName() $ ":", X, Y+YL*(16), FontScalar);
 		DrawTextShadowHRightVCenter(string(gf), X, Y+YL*(16), Width, FontScalar);
-		DrawTextShadowHLeftVCenter("  Gorefiend:", X, Y+YL*(17), FontScalar);
+		DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedGorefastDualBlade'.static.GetLocalizedName() $ ":", X, Y+YL*(17), FontScalar);
 		DrawTextShadowHRightVCenter(string(gf2), X, Y+YL*(17), Width, FontScalar);
-		DrawTextShadowHLeftVCenter("  Rioter:", X, Y+YL*(18), FontScalar);
+		DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedClot_AlphaKing'.static.GetLocalizedName() $ ":", X, Y+YL*(18), FontScalar);
 		DrawTextShadowHRightVCenter(string(ri), X, Y+YL*(18), Width, FontScalar);
-		DrawTextShadowHLeftVCenter("  Slasher:", X, Y+YL*(19), FontScalar);
+		DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedClot_Slasher'.static.GetLocalizedName() $ ":", X, Y+YL*(19), FontScalar);
 		DrawTextShadowHRightVCenter(string(sl), X, Y+YL*(19), Width, FontScalar);
-		DrawTextShadowHLeftVCenter("  Alpha Clot:", X, Y+YL*(20), FontScalar);
+		DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedClot_Alpha'.static.GetLocalizedName() $ ":", X, Y+YL*(20), FontScalar);
 		DrawTextShadowHRightVCenter(string(al), X, Y+YL*(20), Width, FontScalar);
-		DrawTextShadowHLeftVCenter("  Cyst:", X, Y+YL*(21), FontScalar);
+		DrawTextShadowHLeftVCenter("  " $ class'KFGameContent.KFPawn_ZedClot_Cyst'.static.GetLocalizedName() $ ":", X, Y+YL*(21), FontScalar);
 		DrawTextShadowHRightVCenter(string(cy), X, Y+YL*(21), Width, FontScalar);
 	}
 }

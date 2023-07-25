@@ -22,6 +22,11 @@ var const string ChatReadDescription;
 var const string ChatWriteDescription;
 var const array<string> ChatWriteParamHints;
 
+var localized string AlreadyMsg;
+var localized string StagedMsg;
+var localized string PendingMsg;
+var localized string OldMsg;
+
 function bool StageIndicator( const out string Raw, out string StatusMsg, const optional bool ForceOverwrite = false )
 {
 	local string Candidate;
@@ -31,7 +36,7 @@ function bool StageIndicator( const out string Raw, out string StatusMsg, const 
 
 	if ( Candidate != "" && Candidate == StagedIndicator && !ForceOverwrite )
 	{
-		StatusMsg = OptionName $" is already "$ Candidate;
+		StatusMsg = OptionName $ AlreadyMsg $ Candidate;
 		return false;
 	}
 
@@ -40,8 +45,7 @@ function bool StageIndicator( const out string Raw, out string StatusMsg, const 
 	`cdlog("Converted raw string "$ Raw $" to staged value "$ StagedIndicator,
 		bLogControlledDifficulty);
 	
-	StatusMsg = "Staged: "$ OptionName $"="$ StagedIndicator $
-		"\nEffective after current wave"; 
+	StatusMsg = StagedMsg $ OptionName $"="$ StagedIndicator $ "\n" $ PendingMsg; 
 	
 	return true;
 }
@@ -88,7 +92,7 @@ private final function string GetChatLineInternal()
 
 	if ( HasStagedChanges() )
 	{
-		Result $= " (staged: " $ StagedIndicator $ ")";
+		Result $= " (" $ StagedMsg $ StagedIndicator $ ")";
 	}
 
 	return Result;
@@ -150,7 +154,7 @@ function string CommitStagedChangesBasic( const optional bool ForceOverwrite = f
 
 	WriteIndicator( StagedIndicator );
 
-	return OptionName $"="$ StagedIndicator $" (old: "$ OldIndicator $")";
+	return OptionName $"="$ StagedIndicator $" ("$ OldMsg $ OldIndicator $")";
 }
 
 function string GetOptionName()
