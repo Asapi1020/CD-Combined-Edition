@@ -14,6 +14,7 @@ var transient Console OrgConsole;
 var transient xUI_Console NewConsole;
 */
 var CD_PlayerController CDPC;
+var CD_GameReplicationInfo CDGRI;
 var CD_DroppedPickup WeaponPickup;
 
 var const FontRenderInfo MyFontRenderInfo;
@@ -33,11 +34,19 @@ var string MyStats;
 var float ReceivedTime;
 var int VoteLeftTime;
 
+var localized string ItemDropPrefix;
+var localized string WaveInfoBasic;
+var localized string WaveInfoTrader;
+var localized string WaveInfoBoss;
+var localized string CDSettingsString;
+var localized string SpectatorsString;
+
 simulated function PostBeginPlay()
 {
 	Super.PostBeginPlay();	
 
 	CDPC = CD_PlayerController(Owner);
+	SetupCDGRI();
 
 	OnlineSub = class'GameEngine'.static.GetOnlineSubsystem();
 	if (OnlineSub!=None)
@@ -50,6 +59,21 @@ simulated function PostBeginPlay()
 	SetTimer(0.1, true, 'CheckForWeaponPickup');
 }
 
+function SetupCDGRI()
+{
+	CDGRI = CD_GameReplicationInfo(CDPC.WorldInfo.GRI);
+	
+	if(CDGRI == none)
+	{
+		SetTimer(1.f, false, 'SetupCDGRI');
+	}
+}
+
+function bool MainMenuIsOpen()
+{
+	return CDPC != none && CDPC.MyGfxManager != none && CDPC.MyGFxManager.bMenusOpen && CDPC.MyGFxManager.bMenusActive && KFGFxMenu_Trader(CDPC.MyGFxManager.CurrentMenu) == None;
+}
+
 function PostRender()
 {
 	if(CDPC != none)
@@ -60,14 +84,22 @@ function PostRender()
 		if(CDPC.bShowPathNodes)
 			DrawPathsNumber();
 
-		if( !CDPC.bCinematicMode &&
-			WeaponPickup != none && KFGameReplicationInfo(CDPC.WorldInfo.GRI).bTraderIsOpen )
+		if( !CDPC.bCinematicMode && WeaponPickup != none && CDGRI.bTraderIsOpen )
 			DrawWeaponPickupInfo(WeaponPickup, CDPC.Pawn);
 
-		if (CDPC.WorldInfo.GRI.bMatchHasBegun && !CDPC.WorldInfo.GRI.bMatchIsOver && !CDPC.WorldInfo.GRI.bRoundIsOver && CDPC.PlayerReplicationInfo.bWaitingPlayer &&
-			CDPC.MyGfxManager != none && CDPC.MyGFxManager.bMenusOpen && CDPC.MyGFxManager.bMenusActive &&
-			KFGFxMenu_Trader(CDPC.MyGFxManager.CurrentMenu) == None)
-			DrawWaveInfo();
+		if(MainMenuIsOpen())
+		{
+			if(CD_GFxMenu_StartGame(CDPC.MyGFxManager.CurrentMenu) != none)
+			{
+				DrawCDSettings();
+				DrawSpectatorsInfo();
+			}
+
+			if(CDGRI.bMatchHasBegun && !CDGRI.bMatchIsOver && !CDGRI.bRoundIsOver && CDPC.PlayerReplicationInfo.bWaitingPlayer)
+			{
+				DrawWaveInfo();
+			}
+		}
 
 		if (!CDPC.PlayerReplicationInfo.bWaitingPlayer)
 		{
@@ -163,7 +195,7 @@ simulated function SearchInventoryForNewItem()
 			{
 				NewItems.Insert(0,1);
 				NewItems[0] = OnlineSub.ItemPropertiesList[j].Name;
-				CD_PlayerController(Owner).TeamMessage(none, "[Item Drop]" @ NewItems[0], 'System');
+				CD_PlayerController(Owner).TeamMessage(none, ItemDropPrefix @ NewItems[0], 'System');
 			}
 		}
 	}
@@ -172,8 +204,8 @@ simulated function SearchInventoryForNewItem()
 
 simulated function CheckForItems()
 {
-	if (CD_PlayerController(Owner).DropItem && KFGameReplicationInfo(WorldInfo.GRI)!=none)
-		KFGameReplicationInfo(WorldInfo.GRI).ProcessChanceDrop();
+	if (CD_PlayerController(Owner).DropItem && CDGRI!=none)
+		CDGRI.ProcessChanceDrop();
 	SetTimer(240.f,false,'CheckForItems');
 }
 
@@ -410,7 +442,7 @@ function CheckForWeaponPickup()
 	local float DistSq, BestDistSq;
 	local KFPawn_Monster KFPM;
 
-	if (CDPC == None || CDPC.WorldInfo.GRI == None || !CDPC.WorldInfo.GRI.bMatchHasBegun)
+	if (CDPC == None || CDGRI == None || !CDGRI.bMatchHasBegun)
 	{
 		WeaponPickup = None;
 		return;
@@ -503,15 +535,15 @@ function DrawWaveInfo()
 		
 	if (KFGRI.bTraderIsOpen)
 	{
-		WaveInfoText @= ("TRADER:" @ GetTimeString(KFGRI.GetTraderTimeRemaining()));
+		WaveInfoText @= (WaveInfoTrader @ GetTimeString(KFGRI.GetTraderTimeRemaining()));
 	}
 	else
 	{
 		// Check if this is an endless objective wave
 		if (KFGRI.IsBossWave())
-			WaveInfoText @= "BOSS";
+			WaveInfoText @= WaveInfoBoss;
 		else
-			WaveInfoText @= ("ZEDS:" @ KFGRI.AIRemaining);
+			WaveInfoText @= (WaveInfoBasic @ KFGRI.AIRemaining);
 	}
 	
 	// Setup the font and scaling
@@ -572,8 +604,8 @@ function DrawMyStats()
     }
 
     Canvas.TextSize(s, XL, YL, Sc, Sc);
-    X = Canvas.ClipX * 0.0150;
-    Y = Canvas.ClipY * 0.240;
+    X = Canvas.ClipX * 0.023;
+    Y = Canvas.ClipY * 0.36;
     Canvas.SetDrawColor(10, 10, 10, byte(Max(0, (1.0 - ((T / 15.0) ** float(3))) * 200.0)));
 	GUIStyle.DrawRectBox(X - (YL/2), Y - (YL/2), XL+YL, YL*7, 8.f, 0);
 	Canvas.SetPos(X, Y);
@@ -612,14 +644,89 @@ function DrawVoteLeftTime()
 
 		s $= string(time);
 
-		Canvas.TextSize("Next map in:", XL, YL, Sc, Sc);
+		Canvas.TextSize(class'KFGame.KFGFxMenu_PostGameReport'.default.NextMapString, XL, YL, Sc, Sc);
 		X = Canvas.ClipX * 0.5 - XL;
 		Y = Canvas.ClipY * 0.0150;
 		Canvas.SetDrawColor(10, 10, 10, 250);
 		GUIStyle.DrawRectBox(X - (YL/2), Y - (YL/2), 2*XL, YL*2, 8.f, 0);
 		Canvas.SetDrawColor(250, 0, 0, 255);
-		GUIStyle.DrawTextShadow("Next map in:" @ s, X, Y, 1, Sc);
+		GUIStyle.DrawTextShadow(class'KFGame.KFGFxMenu_PostGameReport'.default.NextMapString @ s, X, Y, 1, Sc);
 	}
+}
+
+function DrawCDSettings()
+{
+	local float Sc, XL, YL, X, Y;
+	local string s;
+
+	if(CDGRI == none)
+	{
+		return;
+	}
+
+	Canvas.Font = GUIStyle.PickFont(Sc);
+	s = "MaxMonsters=" $ CDGRI.CDInfoParams.MM $
+		"\nCohortSize=" $ CDGRI.CDInfoParams.CS $
+		"\nWaveSizeFakes=" $ CDGRI.CDInfoParams.WSF $
+		"\nSpawnMod=" $ CDGRI.CDInfoParams.SM $
+		"\nSpawnPoll=" $ CDGRI.CDInfoParams.SP $
+		"\nSpawnCycle=" $ CDGRI.CDInfoParams.SC;
+	Canvas.TextSize("SpawnCycle=nam_poundemonium", XL, YL, Sc, Sc); // The longest setting sentense
+
+	X = Canvas.ClipX * 0.34;
+	Y = Canvas.ClipY * 0.7605;
+	DrawTitledInfoBox(CDSettingsString, s, Sc, XL, YL, X, Y, 6);
+}
+
+function DrawSpectatorsInfo()
+{
+	local float Sc, XL, YL, X, Y;
+	local string s;
+	local int i, n;
+	local KFPlayerReplicationInfo KFPRI;
+
+	if(CDGRI == none || WorldInfo.NetMode == NM_StandAlone) return;
+
+	Canvas.Font = GUIStyle.PickFont(Sc);
+	s = "";
+
+	for(i=CDGRI.PRIArray.length-1; i>=0; --i)
+	{
+		KFPRI = KFPlayerReplicationInfo(CDGRI.PRIArray[i]);
+
+		if(KFPRI != none && KFPRI.bOnlySpectator)
+		{
+			s $= KFPRI.PlayerName $ "\n";
+			++n;
+		}
+	}
+
+	Canvas.TextSize("ABC", XL, YL, Sc, Sc);
+	X = Canvas.ClipX * 0.555;
+	Y = Canvas.ClipY * 0.7605;
+	XL = Canvas.ClipX * 0.171;
+	DrawTitledInfoBox(SpectatorsString, s, Sc, XL, YL, X, Y, max(6, n));
+}
+
+function DrawTitledInfoBox(string title, string body, float Sc, float XL, float YL, float X, float Yb, int LineNum)
+{
+	local float Y, a, h, w;
+
+	a = YL/2;
+	h = YL*(LineNum+1);
+	Y = Yb - h;
+	Canvas.SetDrawColor(0, 0, 0, 250);
+	GUIStyle.DrawRectBox(X-a, Y-a, XL+YL, h, 8.f, 152);
+	Canvas.SetDrawColor(250, 250, 250, 255);
+	GUIStyle.DrawTextShadow(body, X, Y, 1, Sc);
+
+	Canvas.TextSize(title, w, YL, Sc, Sc);
+	h = YL + ScaledBorderSize*2;
+	Y -= (h+a-ScaledBorderSize);
+	Canvas.SetDrawColor(75, 0, 0, 200);
+	GUIStyle.DrawRectBox(X-a, Y-ScaledBorderSize, XL+YL, h, 8.f, 0);
+	Canvas.SetDrawColor(250, 250, 250, 255);
+	GUIStyle.DrawTextShadow(title, X + (XL-w)/2, Y, 1, Sc);	
 }
 
 defaultproperties

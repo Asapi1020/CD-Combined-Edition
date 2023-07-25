@@ -71,6 +71,9 @@ var Color BlackBGColor;
 var Color RedBGColor;
 var Color HUDTextColor;
 
+var localized string DurationString;
+var localized string SecondString;
+
 function PostRender()
 {
 	local float DT;
@@ -188,8 +191,8 @@ final function RenderKillMsg()
 
     Canvas.Font = GUIStyle.PickFont(Sc); //(GUIStyle.DefaultFontSize, Sc);
     Canvas.TextSize("ABC", X, YL, Sc, Sc);
-    X = Canvas.ClipX * 0.0150;
-    Y = Canvas.ClipY * 0.240;
+    X = Canvas.ClipX * 0.023; //0.0150;
+    Y = Canvas.ClipY * 0.36; //0.240;
     
     if(KillMessages.Length >= 1)
     {
@@ -564,8 +567,8 @@ function RenderAccuracy()
 
     Canvas.Font = GUIStyle.PickFont(Sc); //(GUIStyle.DefaultFontSize, Sc);
     Canvas.TextSize("ABC", X, YL, Sc, Sc);
-    X = Canvas.ClipX * 0.020;
-    Y = Canvas.ClipY * 0.450;
+    X = Canvas.ClipX * 0.023; //0.020;
+    Y = Canvas.ClipY * 0.570; //0.450;
     
     STMPC = UTM_PlayerController(Owner);
     if(STMPC != none)
@@ -575,7 +578,7 @@ function RenderAccuracy()
 
         if(STMPC.ShotsFired != 0) f = float(STMPC.ShotsHit)/float(STMPC.ShotsFired) * 100;
         else f = 0;
-        S = "Hit Accuracy:" @ string(round(f)) $ "%" @ "(" $ string(STMPC.ShotsHit) $ "/" $ string(STMPC.ShotsFired) $ ")";
+        S = class'CombinedCD2.xUI_ResultMenu'.default.HitAccuracyString $ ":" @ string(round(f)) $ "%" @ "(" $ string(STMPC.ShotsHit) $ "/" $ string(STMPC.ShotsFired) $ ")";
         Canvas.SetPos(X, Y);
         Canvas.SetDrawColor(0, 255, 10, 255);
         Canvas.DrawText(S,,Sc,Sc);
@@ -583,7 +586,7 @@ function RenderAccuracy()
 
         if(STMPC.ShotsHit != 0) f = float(STMPC.ShotsHitHeadshot)/float(STMPC.ShotsHit) * 100;
         else f = 0;
-        S = "HS Accuracy:" @ string(round(f)) $ "%" @ "(" $ string(STMPC.ShotsHitHeadshot) $ "/" $ string(STMPC.ShotsHit) $ ")";
+        S = class'CombinedCD2.xUI_ResultMenu'.default.HSAccuracyString $ ":" @ string(round(f)) $ "%" @ "(" $ string(STMPC.ShotsHitHeadshot) $ "/" $ string(STMPC.ShotsHit) $ ")";
         Canvas.SetPos(X, Y);
         Canvas.DrawText(S,,Sc,Sc);
     }
@@ -609,7 +612,7 @@ function RenderLargeChallenge()
         Canvas.SetDrawColor(10, 10, 10, 200);
         GUIStyle.DrawRectBox(X - (YL/2), Y - (YL/2), YL*7, YL*4, 8.f, 0);
 
-        S = "Wave" @ string(UTMPRI.LargeWaveNum) $ "/5";
+        S = class'KFGame.KFGFxMenu_PostGameReport'.default.WaveString @ string(UTMPRI.LargeWaveNum) $ "/5";
         Canvas.SetPos(X, Y);
         Canvas.SetDrawColor(0, 255, 10, 255);
         Canvas.DrawText(S,,Sc,Sc);
@@ -655,7 +658,7 @@ function RenderTrashChallenge()
         Canvas.DrawText(S,,Sc,Sc);
         Y += YL;
 
-        S = "(Duration=" $ ((int(UTMGRI.CDInfoParams.MM)<32) ? "30sec" : "40sec") $ ")";
+        S = "(" $ DurationString $ "=" $ ((int(UTMGRI.CDInfoParams.MM)<32) ? "30" : "40") $ SecondString $ ")";
         Canvas.SetPos(X, Y);
         Canvas.DrawText(S,,Sc,Sc);
     }

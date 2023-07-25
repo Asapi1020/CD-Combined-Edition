@@ -33,3 +33,19 @@ static function string GetSteamID(UniqueNetId ID)
 	return "STEAM_0:" $ string(SteamIdAccountNumber % 2) $ ":" $ string(SteamIdAccountNumber / 2);
 }
 
+static function string GetCustomMapName(string MapName)
+{
+	local string CustomName;
+
+	if(Left(MapName, 3) ~= "KF-")
+	{
+		CustomName = Localize("CustomMapName", MapName, "CombinedCD2");
+		if(Left(CustomName, 1) != "?")
+		{
+			return CustomName;
+		}
+		MapName = Mid(MapName, 3);
+	}
+
+	return MapName;
+}

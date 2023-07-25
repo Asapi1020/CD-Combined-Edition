@@ -49,10 +49,26 @@ var array< class<KFWeaponDefinition> > CurWeapDef;
 var array<UserInfo> CurUserInfo;
 var array<string> ColumnText;
 
-const LevelRestrictionToolTip = "Do you require players to reach Lv25?";
-const SkillRestrictionToolTip = "Do you ban this skill?";
-const ListToggleToolTip = "Toggle list contents between weapons and user authorities.";
-const AntiOvercapToolTip = "Do you disable overcap and reset ammo count?";
+//var localized string Title;
+var localized string LevelRestrictionToolTip;
+var localized string SkillRestrictionToolTip;
+var localized string ListToggleToolTip;
+var localized string AntiOvercapToolTip;
+var localized string PerkAuthorityString;
+var localized string MaxUpgradeString;
+var localized string ListToggleButtonText;
+var localized string LevelRequirementString;
+var localized string AntiOvercapString;
+var localized string WeaponHeader;
+var localized string BossOnlyHeader;
+var localized string NameHeader;
+var localized string IDHeader;
+var localized string LoadingMsg;
+var localized string LevelHeader;
+var localized string LevelSetString;
+var localized string BanString;
+var localized string ToggleBossOnlyString;
+var localized string RemoveString;
 
 function SetWindowDrag(bool bDrag)
 {
@@ -68,7 +84,7 @@ function DrawMenu()
 
 	Super.DrawMenu();
 
-	WindowTitle="Admin Menu v1.1";
+	WindowTitle = Title @ "v1.1";
 	Canvas.Font = Owner.CurrentStyle.PickFont(FontScalar);
 	Canvas.TextSize("ABC", XL, YL, FontScalar, FontScalar);
 
@@ -127,14 +143,14 @@ function DrawMenu()
 	else
 		S = string(GetCDPC().PerkRestrictions[index].RequiredLevel);
 
-	DrawControllerInfo("Perk Authority Level", S, PerkSubB, PerkAddB, YL, FontScalar, Owner.HUDOwner.ScaledBorderSize, 30);
+	DrawControllerInfo(PerkAuthorityString, S, PerkSubB, PerkAddB, YL, FontScalar, Owner.HUDOwner.ScaledBorderSize, 30);
 
 	UpgradeSubB = KFGUI_Button(FindComponentID('UpgradeSub'));
 	UpgradeSubB.ButtonText = "-";
 	UpgradeAddB = KFGUI_Button(FindComponentID('UpgradeAdd'));
 	UpgradeAddB.ButtonText = "+";
 	S = string(GetCDGRI().MaxUpgrade);
-	DrawControllerInfo("Max Upgrade Count", S, UpgradeSubB, UpgradeAddB, YL, FontScalar, Owner.HUDOwner.ScaledBorderSize, 30);
+	DrawControllerInfo(MaxUpgradeString, S, UpgradeSubB, UpgradeAddB, YL, FontScalar, Owner.HUDOwner.ScaledBorderSize, 30);
 
 //	List
 	if(!bListUpdate)
@@ -143,76 +159,79 @@ function DrawMenu()
 	}
 
 	ListToggleB = KFGUI_Button(FindComponentID('ListToggle'));
-	ListToggleB.ButtonText = "Toggle List";
+	ListToggleB.ButtonText = ListToggleButtonText;
 	ListToggleB.ToolTip=ListToggleToolTip;
 
 //	Check Boxes (Level & Skills)
 	LevelRestrictionBox = KFGUI_CheckBox(FindComponentID('LevelRestriction'));
 	LevelRestrictionBox.bChecked = GetCDPC().bRequireLv25;
 	LevelRestrictionBox.ToolTip=LevelRestrictionToolTip;
-	DrawBoxDescription("Require Lv25", LevelRestrictionBox, 0.3);
+	DrawBoxDescription(LevelRequirementString, LevelRestrictionBox, 0.3);
 
 	AntiOvercapBox = KFGUI_CheckBox(FindComponentID('AntiOvercap'));
 	AntiOvercapBox.bChecked = GetCDPC().bAntiOvercap;
 	AntiOvercapBox.ToolTip=AntiOvercapToolTip;
-	DrawBoxDescription("Anti Overcap", AntiOvercapBox, 0.3);
+	DrawBoxDescription(AntiOvercapString, AntiOvercapBox, 0.3);
 
 	SkillRestriction0 = KFGUI_CheckBox(FindComponentID('SR0'));
 	SkillRestriction0.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 0);
 	SkillRestriction0.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescriptionReverse(GetCDPC().WeapUIInfo.Perk.default.PerkSkills[0].Name, SkillRestriction0, 0.05);
+	DrawBoxDescriptionReverse(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 0), SkillRestriction0, 0.05);
 
 	SkillRestriction1 = KFGUI_CheckBox(FindComponentID('SR1'));
 	SkillRestriction1.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 1);
 	SkillRestriction1.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescription(GetCDPC().WeapUIInfo.Perk.default.PerkSkills[1].Name, SkillRestriction1, 0.425);
+	DrawBoxDescription(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 1), SkillRestriction1, 0.425);
 
 	SkillRestriction2 = KFGUI_CheckBox(FindComponentID('SR2'));
 	SkillRestriction2.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 2);
 	SkillRestriction2.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescriptionReverse(GetCDPC().WeapUIInfo.Perk.default.PerkSkills[2].Name, SkillRestriction2, 0.05);
+	DrawBoxDescriptionReverse(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 2), SkillRestriction2, 0.05);
 
 	SkillRestriction3 = KFGUI_CheckBox(FindComponentID('SR3'));
 	SkillRestriction3.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 3);
 	SkillRestriction3.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescription(GetCDPC().WeapUIInfo.Perk.default.PerkSkills[3].Name, SkillRestriction3, 0.425);
+	DrawBoxDescription(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 3), SkillRestriction3, 0.425);
 
 	SkillRestriction4 = KFGUI_CheckBox(FindComponentID('SR4'));
 	SkillRestriction4.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 4);
 	SkillRestriction4.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescriptionReverse(GetCDPC().WeapUIInfo.Perk.default.PerkSkills[4].Name, SkillRestriction4, 0.05);
+	DrawBoxDescriptionReverse(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 4), SkillRestriction4, 0.05);
 
 	SkillRestriction5 = KFGUI_CheckBox(FindComponentID('SR5'));
 	SkillRestriction5.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 5);
 	SkillRestriction5.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescription(GetCDPC().WeapUIInfo.Perk.default.PerkSkills[5].Name, SkillRestriction5, 0.425);
+	DrawBoxDescription(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 5), SkillRestriction5, 0.425);
 
 	SkillRestriction6 = KFGUI_CheckBox(FindComponentID('SR6'));
 	SkillRestriction6.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 6);
 	SkillRestriction6.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescriptionReverse(GetCDPC().WeapUIInfo.Perk.default.PerkSkills[6].Name, SkillRestriction6, 0.05);
+	DrawBoxDescriptionReverse(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 6), SkillRestriction6, 0.05);
 
 	SkillRestriction7 = KFGUI_CheckBox(FindComponentID('SR7'));
 	SkillRestriction7.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 7);
 	SkillRestriction7.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescription(GetCDPC().WeapUIInfo.Perk.default.PerkSkills[7].Name, SkillRestriction7, 0.425);
+	DrawBoxDescription(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 7), SkillRestriction7, 0.425);
 
 	SkillRestriction8 = KFGUI_CheckBox(FindComponentID('SR8'));
 	SkillRestriction8.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 8);
 	SkillRestriction8.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescriptionReverse(GetCDPC().WeapUIInfo.Perk.default.PerkSkills[8].Name, SkillRestriction8, 0.05);
+	DrawBoxDescriptionReverse(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 8), SkillRestriction8, 0.05);
 
 	SkillRestriction9 = KFGUI_CheckBox(FindComponentID('SR9'));
 	SkillRestriction9.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 9);
 	SkillRestriction9.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescription(GetCDPC().WeapUIInfo.Perk.default.PerkSkills[9].Name, SkillRestriction9, 0.425);
+	DrawBoxDescription(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 9), SkillRestriction9, 0.425);
 
 	CloseB = KFGUI_Button(FindComponentID('Close'));
-	CloseB.ButtonText = "Close";
+	CloseB.ButtonText = CloseButtonText;
 }
 
 function InitMenu()
 {
+	local int i;
+	local string s;
+
 	super.InitMenu();
 
 	AuthList = KFGUI_ColumnList(FindComponentID('AuthList'));
@@ -222,6 +241,22 @@ function InitMenu()
 
 	WeapRClicker = KFGUI_RightClickMenu(FindComponentID('WeapRClicker'));
 	UserRClicker = KFGUI_RightClickMenu(FindComponentID('UserRClicker'));
+
+	WeapRightClick.ItemRows.Add(7);
+	UserRightClick.ItemRows.Add(6);
+
+	for(i=0; i<5; i++)
+	{
+		s = LevelSetString $ "Lv." $ string(i);
+		WeapRightClick.ItemRows[i].Text = s;
+		UserRightClick.ItemRows[i].Text = s;
+	}
+	
+	WeapRightClick.ItemRows[i].Text = LevelSetString $ "Lv." $ string(i) @ BanString;
+	WeapRightClick.ItemRows[i+1].Text = ToggleBossOnlyString;
+
+	UserRightClick.ItemRows[i-1].Text @= class'KFGame.KFLocalMessage'.default.AdminString;
+	UserRightClick.ItemRows[i].Text = RemoveString;
 }
 
 final function UpdateList()
@@ -238,8 +273,9 @@ final function UpdateList()
 	{
 		TraderItems = KFGameReplicationInfo(GetCDPC().WorldInfo.GRI).TraderItems;
 		CurWeapDef.Remove(0, CurWeapDef.length);
-		AuthList.Columns[0].Text = "Weapon";
-		AuthList.Columns[1].Text = "Boss Only";
+		AuthList.Columns[0].Text = WeaponHeader;
+		AuthList.Columns[1].Text = BossOnlyHeader;
+		AuthList.Columns[2].Text = LevelHeader;
 
 		for(i=0; i<TraderItems.SaleItems.length; i++)
 		{
@@ -255,7 +291,7 @@ final function UpdateList()
 				S $= "\n";
 
 				if(GetCDPC().WeaponRestrictions[index].bOnlyForBoss)
-					S $= "TRUE";
+					S $= Caps(string(true));
 
 				j = GetCDPC().WeaponRestrictions[index].RequiredLevel;
 				if(j > 0)
@@ -268,8 +304,9 @@ final function UpdateList()
 	else
 	{
 		CurUserInfo.Remove(0, CurUserInfo.length);
-		AuthList.Columns[0].Text = "Name";
-		AuthList.Columns[1].Text = "ID";
+		AuthList.Columns[0].Text = NameHeader;
+		AuthList.Columns[1].Text = IDHeader;
+		AuthList.Columns[2].Text = LevelHeader;
 
 		for(i=0; i<GetCDGRI().PRIArray.length; i++)
 		{
@@ -293,7 +330,7 @@ final function UpdateList()
 		if(!GetCDPC().bAuthReceived)
 		{
 			SetTimer(1.f, false, 'DelayedUpdateList');
-			AuthList.AddLine("Now Loading...");
+			AuthList.AddLine(LoadingMsg);
 			return;
 		}	
 	}
@@ -366,6 +403,9 @@ function ButtonClicked(KFGUI_Button Sender)
 
 function SelectedListRow(KFGUI_ListItem Item, int Row, bool bRight, bool bDblClick)
 {
+	if(Row < 0)
+		return;
+
 	if(ListCategoly == WeapList)
 	{
 		SelectedWeap = CurWeapDef[Row];
@@ -427,6 +467,10 @@ function UserClickedRow(int RowNum)
 	{
 		SelectedUser.AuthorityLevel = RowNum;
 		GetCDPC().ChangeUserAuthority(SelectedUser);
+	}
+	else if(RowNum == 5)
+	{
+		GetCDPC().RemoveAuthorityInfo(SelectedUser);
 	}
 	SetTimer(1.f, false, 'DelayedUpdateList');
 }
@@ -491,9 +535,9 @@ defaultproperties
 	XSize=0.64
 	YSize=0.9
 	ListCategoly=WeapList
-	ColumnText(0)="Weapon"
-	ColumnText(1)="Boss Only"
-	ColumnText(2)="Lv."
+	ColumnText(0)=WeaponHeader
+	ColumnText(1)=BossOnlyHeader
+	ColumnText(2)=LevelHeader
 
 //	Perk Option
 
@@ -638,23 +682,11 @@ defaultproperties
 
 	Begin Object Class=KFGUI_RightClickMenu Name=WeapRClicker
 		ID="WeapRClick"
-		ItemRows(0)=(Text="Set Lv.0")
-		ItemRows(1)=(Text="Set Lv.1")
-		ItemRows(2)=(Text="Set Lv.2")
-		ItemRows(3)=(Text="Set Lv.3")
-		ItemRows(4)=(Text="Set Lv.4")
-		ItemRows(5)=(Text="Set Lv.5 (Ban)")
-		ItemRows(6)=(Text="Toggle Boss Only")
 		OnSelectedItem=WeapClickedRow
 	End Object
 	
 	Begin Object Class=KFGUI_RightClickMenu Name=UserRClicker
 		ID="UserRClick"
-		ItemRows(0)=(Text="Set Lv.0")
-		ItemRows(1)=(Text="Set Lv.1")
-		ItemRows(2)=(Text="Set Lv.2")
-		ItemRows(3)=(Text="Set Lv.3")
-		ItemRows(4)=(Text="Set Lv.4 (Admin)")
 		OnSelectedItem=UserClickedRow
 	End Object
 

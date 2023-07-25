@@ -18,15 +18,15 @@ function PerkChanged( byte NewPerkIndex, bool bClickedIndex)
 
 			//	Level filter
 			if(CDPC.IsRestrictedLevel(KFPC.PerkList[NewPerkIndex].PerkLevel))
-				KFPC.ShowConnectionProgressPopup(PMT_AdminMessage,"Level Restriction", "Required level 25");
+				KFPC.ShowConnectionProgressPopup(PMT_AdminMessage, class'CombinedCD2.CD_PlayerController'.default.LevelRestrictionMsg, class'CombinedCD2.CD_PlayerController'.default.LevelRequirementMsg);
 
 			//	Authorized Perk filter
 			else if( CDPC.IsRestrictedPerk(Perk) )
-				KFPC.ShowConnectionProgressPopup(PMT_AdminMessage,"PERK Restriction", "You are not authorized to use " $ Mid(string(Perk), 7));
+				KFPC.ShowConnectionProgressPopup(PMT_AdminMessage, class'CombinedCD2.CD_PlayerController'.default.PerkRestrictionMsg, class'CombinedCD2.CD_PlayerController'.default.AuthorityErrorMsg $ Mid(string(Perk), 7));
 
 			//	Sole Perks System
 			else if( CDGRI.bMatchHasBegun && CDGRI.bEnableSolePerksSystem && !CDGRI.ControlSolePerks(KFPC, Perk) )
-				KFPC.ShowConnectionProgressPopup(PMT_AdminMessage,"Perk Restriction", "The second" @ Mid(string(Perk), 7) @ "is not allowed!");
+				KFPC.ShowConnectionProgressPopup(PMT_AdminMessage, class'CombinedCD2.CD_PlayerController'.default.PerkRestrictionMsg, class'CombinedCD2.CD_PlayerController'.default.SecondString @ Mid(string(Perk), 7) @ class'CombinedCD2.CD_PlayerController'.default.NotAllowedString);
 
 			else
 				super.PerkChanged(NewPerkIndex, bClickedIndex);				
@@ -49,7 +49,7 @@ function Callback_SkillSelected( byte TierIndex, byte SkillIndex )
 
 		if( CD_PlayerController(KFPC).IsRestrictedSkill(Perk, index) )
 		{
-			KFPC.ShowConnectionProgressPopup(PMT_AdminMessage,"Skill Restriction", class'CD_PlayerController'.static.SkillBanMessage(Perk, index) @ "is banned");
+			KFPC.ShowConnectionProgressPopup(PMT_AdminMessage, class'CombinedCD2.CD_PlayerController'.default.SkillRestrictionMsg, class'CD_PlayerController'.static.SkillBanMessage(Perk, index) @ class'CombinedCD2.CD_PlayerController'.default.BannedString);
 			return;
 		}
 	  	

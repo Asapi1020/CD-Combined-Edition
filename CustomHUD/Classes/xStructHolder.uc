@@ -41,3 +41,16 @@ struct CD_PerkInfo
 	var class<KFPerk> Perk;
 	var int RequiredLevel;
 };
+
+
+struct PerkUseNum
+{
+	var class<KFPerk> Perk;
+	var int Num;
+};
+
+struct LoadoutInfo
+{
+	var class<KFPerk> Perk;
+	var array< class<KFWeaponDefinition> > WeapDef;
+};

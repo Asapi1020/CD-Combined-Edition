@@ -1,5 +1,7 @@
 class CD_GFxWidget_PartyInGame extends KFGFxWidget_PartyInGame;
 
+var localized string CDReadyButton;
+
 function UpdateReadyButtonText()
 {
 	Local bool bIsConsole;
@@ -8,7 +10,7 @@ function UpdateReadyButtonText()
 	if (ReadyButton != none)
 	{
 		bIsConsole = GetPC().WorldInfo.IsConsoleBuild();
-		ButtonText = "CD Ready";
+		ButtonText = CDReadyButton;
 
 		if(bIsConsole && bShowingSkipTrader)
 		{

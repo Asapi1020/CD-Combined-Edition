@@ -31,7 +31,7 @@ defaultproperties
 	IniDefsArrayName="FleshpoundHPFakesDefs"
 	OptionName="FleshpoundHPFakes"
 	DefaultSettingValue=6
-	MinSettingValue=0
+	MinSettingValue=1
 	MaxSettingValue=32
 
 	ChatCommandNames=("!cdfleshpoundhpfakes","!cdfphpf")

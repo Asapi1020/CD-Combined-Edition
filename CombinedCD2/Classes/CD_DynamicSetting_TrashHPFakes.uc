@@ -31,7 +31,7 @@ defaultproperties
 	IniDefsArrayName="TrashHPFakesDefs"
 	OptionName="TrashHPFakes"
 	DefaultSettingValue=6
-	MinSettingValue=0
+	MinSettingValue=1
 	MaxSettingValue=32
 
 	ChatCommandNames=("!cdtrashhpfakes","!cdthpf")

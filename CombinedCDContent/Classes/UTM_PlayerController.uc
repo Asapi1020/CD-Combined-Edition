@@ -31,6 +31,9 @@ var rotator LargeRot;
 var int LargeWaveNum;
 var bool bCheckingWeapSkin;
 
+var localized string ResultString;
+var localized string CompleteTitle, CompleteMsg;
+
 reliable server function OpenTraderMenuFromSTMOptions(){ OpenTraderMenu(true); }
 
 
@@ -297,7 +300,7 @@ function LogLargeResult()
 
     if(UTMPRI.LargeWaveNum > 0)
     {
-        ClientMessage("Result(SC:" $ string(UTMPRI.SCKills) @ "FP:" $ string(UTMPRI.FPKills) $ ")", 'CDEcho');
+        ClientMessage(ResultString $ "(SC:" $ string(UTMPRI.SCKills) @ "FP:" $ string(UTMPRI.FPKills) $ ")", 'CDEcho');
         UTMPRI.LargeWaveNum = 0;
         UTMPRI.SCKills = 0;
         UTMPRI.FPKills = 0;
@@ -618,7 +621,7 @@ function NotifyKilled( Controller Killer, Controller Killed, pawn KilledPawn, cl
         STMDo("ZedTime");
         UTMPRI.PendingZed = none;
         LogLargeResult();
-        ShowMessageBar('Priority', "COMPLETED", "You are the largest!");
+        ShowMessageBar('Priority', CompleteTitle, CompleteMsg);
     }
 
     super.NotifyKilled(Killer, Killed, KilledPawn, damageType);
@@ -672,10 +675,16 @@ function SetSkinMat(int TargetSkinId)
 
 defaultproperties
 {
-    PurchaseHelperClass=class'KFAutoPurchaseHelper'
+    PurchaseHelperClass=class'UTM_AutoPurchaseHelper'
 
-    PerkList.Add((PerkClass=class'KFPerk_Berserker'))
-    PerkList.Add((PerkClass=class'KFPerk_Demolitionist'))
-    PerkList.Add((PerkClass=class'KFPerk_Firebug'))
+    PerkList[0]=(PerkClass=class'KFPerk_Berserker')
+    PerkList[1]=(PerkClass=class'KFPerk_Commando')
+    PerkList[2]=(PerkClass=class'KFPerk_Support')
+    PerkList[3]=(PerkClass=class'KFPerk_FieldMedic')
+    PerkList[4]=(PerkClass=class'KFPerk_Demolitionist')
+    PerkList[5]=(PerkClass=class'KFPerk_Firebug')
+    PerkList.Add((PerkClass=class'KFPerk_Gunslinger'))
+    PerkList.Add((PerkClass=class'KFPerk_Sharpshooter'))
+    PerkList.Add((PerkClass=class'KFPerk_Swat'))
     PerkList.Add((PerkClass=class'KFPerk_Survivalist'))
 }

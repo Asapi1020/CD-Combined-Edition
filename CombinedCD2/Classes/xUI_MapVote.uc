@@ -9,17 +9,19 @@ var int SelectedMapIndex, SelectedModeIndex;
 var editinline export KFGUI_RightClickMenu MapRightClick;
 var bool bFirstTime;
 
-var localized string CloseButtonText;
+//var localized string Title;
 var localized string CloseButtonToolTip;
 var localized string ColumnMapName;
-var localized string ColumnSequence;
-var localized string ColumnPlayCount;
-var localized string ColumnRating;
+//var localized string ColumnSequence;
+//var localized string ColumnPlayCount;
+//var localized string ColumnRating;
 var localized string ColumnGame;
 var localized string ColumnNumVotes;
-var localized string Title;
-
-const ResultButtonToolTip="Open the match result menu";
+var localized string ColumnGameMode;
+var localized string MatchResultButtonText;
+var localized string ResultButtonToolTip;
+var localized string VoteMapString;
+var localized string AdminForceString;
 
 function FRowItem newFRowItem(string Text, bool isDisabled)
 {
@@ -53,17 +55,22 @@ function InitMenu()
 	
 	MapList.Columns.AddItem(newFColumnItem(ColumnMapName,1.f));
 
-	GameModeList.Columns.AddItem(newFColumnItem("Game Mode",1.f));
+	GameModeList.Columns.AddItem(newFColumnItem(ColumnGameMode,1.f));
 	
 	CurrentVotes.Columns.AddItem(newFColumnItem(ColumnGame,0.2));
 	CurrentVotes.Columns.AddItem(newFColumnItem(ColumnMapName,0.5));
 	CurrentVotes.Columns.AddItem(newFColumnItem(ColumnNumVotes,0.3));
 
 	ResultButton = KFGUI_Button(FindComponentID('Result'));
-	ResultButton.ButtonText = "Match Result";
+	ResultButton.ButtonText = MatchResultButtonText;
 	ResultButton.ToolTip = ResultButtonToolTip;
+
+	MapRightClick.ItemRows.Add(2);
+	MapRightClick.ItemRows[0].Text=VoteMapString;
+	MapRightClick.ItemRows[1].Text=AdminForceString;
+	MapRightClick.ItemRows[1].bDisabled = true;
 	
-	WindowTitle="Map Vote v2.1";
+	WindowTitle = Title @ "v2.1";
 }
 
 function CloseMenu()
@@ -344,8 +351,6 @@ defaultproperties
 	
 	Begin Object Class=KFGUI_RightClickMenu Name=MapRClicker
 		ID="RClick"
-		ItemRows(0)=(Text="Vote this map")
-		ItemRows(1)=(Text="Admin force this map",bDisabled=true)
 		OnSelectedItem=ClickedRow
 	End Object
 	MapRightClick=MapRClicker

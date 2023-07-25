@@ -1,5 +1,8 @@
 class xUI_MenuBase extends KFGUI_FloatingWindow;
 
+var localized string Title;
+var localized string CloseButtonText;
+
 function CD_PlayerController GetCDPC()
 {
 	return CD_PlayerController(GetPlayer());
@@ -15,7 +18,7 @@ function CD_GameReplicationInfo GetCDGRI()
 	return CD_GameReplicationInfo(GetCDPC().WorldInfo.GRI);
 }
 
-function DrawControllerInfo(string Title, string Value, KFGUI_Button LB, KFGUI_Button RB, float YL, float FontScalar, float BorderSize, int ValueDarkness, optional float SizeRate=1.f, optional bool bHeaderLess=false)
+function DrawControllerInfo(string InfoTitle, string Value, KFGUI_Button LB, KFGUI_Button RB, float YL, float FontScalar, float BorderSize, int ValueDarkness, optional float SizeRate=1.f, optional bool bHeaderLess=false)
 {
 	local float XPos, YPos, BoxW;
 
@@ -29,7 +32,7 @@ function DrawControllerInfo(string Title, string Value, KFGUI_Button LB, KFGUI_B
 		Canvas.SetDrawColor(0, 0, 0, 200);
 		Owner.CurrentStyle.DrawRectBox(XPos, YPos, BoxW, YL + BorderSize, 8.f, 150);
 		Canvas.SetDrawColor(250, 250, 250, 255);
-		DrawTextShadowHVCenter(Title, XPos, YPos, BoxW, FontScalar);
+		DrawTextShadowHVCenter(InfoTitle, XPos, YPos, BoxW, FontScalar);
 	}
 
 	//	Value

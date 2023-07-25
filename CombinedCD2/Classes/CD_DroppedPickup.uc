@@ -171,6 +171,10 @@ simulated function string GetWeightText(Pawn P)
 	return WeightText;
 }
 
+simulated function SetEmptyMaterial()
+{
+	return;
+}
 
 
 defaultproperties
@@ -182,5 +186,5 @@ defaultproperties
 	SpareAmmo(0)=-1
 	SpareAmmo(1)=-1
 
-	EmptyPickupColor=(R=1)
+	EmptyPickupColor=(R=0, G=0, B=1)
 }

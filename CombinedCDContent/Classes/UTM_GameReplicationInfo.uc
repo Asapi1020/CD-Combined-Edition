@@ -38,6 +38,11 @@ simulated function bool ShouldSetBossCamOnBossSpawn()
     return false;
 }
 
+simulated function bool ShouldSetBossCamOnBossDeath()
+{
+    return false;
+}
+
 simulated event bool CanChangePerks()
 {
     return true;

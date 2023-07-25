@@ -13,12 +13,15 @@ struct BZNum
 };
 var array<BZNum> BZNumArray;
 
+var localized string MissCycleMsg;
+var localized string LengthMissMatchMsg;
+
 function TrySCA(string s, optional bool bBrief)
 {
 	//	s = "!cdsca cyclename wavex wsfxx"
 	local array<string> splitbuf;
 	local string CycleName, option;
-	local int TargetWave, TargetWSF, TargetPlayerCount, i;
+	local int TargetWave, TargetWSF, i;
 	local CD_SpawnCycle_Preset SCP;
 
 	//	Define params
@@ -36,19 +39,16 @@ function TrySCA(string s, optional bool bBrief)
 
 	if(!(SpawnCycleCatalog.ExistThisCycle(CycleName, SCP)))
 	{
-		BroadcastCDEcho("Not found a spawn cycle to analyze.");
+		BroadcastCDEcho(MissCycleMsg);
 		return;
 	}
 
-	if ( FakesModeEnum == FPM_ADD ) TargetPlayerCount = TargetWSF + GetNumPlayers();
-	else TargetPlayerCount = TargetWSF;
-
 	Count.length=0;
 	Count.length=default.CDZedClass.Length;
-	if(TargetWave > 0) CycleAnalyzePerWave(SCP, TargetWave-1, TargetPlayerCount);
+	if(TargetWave > 0) CycleAnalyzePerWave(SCP, TargetWave-1, TargetWSF);
 	else if(TargetWave == 0)
 	{
-		for(i=0; i<((GameLength*3)+4); i++) CycleAnalyzePerWave(SCP, i, TargetPlayerCount);
+		for(i=0; i<((GameLength*3)+4); i++) CycleAnalyzePerWave(SCP, i, TargetWSF);
 	}
 	PrintAnalisis(CycleName, TargetWave, TargetWSF, bBrief);
 }
@@ -56,6 +56,7 @@ function TrySCA(string s, optional bool bBrief)
 function PrintAnalisis(string Cycle, int Wave, int WSF, optional bool bBrief)
 {
 	local int Total, i, Large, Medium, Trash, Bosses, T, M, L;
+	local string s, s1, s2;
 
 	T = TrashAmount;
 	M = T + MediumAmount;
@@ -70,14 +71,21 @@ function PrintAnalisis(string Cycle, int Wave, int WSF, optional bool bBrief)
 		else Bosses += Count[i];
 	}
 
-	BroadcastCDEcho( "[" $ Cycle  $ ( (Wave==0) ? "" : (" Wave" $ string(Wave)) ) $ " WSF" $ string(WSF) $ "]\n" $
-					  "SC=" $ string(Count[M]) $ " | FP=" $ string(Count[M+3] + Count[M+4]) $ " | QP=" $ string(Count[M+1] + Count[M+2]) $ "\n" $ 
-					  "Large(" $ string(Round(Large*100/Total)) $ "%)\n" $
-					  "Medium(" $ string(Round(Medium*100/Total)) $ "%)\n" $
-					  "Trash(" $ string(Round(Trash*100/Total)) $ "%)" );
+	s = "SC=" $ string(Count[M]) $ " | FP=" $ string(Count[M+3] + Count[M+4]) $ " | QP=" $ string(Count[M+1] + Count[M+2]) $ "\n" $ 
+		"Large(" $ string(Round(Large*100/Total)) $ "%)";
+	s1 = "Medium(" $ string(Round(Medium*100/Total)) $ "%)";
+	s2 = "Trash(" $ string(Round(Trash*100/Total)) $ "%)";
 
-	if(bBrief) return;
+	if(bBrief)
+	{
+		DisplayCycleAnalisisInHUD(Cycle, s @ s1);
+		return;
+	}
 
+	s = "[" $ Cycle  $ ( (Wave==0) ? "" : (" Wave" $ string(Wave)) ) $ " WSF" $ string(WSF) $ "]\n" $
+		s $ "\n" $ s1 $ "\n" $ s2;
+
+	BroadcastCDEcho(s);
 	BroadcastCDEcho( "------------------------------------" $ "\n" $ 
 					 "[" $ Cycle $  ( (Wave==0) ? "" : (" Wave" $ string(Wave)) ) $ " WSF" $ string(WSF) $ "]\n" $
 					 "------------------------------------" $ "\n" $ 
@@ -142,7 +150,7 @@ function CycleAnalyzePerWave(CD_SpawnCycle_Preset SCP, int WaveIdx, int PlayerCo
 
 	if ( 0 == CycleDefs.length )
 	{
-		BroadcastCDEcho("The cycle exists but is not defined for current game length.");
+		BroadcastCDEcho(LengthMissMatchMsg);
 		return;
 	}
 

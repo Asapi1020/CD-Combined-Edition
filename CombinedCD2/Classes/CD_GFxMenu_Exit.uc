@@ -1,17 +1,19 @@
 class CD_GFxMenu_Exit extends KFGFxMenu_Exit;
 
+var localized string GratitudeString;
+
 function ShowExitToOSPopUp()
 {
 	if(Manager != none)
 	{
 		if( class'WorldInfo'.static.IsConsoleBuild(CONSOLE_Durango) )
 		{
-			Manager.DelayedOpenPopup(EConfirmation, EDPPID_Misc, "Exit", "Thank you for playing!",
+			Manager.DelayedOpenPopup(EConfirmation, EDPPID_Misc, HeaderString, GratitudeString,
 				Class'KFCommon_LocalizedStrings'.default.ConfirmString, Class'KFCommon_LocalizedStrings'.default.CancelString, OnLogoutConfirm);
 		}
 		else
 		{
-			Manager.DelayedOpenPopup(EConfirmation, EDPPID_Misc, "Exit", "Thank you for playing!",
+			Manager.DelayedOpenPopup(EConfirmation, EDPPID_Misc, HeaderString, GratitudeString,
 				Class'KFCommon_LocalizedStrings'.default.ConfirmString, Class'KFCommon_LocalizedStrings'.default.CancelString, OnQuitConfirm );
 		}
 	}
@@ -31,7 +33,7 @@ function ShowLeaveGamePopUp()
 {
 	if(Manager != none )
 	{
-		Manager.DelayedOpenPopup(EConfirmation, EDPPID_Misc, "Leave Game", "Thank you for playing!",
+		Manager.DelayedOpenPopup(EConfirmation, EDPPID_Misc, class'KFGame.KFGFxObject_Menu'.default.LeavePartyTitleString, GratitudeString,
 	 		Class'KFCommon_LocalizedStrings'.default.ConfirmString, Class'KFCommon_LocalizedStrings'.default.CancelString, OnLeaveGameConfirm);
 	}	
 }

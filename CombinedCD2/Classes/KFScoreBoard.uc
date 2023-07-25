@@ -29,6 +29,11 @@ var localized string Ready;
 var localized string NotReady;
 var localized string Unknown;
 var localized string Dead;
+var localized string Kills;
+var localized string DamageDealt;
+var localized string Dosh;
+var localized string Ping;
+var localized string SoloGameString;
 
 function DrawMenu()
 {
@@ -128,7 +133,7 @@ function DrawMenu()
 	Owner.CurrentStyle.DrawRectBox(BoxX, YPos, BoxW, BoxH, Settings.Style.EdgeSize, Settings.Style.ShapeServerNameBox);
 	
 	SetDrawColor(Canvas, Settings.Style.ServerNameTextColor);
-	S = KFGRI.ServerName;
+	S = (PC.WorldInfo.NetMode == NM_StandAlone) ? SoloGameString : KFGRI.ServerName;
 	DrawTextShadowHVCenter(S, BoxX, YPos, BoxW, FontScalar);
 	
 	YPos += BoxH;
@@ -141,7 +146,7 @@ function DrawMenu()
 	
 	SetDrawColor(Canvas, Settings.Style.GameInfoTextColor);
 	S = class'KFCommon_LocalizedStrings'.static.GetFriendlyMapName(PC.WorldInfo.GetMapName(true));
-	if(Left(S, 3) ~= "KF-") S = Mid(S, 3);
+	S = class'CD_Object'.static.GetCustomMapName(S);
 	DrawTextShadowHLeftVCenter(S, BoxX + Settings.Style.EdgeSize, YPos, FontScalar);
 	
 	S = KFGRI.GameClass.default.GameName $ " - " $ class'KFCommon_LocalizedStrings'.Static.GetDifficultyString(KFGRI.GameDifficulty);
@@ -300,11 +305,11 @@ function DrawMenu()
 	DrawTextShadowHLeftVCenter(Rank, XPos + RankXPos, YPos, FontScalar);
 	DrawTextShadowHLeftVCenter(class'KFGFxHUD_ScoreboardWidget'.default.PlayerString, XPos + PlayerXPos, YPos, FontScalar);
 	DrawTextShadowHLeftVCenter(class'KFGFxMenu_Inventory'.default.PerkFilterString, XPos + PerkXPos, YPos, FontScalar);
-	DrawTextShadowHVCenter("Kills", XPos + KillsXPos, YPos, KillsWBox, FontScalar);
-	DrawTextShadowHVCenter("Damage Dealt", XPos + AssistXPos, YPos, AssistWBox, FontScalar);
-	DrawTextShadowHVCenter("Dosh", XPos + CashXPos, YPos, CashWBox, FontScalar);
-	DrawTextShadowHVCenter("State", XPos + HealthXPos, YPos, HealthWBox, FontScalar);
-	DrawTextShadowHVCenter("Ping", XPos + PingXPos, YPos, PingWBox, FontScalar);
+	DrawTextShadowHVCenter(Kills, XPos + KillsXPos, YPos, KillsWBox, FontScalar);
+	DrawTextShadowHVCenter(DamageDealt, XPos + AssistXPos, YPos, AssistWBox, FontScalar);
+	DrawTextShadowHVCenter(Dosh, XPos + CashXPos, YPos, CashWBox, FontScalar);
+	DrawTextShadowHVCenter(State, XPos + HealthXPos, YPos, HealthWBox, FontScalar);
+	DrawTextShadowHVCenter(Ping, XPos + PingXPos, YPos, PingWBox, FontScalar);
 
 //	Player List
 	PlayersList.XPosition = ((Canvas.ClipX - Width) * 0.5) / InputPos[2];
@@ -328,7 +333,7 @@ function DrawMenu()
 			0);
 
 		SetDrawColor(Canvas, Settings.Style.ListHeaderTextColor);
-		S = "Spectators:";
+		S = Spectators $ ":";
 		for(i=0; i<SpectatorsArray.length; i++)
 		{
 			if(i>0)
@@ -349,7 +354,7 @@ function DrawPlayerEntry(Canvas C, int Index, float YOffset, float Height, float
 	local KFPlayerReplicationInfo KFPRI;
 	local byte Level, PrestigeLevel;
 	local bool bIsZED;
-	local int Ping;
+	local int PingInt;
 	
 	local RankInfo CurrentRank;
 	local bool HasRank;
@@ -636,7 +641,7 @@ function DrawPlayerEntry(Canvas C, int Index, float YOffset, float Height, float
 		SetDrawColor(C, Settings.Style.StateTextColorLobby);
 		S = class'KFGFxMenu_ServerBrowser'.default.InLobbyString;;
 	}
-	else if (!KFGRI.bMatchHasBegun)
+	else if (!KFGRI.bMatchHasBegun || KFPRI.bWaitingPlayer)
 	{
 		if (KFPRI.bReadyToPlay)
 		{
@@ -646,6 +651,19 @@ function DrawPlayerEntry(Canvas C, int Index, float YOffset, float Height, float
 		else
 		{
 			SetDrawColor(C, Settings.Style.StateTextColorNotReady);
+			S = NotReady;
+		}
+	}
+	else if (KFGRI.bTraderIsOpen)
+	{
+		if (CD_PlayerReplicationInfo(KFPRI).bIsReadyForNextWave)
+		{
+			SetDrawColor(C, Settings.Style.PingTextColorLow);
+			S = Ready;
+		}
+		else
+		{
+			SetDrawColor(C, Settings.Style.PingTextColorHigh);
 			S = NotReady;
 		}
 	}
@@ -692,33 +710,33 @@ function DrawPlayerEntry(Canvas C, int Index, float YOffset, float Height, float
 	}
 	else
 	{
-		Ping = int(KFPRI.Ping * `PING_SCALE);
+		PingInt = int(KFPRI.Ping * `PING_SCALE);
 
 		if (CurrentRank.ApplyColorToFields.Ping)
 			SetDrawColor(C, CurrentRank.TextColor);
-		else if (Ping <= Settings.Ping.Low)
+		else if (PingInt <= Settings.Ping.Low)
 			SetDrawColor(C, Settings.Style.PingTextColorLow);
-		else if (Ping <= Settings.Ping.High)
+		else if (PingInt <= Settings.Ping.High)
 			SetDrawColor(C, Settings.Style.PingTextColorMid);
 		else
 			SetDrawColor(C, Settings.Style.PingTextColorHigh);
 
-		S = string(Ping);
+		S = string(PingInt);
 	}
 
 	C.TextSize(S, XL, YL, FontScalar, FontScalar);
 	DrawTextShadowHVCenter(S, PingXPos, TextYOffset, Settings.Ping.ShowPingBars ? PingWBox/2 : PingWBox, FontScalar);
 	C.SetDrawColor(250, 250, 250, 255);
 	if (Settings.Ping.ShowPingBars)
-		DrawPingBars(C, YOffset + (Height/2) - ((Height*0.5)/2), Width - (Height*0.5) - (Owner.HUDOwner.ScaledBorderSize*2), Height*0.5, Height*0.5, float(Ping));
+		DrawPingBars(C, YOffset + (Height/2) - ((Height*0.5)/2), Width - (Height*0.5) - (Owner.HUDOwner.ScaledBorderSize*2), Height*0.5, Height*0.5, float(PingInt));
 }
 
-final function DrawPingBars(Canvas C, float YOffset, float XOffset, float W, float H, float Ping)
+final function DrawPingBars(Canvas C, float YOffset, float XOffset, float W, float H, float PingFloat)
 {
 	local float PingMul, BarW, BarH, BaseH, XPos, YPos;
 	local byte i;
 
-	PingMul = 1.f - FClamp(FMax(Ping - Settings.Ping.Low, 1.f) / Settings.Ping.High, 0.f, 1.f);
+	PingMul = 1.f - FClamp(FMax(PingFloat - Settings.Ping.Low, 1.f) / Settings.Ping.High, 0.f, 1.f);
 	BarW = W / PingBars;
 	BaseH = H / PingBars;
 

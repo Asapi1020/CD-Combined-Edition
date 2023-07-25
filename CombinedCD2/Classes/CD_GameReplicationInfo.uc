@@ -1,10 +1,15 @@
 class CD_GameReplicationInfo extends KFGameReplicationInfo;
 
+`include(CD_Log.uci)
+
 var PlayerReplicationInfo FirstCommando;
 var PlayerReplicationInfo FirstMedic;
 
 var bool bEnableSolePerksSystem;
+var bool bAllBoss;
 var int MaxUpgrade;
+
+var array<string> DebugTexts;
 
 struct CDInfo
 {
@@ -27,12 +32,28 @@ replication
 	if((Role == ROLE_Authority) && bNetDirty)
 		FirstCommando, FirstMedic, bEnableSolePerksSystem, CDInfoParams, CDFinalParams,
 		DamageDealer, Healer, Precision, Headpopper, ZedSlayer, LargeKiller, HuskKiller, Guardian,
-		MaxUpgrade;
+		MaxUpgrade, bAllBoss;
+}
+
+simulated function bool ShouldSetBossCamOnBossSpawn()
+{
+	// Wierd code to avoid a freaking bug.
+	/*
+	if(!bAllBoss)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+	*/
+	return false;
 }
 
 simulated function bool ShouldSetBossCamOnBossDeath()
 {
-	return false;
+	return !bAllBoss;
 }
 
 simulated function LogoutCheck(PlayerController PC)
