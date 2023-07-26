@@ -21,7 +21,7 @@ function bool IsItemFiltered(STraderItem Item, optional bool bDebug)
 //	KFWD = class<KFDamageType>(class'CD_Object'.static.GetWeapClass(Item.WeaponDef).default.InstantHitDamageTypes[3]).default.WeaponDef;
 	KFWD = Item.WeaponDef;
 
-	if( !CD_PlayerController(KFPC).IsAllowedWeapon(KFWD, KFGRI.WaveNum == KFGRI.WaveMax - 1, true, false) )
+	if( !CD_PlayerController(KFPC).IsAllowedWeapon(KFWD, KFGRI.WaveNum == KFGRI.WaveMax - 1, false) )
 		return true;
 	
 	//	All DLC is available

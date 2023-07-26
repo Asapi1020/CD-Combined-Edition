@@ -48,7 +48,7 @@ function DoAutoPurchase()
 
 	for(i=0; i<LoadoutList[LoadoutIndex].WeapDef.length; i++)
 	{
-		if(!Outer.IsAllowedWeapon(LoadoutList[LoadoutIndex].WeapDef[i], false, false, false))
+		if(!Outer.IsAllowedWeapon(LoadoutList[LoadoutIndex].WeapDef[i], false, false))
 		{
 			`cdlog(string(LoadoutList[LoadoutIndex].WeapDef[i]) $ ": Restricted");
 			continue;
