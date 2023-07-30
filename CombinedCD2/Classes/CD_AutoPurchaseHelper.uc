@@ -155,26 +155,11 @@ function DoAutoPurchase()
 function ServerReceiveLoadoutList(class<KFPerk> Perk, class<KFWeaponDefinition> WeapDef, bool bInit, int Priority, int DefLen)
 {
 	local int i;
-
-	if(Priority == DefLen)
-	{
-		if(LoadedNoneWeap())
-		{
-			if(RetryNum < 50)
-				Outer.SetTimer(2.f, false, 'ClientSendLoadoutList');
-
-			else
-				`cdlog("Failed to load some weapons");
-		}
-		else
-		{
-			RetryNum = 0;
-		}
-	}
-
+	
 	if(bInit)
 	{
 		LoadoutList.Remove(0, LoadoutList.length);
+		`cdlog("Load Stage: 0");
 	}
 
 	i = LoadoutList.Find('Perk', Perk);
@@ -183,17 +168,20 @@ function ServerReceiveLoadoutList(class<KFPerk> Perk, class<KFWeaponDefinition> 
 		LoadoutList.Add(1);
 		i = LoadoutList.length-1;
 		LoadoutList[i].Perk = Perk;
+		`cdlog("Load Stage: 1");
 	}
 
 	if(Priority == 0)
 	{
 		LoadoutList[i].WeapDef.Remove(0, LoadoutList[i].WeapDef.length);
 		LoadoutList[i].WeapDef.Add(DefLen);
+		`cdlog("Load Stage: 2 - " $ string(Perk));
 	}
 
 	if(Priority < DefLen)
 	{
 		LoadoutList[i].WeapDef[Priority] = WeapDef;
+		`cdlog("Load Stage: 3 - " $ string(WeapDef));
 	}
 }
 
@@ -230,11 +218,15 @@ function SwitchLoadoutList(int i, int j, class<KFPerk> Perk)
 
 function bool LoadedNoneWeap()
 {
-	local LoadoutInfo LI;
-	foreach LoadoutList(LI)
+	local int i, j;
+
+	for(i=0; i<LoadoutList.length; i++)
 	{
-		if(LI.WeapDef.Find(none) != INDEX_NONE)
-			return true;
+		for(j=0; j<LoadoutList[i].WeapDef.length; j++)
+		{
+			if(LoadoutList[i].WeapDef[j] == none)
+				return true;
+		}
 	}
 
 	return false;
