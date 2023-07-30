@@ -4,6 +4,7 @@ class CD_AutoPurchaseHelper extends KFAutoPurchaseHelper
 `include(CD_Log.uci)
 
 var int PurchaseCount;
+var int RetryNum;
 var array<LoadoutInfo> LoadoutList;
 
 var localized string AutoTraderPartialSuccessMsg;
@@ -57,7 +58,7 @@ function DoAutoPurchase()
 		ItemIndex = TraderItems.SaleItems.Find('WeaponDef', LoadoutList[LoadoutIndex].WeapDef[i]);
 		if(ItemIndex == INDEX_NONE)
 		{
-			`cdlog("ERROR: Failed to register LoadoutWeapon");
+			`cdlog("ERROR: Failed to register LoadoutWeapon: " $ string(LoadoutList[LoadoutIndex].WeapDef[i]));
 			continue;
 		}
 
@@ -148,12 +149,28 @@ function DoAutoPurchase()
 			ClientMessage = AutoTraderNullMsg;
 	}
 	
-	Outer.ShowMessageBar('Priority', ClientMessage );
+	Outer.ShowMessageBar('Game', ClientMessage );
 }	
 
 function ServerReceiveLoadoutList(class<KFPerk> Perk, class<KFWeaponDefinition> WeapDef, bool bInit, int Priority, int DefLen)
 {
 	local int i;
+
+	if(Priority == DefLen)
+	{
+		if(LoadedNoneWeap())
+		{
+			if(RetryNum < 50)
+				Outer.SetTimer(2.f, false, 'ClientSendLoadoutList');
+
+			else
+				`cdlog("Failed to load some weapons");
+		}
+		else
+		{
+			RetryNum = 0;
+		}
+	}
 
 	if(bInit)
 	{
@@ -175,7 +192,9 @@ function ServerReceiveLoadoutList(class<KFPerk> Perk, class<KFWeaponDefinition> 
 	}
 
 	if(Priority < DefLen)
+	{
 		LoadoutList[i].WeapDef[Priority] = WeapDef;
+	}
 }
 
 function RemoveLoadoutList(int idx, class<KFPerk> Perk)
@@ -207,4 +226,16 @@ function SwitchLoadoutList(int i, int j, class<KFPerk> Perk)
 	TempWeapDef = LoadoutList[idx].WeapDef[i];
 	LoadoutList[idx].WeapDef[i] = LoadoutList[idx].WeapDef[j];
 	LoadoutList[idx].WeapDef[j] = TempWeapDef;
+}
+
+function bool LoadedNoneWeap()
+{
+	local LoadoutInfo LI;
+	foreach LoadoutList(LI)
+	{
+		if(LI.WeapDef.Find(none) != INDEX_NONE)
+			return true;
+	}
+
+	return false;
 }

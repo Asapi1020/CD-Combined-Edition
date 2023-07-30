@@ -27,7 +27,7 @@ var const float WeaponIconSize;
 var const float WeaponFontScale;
 var const color WeaponIconColor,WeaponOverweightIconColor;
 
-var Vector2D WaveInfoLoc, WaveInfoSize;
+var Vector2D WaveInfoLoc, WaveInfoSize, NoContainerLoc;
 var float TextScale;
 
 var string MyStats;
@@ -604,8 +604,8 @@ function DrawMyStats()
     }
 
     Canvas.TextSize(s, XL, YL, Sc, Sc);
-    X = Canvas.ClipX * 0.023;
-    Y = Canvas.ClipY * 0.36;
+    X = Canvas.ClipX * default.NoContainerLoc.X;
+    Y = Canvas.ClipY * default.NoContainerLoc.Y;
     Canvas.SetDrawColor(10, 10, 10, byte(Max(0, (1.0 - ((T / 15.0) ** float(3))) * 200.0)));
 	GUIStyle.DrawRectBox(X - (YL/2), Y - (YL/2), XL+YL, YL*7, 8.f, 0);
 	Canvas.SetPos(X, Y);
@@ -746,6 +746,7 @@ defaultproperties
 
 	WaveInfoLoc=(X=1456, Y=704)
 	WaveInfoSize=(X=250, Y=48)
+	NoContainerLoc=(X=0.023, Y=0.36)
 	TextScale=1.35
 
 	VoteLeftTime=-1
