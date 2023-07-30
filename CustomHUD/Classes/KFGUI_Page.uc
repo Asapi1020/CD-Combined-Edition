@@ -87,7 +87,7 @@ function DrawBoxDescription(string Title, KFGUI_CheckBox C, float RightEnd)
 	YPos = C.CompPos[1]-CompPos[1];
 
 	DrawBoxDescriptionCore(XPos, YPos, Width, Height, 153, Title, YL, FontScalar);
-	DrawTextShadowHLeftVCenter(Title, XPos+YL, YPos, FontScalar);
+	DrawTextShadowHLeftVCenter(Title, XPos+Width*0.1, YPos, FontScalar);
 }
 
 function DrawBoxDescriptionReverse(string Title, KFGUI_CheckBox C, float LeftEnd)
@@ -100,27 +100,18 @@ function DrawBoxDescriptionReverse(string Title, KFGUI_CheckBox C, float LeftEnd
 	YPos = C.CompPos[1]-CompPos[1];
 
 	DrawBoxDescriptionCore(XPos, YPos, Width, Height, 151, Title, YL, FontScalar);
-	DrawTextShadowHRightVCenter(Title, XPos, YPos, Width-YL, FontScalar);
+	DrawTextShadowHRightVCenter(Title, XPos-Width*0.1, YPos, Width, FontScalar);
 }
 
 function DrawBoxDescriptionCore(float XPos, float YPos, float Width, float Height, int ShapeID, string Title, out float YL, out float FontScalar)
 {
-	local float XL;
-
 	Canvas.SetDrawColor(0, 0, 0, 215);
 	Owner.CurrentStyle.DrawRectBox(XPos, YPos, Width, Height, 2.5f, ShapeID);
 	Canvas.SetDrawColor(250, 250, 250, 255);
 
 	Canvas.Font = Owner.CurrentStyle.PickFont(FontScalar);
 
-	while (true)
-	{
-		Canvas.TextSize(Title, XL, YL, FontScalar, FontScalar);
-		if (XL < Width)
-			return;
-
-		FontScalar -= 0.001;
-	}
+	FitScale(Title, Width*0.85, FontScalar);
 }
 
 function FColumnItem newFColumnItem(string Text, float Width)
@@ -129,6 +120,20 @@ function FColumnItem newFColumnItem(string Text, float Width)
 	newItem.Text=Text;
 	newItem.Width=Width;
 	return newItem;
+}
+
+function FitScale(string s, float w, out float sc)
+{
+	local float XL, YL;
+
+	while(true)
+	{
+		Canvas.TextSize(s, XL, YL, sc, sc);
+		if(XL < w)
+			return;
+
+		sc -= 0.001;
+	}
 }
 
 defaultproperties
