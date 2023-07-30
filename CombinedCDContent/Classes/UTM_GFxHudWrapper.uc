@@ -191,8 +191,8 @@ final function RenderKillMsg()
 
     Canvas.Font = GUIStyle.PickFont(Sc); //(GUIStyle.DefaultFontSize, Sc);
     Canvas.TextSize("ABC", X, YL, Sc, Sc);
-    X = Canvas.ClipX * 0.023; //0.0150;
-    Y = Canvas.ClipY * 0.36; //0.240;
+    X = Canvas.ClipX * default.NoContainerLoc.X; //0.023; //0.0150;
+    Y = Canvas.ClipY * default.NoContainerLoc.Y; //0.36; //0.240;
     
     if(KillMessages.Length >= 1)
     {
@@ -567,8 +567,8 @@ function RenderAccuracy()
 
     Canvas.Font = GUIStyle.PickFont(Sc); //(GUIStyle.DefaultFontSize, Sc);
     Canvas.TextSize("ABC", X, YL, Sc, Sc);
-    X = Canvas.ClipX * 0.023; //0.020;
-    Y = Canvas.ClipY * 0.570; //0.450;
+    X = Canvas.ClipX * 0.175; //0.023; //0.020;
+    Y = Canvas.ClipY * 0.060; // 0.570; //0.450;
     
     STMPC = UTM_PlayerController(Owner);
     if(STMPC != none)

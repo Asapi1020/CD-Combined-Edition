@@ -4,6 +4,7 @@ class CD_AutoPurchaseHelper extends KFAutoPurchaseHelper
 `include(CD_Log.uci)
 
 var int PurchaseCount;
+var int RetryNum;
 var array<LoadoutInfo> LoadoutList;
 
 var localized string AutoTraderPartialSuccessMsg;
@@ -48,7 +49,7 @@ function DoAutoPurchase()
 
 	for(i=0; i<LoadoutList[LoadoutIndex].WeapDef.length; i++)
 	{
-		if(!Outer.IsAllowedWeapon(LoadoutList[LoadoutIndex].WeapDef[i], false, false, false))
+		if(!Outer.IsAllowedWeapon(LoadoutList[LoadoutIndex].WeapDef[i], false, false))
 		{
 			`cdlog(string(LoadoutList[LoadoutIndex].WeapDef[i]) $ ": Restricted");
 			continue;
@@ -57,7 +58,7 @@ function DoAutoPurchase()
 		ItemIndex = TraderItems.SaleItems.Find('WeaponDef', LoadoutList[LoadoutIndex].WeapDef[i]);
 		if(ItemIndex == INDEX_NONE)
 		{
-			`cdlog("ERROR: Failed to register LoadoutWeapon");
+			`cdlog("ERROR: Failed to register LoadoutWeapon: " $ string(LoadoutList[LoadoutIndex].WeapDef[i]));
 			continue;
 		}
 
@@ -148,16 +149,17 @@ function DoAutoPurchase()
 			ClientMessage = AutoTraderNullMsg;
 	}
 	
-	Outer.ShowMessageBar('Priority', ClientMessage );
+	Outer.ShowMessageBar('Game', ClientMessage );
 }	
 
 function ServerReceiveLoadoutList(class<KFPerk> Perk, class<KFWeaponDefinition> WeapDef, bool bInit, int Priority, int DefLen)
 {
 	local int i;
-
+	
 	if(bInit)
 	{
 		LoadoutList.Remove(0, LoadoutList.length);
+		`cdlog("Load Stage: 0");
 	}
 
 	i = LoadoutList.Find('Perk', Perk);
@@ -166,16 +168,21 @@ function ServerReceiveLoadoutList(class<KFPerk> Perk, class<KFWeaponDefinition> 
 		LoadoutList.Add(1);
 		i = LoadoutList.length-1;
 		LoadoutList[i].Perk = Perk;
+		`cdlog("Load Stage: 1");
 	}
 
 	if(Priority == 0)
 	{
 		LoadoutList[i].WeapDef.Remove(0, LoadoutList[i].WeapDef.length);
 		LoadoutList[i].WeapDef.Add(DefLen);
+		`cdlog("Load Stage: 2 - " $ string(Perk));
 	}
 
 	if(Priority < DefLen)
+	{
 		LoadoutList[i].WeapDef[Priority] = WeapDef;
+		`cdlog("Load Stage: 3 - " $ string(WeapDef));
+	}
 }
 
 function RemoveLoadoutList(int idx, class<KFPerk> Perk)
@@ -207,4 +214,20 @@ function SwitchLoadoutList(int i, int j, class<KFPerk> Perk)
 	TempWeapDef = LoadoutList[idx].WeapDef[i];
 	LoadoutList[idx].WeapDef[i] = LoadoutList[idx].WeapDef[j];
 	LoadoutList[idx].WeapDef[j] = TempWeapDef;
+}
+
+function bool LoadedNoneWeap()
+{
+	local int i, j;
+
+	for(i=0; i<LoadoutList.length; i++)
+	{
+		for(j=0; j<LoadoutList[i].WeapDef.length; j++)
+		{
+			if(LoadoutList[i].WeapDef[j] == none)
+				return true;
+		}
+	}
+
+	return false;
 }
