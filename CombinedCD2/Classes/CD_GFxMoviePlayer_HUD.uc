@@ -1,6 +1,6 @@
 class CD_GFxMoviePlayer_HUD extends KFGFxMoviePlayer_HUD;
 
-function ShowObjectiveContainer(string title, string body)
+function bool ShowObjectiveContainer(string title, string body)
 {
 	local CD_GFxHUD_ObjectiveConatiner CDOC;
 
@@ -8,8 +8,13 @@ function ShowObjectiveContainer(string title, string body)
 	{
 		CDOC = CD_GFxHUD_ObjectiveConatiner(WaveInfoWidget.ObjectiveContainer);
 		if(CDOC != none)
+		{
 			CDOC.SetObjectiveContainer(title, body);
+			return true;
+		}
 	}
+
+	return false;
 }
 
 defaultproperties
