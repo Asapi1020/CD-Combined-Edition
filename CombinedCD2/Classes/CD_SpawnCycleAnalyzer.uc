@@ -13,9 +13,6 @@ struct BZNum
 };
 var array<BZNum> BZNumArray;
 
-var localized string MissCycleMsg;
-var localized string LengthMissMatchMsg;
-
 function TrySCA(string s, optional bool bBrief)
 {
 	//	s = "!cdsca cyclename wavex wsfxx"
@@ -39,7 +36,7 @@ function TrySCA(string s, optional bool bBrief)
 
 	if(!(SpawnCycleCatalog.ExistThisCycle(CycleName, SCP)))
 	{
-		BroadcastCDEcho(MissCycleMsg);
+		BroadcastLocalizedEcho("<local>CD_SpawnCycleAnalyzer.MissCycleMsg</local>");
 		return;
 	}
 
@@ -150,7 +147,7 @@ function CycleAnalyzePerWave(CD_SpawnCycle_Preset SCP, int WaveIdx, int PlayerCo
 
 	if ( 0 == CycleDefs.length )
 	{
-		BroadcastCDEcho(LengthMissMatchMsg);
+		BroadcastLocalizedEcho("<local>CD_SpawnCycleAnalyzer.LengthMissMatchMsg</local>");
 		return;
 	}
 

@@ -7,11 +7,6 @@ var int PurchaseCount;
 var int RetryNum;
 var array<LoadoutInfo> LoadoutList;
 
-var localized string AutoTraderPartialSuccessMsg;
-var localized string AutoTraderCompleteSuccessMsg;
-var localized string AutoTraderFailMsg;
-var localized string AutoTraderNullMsg;
-
 function bool CanUpgrade(STraderItem SelectedItem, out int CanCarryIndex, out int bCanAffordIndex, optional bool bPlayDialog)
 {
 	local bool b1, b2;
@@ -137,19 +132,19 @@ function DoAutoPurchase()
 	if(Failed > 0)
 	{
 		if(Purchased > 0)
-			ClientMessage = AutoTraderPartialSuccessMsg;
+			ClientMessage = "<local>CD_AutoPurchaseHelper.AutoTraderPartialSuccessMsg</local>";
 		else
-			ClientMessage = AutoTraderFailMsg;
+			ClientMessage = "<local>CD_AutoPurchaseHelper.AutoTraderFailMsg</local>";
 	}
 	else
 	{
 		if(Purchased > 0)
-			ClientMessage = AutoTraderCompleteSuccessMsg;
+			ClientMessage = "<local>CD_AutoPurchaseHelper.AutoTraderCompleteSuccessMsg</local>";
 		else
-			ClientMessage = AutoTraderNullMsg;
+			ClientMessage = "<local>CD_AutoPurchaseHelper.AutoTraderNullMsg</local>";
 	}
 	
-	Outer.ShowMessageBar('Game', ClientMessage );
+	Outer.ShowMessageBar('Game', ClientMessage, , true);
 }	
 
 function ServerReceiveLoadoutList(class<KFPerk> Perk, class<KFWeaponDefinition> WeapDef, bool bInit, int Priority, int DefLen)

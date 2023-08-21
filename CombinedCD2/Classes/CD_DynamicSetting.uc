@@ -57,11 +57,6 @@ var const string ChatReadDescription;
 var const string ChatWriteDescription;
 var const string ChatWriteParamHintFragment;
 
-var localized string AlreadyMsg;
-var localized string StagedMsg;
-var localized string PendingMsg;
-var localized string OldMsg;
-
 function bool StageIndicator( const out string Raw, out string StatusMsg, const optional bool ForceOverwrite = false )
 {
 	// takes unsanitized string "Raw", attempts to interpret it as
@@ -72,7 +67,7 @@ function bool StageIndicator( const out string Raw, out string StatusMsg, const 
 
 	if ( Raw != "" && Raw == StagedIndicator && !ForceOverwrite )
 	{
-		StatusMsg = OptionName $ AlreadyMsg $ Raw;
+		StatusMsg = OptionName $ "<local>CD_Setting.AlreadyMsg</local>" $ Raw;
 		return false;
 	}
 
@@ -119,13 +114,13 @@ function bool StageIndicator( const out string Raw, out string StatusMsg, const 
 		       " (indicator: "$ StagedIndicator $")", bLogControlledDifficulty);
 		if ( StagedIndicator == ReadIndicator() )
 		{
-			StatusMsg = OptionName $ AlreadyMsg $ StagedIndicator;
+			StatusMsg = OptionName $ "<local>CD_Setting.AlreadyMsg</local>" $ StagedIndicator;
 		}
 	}
 
 	if ( StatusMsg == "" )
 	{
-		StatusMsg = StagedMsg $ OptionName $"="$ StagedIndicator $ "\n" $ PendingMsg; 
+		StatusMsg = "<local>CD_Setting.StagedMsg</local>" $ OptionName $"="$ StagedIndicator $ "\n<local>CD_Setting.PendingMsg</local>"; 
 		return true;
 	}
 	
@@ -240,7 +235,7 @@ private final function string GetChatLineInternal( bool BriefFormat )
 	// Append the staged value, if any
 	if ( HasStagedChanges() )
 	{
-		Result $= " (" $ StagedMsg $ StagedIndicator $ ")";
+		Result $= " (<local>CD_Setting.StagedMsg</local>" $ StagedIndicator $ ")";
 	}
 
 	return Result;
@@ -309,7 +304,7 @@ function string CommitStagedChanges( const int OverrideWaveNum, const optional b
 		WriteValue( StagedValue );
 	}
 
-	return OptionName $"="$ StagedIndicator $" (" $ OldMsg $ OldIndicator $")";
+	return OptionName $"="$ StagedIndicator $" (<local>CD_Setting.OldMsg</local>" $ OldIndicator $")";
 }
 
 function string RegulateValue( const int OverrideWaveNum )
@@ -334,7 +329,7 @@ function string RegulateValue( const int OverrideWaveNum )
 		PrettyNewValue = PrettyValue( NewValue );
 		if ( PrettyOldValue != PrettyNewValue )
 		{
-			StatusMsg = OptionName $"="$ PrettyNewValue $" (" $ OldMsg $ PrettyOldValue $ ")";
+			StatusMsg = OptionName $"="$ PrettyNewValue $" (<local>CD_Setting.OldMsg</local>" $ PrettyOldValue $ ")";
 			`cdlog( "Regulated "$ StatusMsg, bLogControlledDifficulty ); 
 		}
 		else

@@ -211,7 +211,7 @@ function DrawDisplaySettings(float XPos, float YPos, float BoxW, float YL, float
 
 	AccBox = KFGUI_CheckBox(FindComponentID('Acc'));
 	AccBox.bChecked=GetSTMPC().bShowAcc;
-	DrawBoxDescription(class'CombinedCD2.CD_StatsSystem'.default.AccuracyString, AccBox, 0.25);
+	DrawBoxDescription(Localize("CD_StatsSystem", "AccuracyString", "CombinedCD2"), AccBox, 0.25);
 
 	HideTraderPathsBox = KFGUI_CheckBox(FindComponentID('HideTraderPaths'));
 	HideTraderPathsBox.bChecked = GetSTMPC().bHideTraderPaths;
