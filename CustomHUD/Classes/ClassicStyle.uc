@@ -19,7 +19,7 @@ function RenderFramedWindow(KFGUI_FloatingWindow P)
 
 	// Frame itself.
 	Canvas.SetPos(0, TitleHeight);
-	Canvas.SetDrawColor(10, 10, 10, 200);
+	Canvas.DrawColor = P.FrameColor; //Canvas.SetDrawColor(10, 10, 10, 200);
 	Owner.CurrentStyle.DrawRectBox(P.XPosition, P.YPosition, P.CompPos[2], P.CompPos[3], 8.f, 0);
 
 	// Frame Header
@@ -41,18 +41,7 @@ function RenderFramedWindow(KFGUI_FloatingWindow P)
 
 function RenderWindow(KFGUI_Page P)
 {
-/*	local int XS, YS;
-
-	XS = Canvas.ClipX-Canvas.OrgX;
-	YS = Canvas.ClipY-Canvas.OrgY;
-*/
-	// Frame itself.
-//	if (P.bWindowFocused)
-//		Canvas.SetDrawColor(105, 105, 105, 255);
-//	else Canvas.SetDrawColor(85, 85, 85, P.FrameOpacity);
-
 	Canvas.SetPos(0, 0);
-//	Canvas.DrawTileStretched(BorderTextures[`BOX_SMALL_SLIGHTTRANSPARENT], XS, YS, 0,0, 128, 128);
 	Canvas.SetDrawColor(30, 30, 30, 200);
 	Owner.CurrentStyle.DrawRectBox(P.XPosition, P.YPosition, P.CompPos[2], P.CompPos[3], 8.f, 0);
 }
@@ -128,7 +117,6 @@ function RenderScrollBar(KFGUI_ScrollBarBase S)
 	else Canvas.SetDrawColor(15, 15, 15, 160);
 
 	Canvas.SetPos(0.f, 0.f);
-//	Canvas.DrawTileStretched(BorderTextures[`BOX_INNERBORDER], S.CompPos[2], S.CompPos[3], 0,0, 128, 128);
 	Canvas.SetDrawColor(5, 5, 5, 200);
 	Owner.CurrentStyle.DrawRectBox(S.XPosition, S.YPosition, S.CompPos[2], S.CompPos[3], 5.f, 0);
 
@@ -212,7 +200,6 @@ function RenderComboBox(KFGUI_ComboBox C)
 
 	Canvas.SetPos(0.f, 0.f);
 	Owner.CurrentStyle.DrawRectBox(0.f, 0.f, C.CompPos[2], C.CompPos[3], 2.5f, 0);
-//	Canvas.DrawTileStretched(BorderTextures[`BOX_INNERBORDER], C.CompPos[2], C.CompPos[3], 0,0, 128, 128);
 
 	DrawArrowBox(3, C.CompPos[2]-32, 0.5f, 32, 32);
 
@@ -238,7 +225,6 @@ function RenderComboList(KFGUI_ComboSelector C)
 	Edge = C.Combo.BorderSize;
 	Canvas.SetPos(0.f, 0.f);
 	Owner.CurrentStyle.DrawRectBox(0.f, 0.f, C.CompPos[2], C.CompPos[3], 2.5f, 0);
-//	Canvas.DrawTileStretched(BorderTextures[`BOX_SMALL_SLIGHTTRANSPARENT], C.CompPos[2], C.CompPos[3], 0,0, 128, 128);
 
 	// While rendering, figure out mouse focus row.
 	X = C.Owner.MousePosition.X - Canvas.OrgX;

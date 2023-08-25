@@ -21,14 +21,14 @@ function Print( string message, optional bool autoPrefix = true )
 
 	if ( autoPrefix )
 	{
-		message = "[ControlledDifficulty] "$message;
+		message = "#{00ff00}[ControlledDifficulty]#{NOPARSE} "$message;
 	}
 
 	LocalGVC = class'GameEngine'.static.GetEngine().GameViewport;
 
 	if ( LocalGVC != None )
 	{
-		LocalGVC.ViewportConsole.OutputTextLine(message);
+		LocalGVC.ViewportConsole.OutputText(message);
 	}
 
 	`cdlog(message, true);

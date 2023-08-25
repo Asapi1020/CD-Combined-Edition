@@ -100,7 +100,14 @@ final function ParseTextLines()
 				break;
 
 			S = Mid(S, j+2);
-			if (Left(S, 4) == "DEF}")
+			if(Left(S, 8) == "NOPARSE}")
+			{
+				C.A = 0;
+				S = Mid(S, 8);
+				TextType = TEXT_FIELD_NONE;
+				continue;
+			}
+			else if (Left(S, 4) == "DEF}")
 			{
 				C.A = 0;
 				S = Mid(S, 4);
@@ -236,11 +243,12 @@ function InitSize()
 final function ParseLines(float ClipX)
 {
 	local float X, XS, YS;
-	local int i, j,z, n;
+	local int i, j, z, n, InsertCount;
 
+	InsertCount=0;
 	for (i=0; i < Lines.Length; ++i)
 	{
-		Lines[i].Y = i*TextHeight;
+		Lines[i].Y = (i+InsertCount)*TextHeight;
 		X = 0.f;
 		for (j=0; j < Lines[i].Text.Length; ++j)
 		{
@@ -271,6 +279,8 @@ final function ParseLines(float ClipX)
 				// End the current line at wrapping point.
 				Lines[i].Text[j].S = Left(Lines[i].Text[j].S, z);
 				Lines[i].Text.Length = j+1;
+
+				InsertCount+=1;
 				break;
 			}
 			X+=XS;
@@ -475,6 +485,11 @@ function SetVisibility(bool Visible)
 	{
 		ScrollBar.SetVisibility(Visible);
 	}
+}
+
+final function AppendText(string S)
+{
+    AddText(S, bTextParsed); 
 }
 
 defaultproperties

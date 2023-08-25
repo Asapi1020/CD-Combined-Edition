@@ -379,7 +379,7 @@ function RenderRightClickMenu(KFGUI_RightClickMenu C)
 		Canvas.SetPos(Edge, YP);
 		if (C.ItemRows[i].bSplitter)
 		{
-			Canvas.SetDrawColor(0, 0,0, 255);
+			Canvas.SetDrawColor(0, 0, 0, 255);
 			Canvas.DrawText("-------", ,TextScale, TextScale);
 		}
 		else

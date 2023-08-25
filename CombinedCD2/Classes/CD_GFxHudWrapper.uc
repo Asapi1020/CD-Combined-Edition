@@ -7,12 +7,12 @@ var transient OnlineSubsystem OnlineSub;
 var transient array<byte> WasNewlyAdded;
 var transient array<string> NewItems;
 var transient bool bLoadedInitItems;
-/*
+
 var class<xUI_Console> ConsoleClass;
 var transient GameViewportClient ClientViewport;
 var transient Console OrgConsole;
 var transient xUI_Console NewConsole;
-*/
+
 var CD_PlayerController CDPC;
 var CD_GameReplicationInfo CDGRI;
 var CD_DroppedPickup WeaponPickup;
@@ -116,12 +116,12 @@ function LaunchHUDMenus()
 	Scoreboard = KFScoreBoard(GUIController.InitializeHUDWidget(ScoreboardClass));
 	Scoreboard.SetVisibility(false);
 
-//	InitializeHUD();
+	InitializeHUD();
 }
-/*
+
 function InitializeHUD()
 {
-    if(KFPlayerOwner == none || KFPlayerOwner.PlayerReplicationInfo == none) || KFPlayerOwner.MyGFxManager == none) || HudMovie == none) || !KFPlayerOwner.PlayerReplicationInfo.bOnlySpectator && (KFPlayerOwner.MyGFxManager.PartyWidget == none) || KFPlayerOwner.MyGFxManager.PartyWidget.PartyChatWidget == none)
+    if(KFPlayerOwner == none || KFPlayerOwner.PlayerReplicationInfo == none || KFPlayerOwner.MyGFxManager == none || HudMovie == none || !KFPlayerOwner.PlayerReplicationInfo.bOnlySpectator && (KFPlayerOwner.MyGFxManager.PartyWidget == none) || KFPlayerOwner.MyGFxManager.PartyWidget.PartyChatWidget == none)
     {
         SetTimer(1.0, false, 'InitializeHUD');
         return;
@@ -130,7 +130,9 @@ function InitializeHUD()
     ClientViewport = LocalPlayer(PlayerOwner.Player).ViewportClient;
     
     if(ClientViewport != none)
+    {
     	CreateAndSetConsoleReplacment();
+    }
 }
 
 final function CreateAndSetConsoleReplacment()
@@ -148,7 +150,7 @@ final function CreateAndSetConsoleReplacment()
     OrgConsole.__OnReceivedNativeInputChar__Delegate = NewConsole.InputChar;
     ClientViewport.ViewportConsole = NewConsole;   
 }
-*/
+
 exec function SetShowScores(bool bNewValue)
 {
 	if (Scoreboard != None)
@@ -164,7 +166,24 @@ exec function SetShowScores(bool bNewValue)
 simulated function Destroyed()
 {
 	Super.Destroyed();
+	ResetConsole();
+	if(GUIController != none)
+	{
+		GUIController.Destroy();
+	}
+
 	NotifyLevelChange();
+}
+
+final function ResetConsole()
+{
+    if(OrgConsole == none || ClientViewport.ViewportConsole == OrgConsole)
+    {
+        return;
+    }
+    ClientViewport.ViewportConsole = OrgConsole;
+    OrgConsole.__OnReceivedNativeInputKey__Delegate = OrgConsole.InputKey;
+    OrgConsole.__OnReceivedNativeInputChar__Delegate = OrgConsole.InputChar;  
 }
 
 simulated final function NotifyLevelChange()
@@ -732,7 +751,7 @@ function DrawTitledInfoBox(string title, string body, float Sc, float XL, float 
 defaultproperties
 {
 	ScoreboardClass=class'KFScoreBoard'
-//	ConsoleClass=class'xUI_Console'
+	ConsoleClass=class'CombinedCD2.xUI_Console'
 	BackgroundTexture=Texture2D'EngineResources.WhiteSquareTexture'
 
 	MyFontRenderInfo=(bClipText=true)

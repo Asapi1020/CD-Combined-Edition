@@ -87,7 +87,7 @@ static function PrintSpawnSummaries(
 	local int WaveIndex;
 	local CD_AIWaveInfo WaveInfo;
 	local CD_WaveSummary WaveSummary, GameSummary;
-	local string WaveSummaryString;
+	local string WaveSummaryString, OutputText;
 
 	if ( PlayerCount <= 0 )
 	{
@@ -95,6 +95,7 @@ static function PrintSpawnSummaries(
 	}
 
 	GameSummary = new class'CD_WaveSummary';
+	OutputText = "";
 
 	for ( WaveIndex = 0; WaveIndex < WaveInfos.length; WaveIndex++ )
 	{
@@ -108,12 +109,12 @@ static function PrintSpawnSummaries(
 		GameSummary.AddParamToSelf( WaveSummary );
 		WaveSummaryString = WaveSummary.GetString();
 
-		CDCP.Print( "["$class'CD_StringUtils'.static.GetShortWaveNameByIndex( WaveIndex )$"] "$WaveSummaryString, false );
+		OutputText $= "["$class'CD_StringUtils'.static.GetShortWaveNameByIndex( WaveIndex )$"] "$WaveSummaryString$"\n";
 	}
-
-	CDCP.Print( " >> Projected Game Totals:", false );
-	CDCP.Print( "         "$GameSummary.GetString(), false );
-	CDCP.Print( " >> Boss wave not included in preceding tally.", false );
+	OutputText $= " #{00ff00}>>#{NOPARSE} Projected Game Totals:\n" $
+				  "         " $ GameSummary.GetString() $ "\n" $
+				  " #{00ff00}>>#{NOPARSE} Boss wave not included in preceding tally.";
+	CDCP.Print(OutputText, false);
 }
 
 private static function GetCDWaveSummary(

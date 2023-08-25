@@ -12,6 +12,7 @@ var() bool bPersistant, // Reuse the same menu object throughout the level.
 			bNoBackground; // Don't draw the background.
 
 var bool bWindowFocused; // This page is currently focused.
+var Color FrameColor;
 
 function DrawMenu()
 {
@@ -141,4 +142,5 @@ defaultproperties
 	bUnique=true
 	bPersistant=true
 	FrameOpacity=175
+	FrameColor=(R=10, G=10, B=10, A=200)
 }

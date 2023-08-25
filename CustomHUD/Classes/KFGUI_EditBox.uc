@@ -10,7 +10,7 @@ var enum eTextCase
 	TXTC_Lower,
 } TextCase;
 
-var Color FontColor;
+var Color FontColor, BackgroundColor, CursorColor;
 
 var string TextStr, AllowedCharSet;
 var bool bDrawBackground, bNoClearOnEnter, bMaskText, bIntOnly, bFloatOnly, bIncludeSign, bConvertSpaces, bCtrl, bAllSelected, bForceShowCaret;
@@ -34,7 +34,7 @@ function InitMenu()
 	bAllSelected = true;
 }
 
-function SetText(string NewText, optional bool bIgnoreDelegate)
+function SetText(string NewText, optional bool bIgnoreDelegate, optional bool bNoSelect)
 {
 	local bool bChanged;
 
@@ -45,7 +45,7 @@ function SetText(string NewText, optional bool bIgnoreDelegate)
 	if (bChanged && !bIgnoreDelegate)
 		TextChanged();
 
-	bAllSelected=true;
+	bAllSelected=!bNoSelect;
 }
 
 function bool NotifyInputChar(int Key, string Unicode)
@@ -172,6 +172,11 @@ function bool ProcessControlKey(name Key, EInputEvent Event)
 			}
 			return true;
 		}
+		else if (Key == 'A')
+		{
+			// all
+			HandleMouseClick(false);
+		}
 	}
 
 	return false;
@@ -234,7 +239,7 @@ function bool NotifyInputKey(int ControllerId, name Key, EInputEvent Event, floa
 	}
 	else if (Event == IE_Pressed || Event == IE_Repeat)
 	{
-		if (Key == 'Backspace' || Key == 'Delete')
+		if (Key == 'Backspace')
 		{
 			if (bAllSelected)
 			{
@@ -247,6 +252,19 @@ function bool NotifyInputKey(int ControllerId, name Key, EInputEvent Event, floa
 				CaretPos -= 1;
 			}
 
+			return true;
+		}
+		else if(Key == 'Delete')
+		{
+			if (bAllSelected)
+			{
+				SetInputText("");
+				CaretPos = 0;
+			}
+			else if (CaretPos < Len(TextStr))
+			{
+				SetInputText(Left(TextStr, CaretPos) $ Right(TextStr, Len(TextStr)-CaretPos-1));
+			}
 			return true;
 		}
 		else if (Key == 'Left')
@@ -308,17 +326,16 @@ function DrawMenu()
 {
 	local string Storage, FinalDraw, TmpString;
 	local int MaskIndex, StorageLength;
-	local float XL, YL, BoxWidth, FontScale, CursorY, BorderSize;
+	local float XL, YL, BoxWidth, FontScale, CursorY, BorderSize, CursorOffsetX;
 	local FontRenderInfo FRI;
 
 	Super.DrawMenu();
 
 	if (bDrawBackground)
 	{
-		Canvas.SetDrawColor(30, 30, 30, 200);
+		Canvas.DrawColor = BackgroundColor;
 		Canvas.SetPos(0.f, 0.f);
 		Owner.CurrentStyle.DrawRectBox(0, 0, CompPos[2], CompPos[3], 1.f, 0);
-		//Canvas.DrawTileStretched(Owner.CurrentStyle.BorderTextures[`BOX_SMALL], CompPos[2], CompPos[3], 0,0, Owner.CurrentStyle.BorderTextures[`BOX_SMALL].GetSurfaceWidth(), Owner.CurrentStyle.BorderTextures[`BOX_SMALL].GetSurfaceHeight());
 	}
 
 	BorderSize = Owner.CurrentStyle.ScreenScale(4.f);
@@ -353,6 +370,7 @@ function DrawMenu()
 			FinalDraw = Mid(Storage, FirstVis, CaretPos-FirstVis);
 			Canvas.TextSize(FinalDraw, XL, YL, FontScale, FontScale);
 
+			// Scrolling to right for too long sentence
 			while ( (XL >= BoxWidth) && (FirstVis < Len(Storage)))
 			{
 				FirstVis++;
@@ -377,28 +395,26 @@ function DrawMenu()
 			Canvas.TextSize("W", XL, YL, FontScale, FontScale);
 			XL = BorderSize;
 			bAllSelected=false;
+			CursorOffsetX = -3;
 		}
 		else
 		{
 			TmpString = Mid(FinalDraw, 0, CaretPos-FirstVis);
 			Canvas.TextSize(TmpString, XL, YL, FontScale, FontScale);
+			CursorOffsetX = 3;
 		}
 
 		CursorY = (CompPos[3]/2) - ((YL-Owner.HUDOwner.ScaledBorderSize)/2);
 
 		if (bAllSelected)
 		{
-			Canvas.SetDrawColor(10, 10, 10, 200);
-			Canvas.SetPos(BorderSize, CursorY);
-			Owner.CurrentStyle.DrawRectBox(0, 0, XL, YL-Owner.HUDOwner.ScaledBorderSize, 5.f, 0);
-			//Canvas.DrawTile(Owner.DefaultPens[`PEN_WHITE], XL, YL-Owner.HUDOwner.ScaledBorderSize, 0, 0, Owner.DefaultPens[`PEN_WHITE].GetSurfaceWidth(), Owner.DefaultPens[`PEN_WHITE].GetSurfaceHeight());
+			Canvas.SetDrawColor(255, 87, 51, 255);
+			Owner.CurrentStyle.DrawRectBox(BorderSize, CursorY, XL, YL-Owner.HUDOwner.ScaledBorderSize, 3.f, 0);
 		}
 		else
 		{
-			Canvas.SetDrawColor(255, 255, 255, Owner.CursorFlash);
-			Canvas.SetPos(XL + (Len(FinalDraw) == 0 ? 0 : 3), CursorY);
-			Owner.CurrentStyle.DrawRectBox(0, 0, 3, YL-Owner.HUDOwner.ScaledBorderSize, 1.f, 0);
-			//Canvas.DrawTile(Owner.DefaultPens[`PEN_WHITE], 3, YL-Owner.HUDOwner.ScaledBorderSize, 0, 0, Owner.DefaultPens[`PEN_WHITE].GetSurfaceWidth(), Owner.DefaultPens[`PEN_WHITE].GetSurfaceHeight());
+			Canvas.SetDrawColor(CursorColor.R, CursorColor.G, CursorColor.B, Owner.CursorFlash);
+			Owner.CurrentStyle.DrawRectBox(XL + CursorOffsetX, CursorY, Owner.HUDOwner.ScaledBorderSize, YL-Owner.HUDOwner.ScaledBorderSize, 1.f, 0);
 		}
 	}
 
@@ -424,6 +440,8 @@ Delegate OnTextFinished(KFGUI_EditBox Sender, string S);
 defaultproperties
 {
 	FontColor=(R=255, G=255, B=255, A=255)
+	BackgroundColor=(R=30, G=30, B=30, A=200)
+	CursorColor=(R=255, G=255, B=255)
 	MaxWidth=768
 	TextScale=1
 	TextCase=TXTC_None
