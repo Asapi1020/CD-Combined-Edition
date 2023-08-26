@@ -7,6 +7,7 @@ var transient KF2GUIController Controller;
 var transient bool bDisconnecting;
 var transient CD_GFxHUDWrapper HUD;
 var string PreviousMessage;
+var bool bTyping;
 
 function Initialized()
 {
@@ -130,11 +131,25 @@ function bool InputKey(int ControllerId, name Key, EInputEvent Event, optional f
         // Press Event
         if(Event == IE_Pressed)
         {
-            //	Open Console Menu
             if(Key == ConsoleKey)
             {
-            	ConsoleMenu.DoClose();
+            	//	Change type to open
+            	if(bTyping)
+            	{
+            		bTyping = false;
+            		ConsoleMenu.Transit();
+            	}
+            	else
+            	{
+            		ConsoleMenu.DoClose();
+            	}
                 return true;
+            }
+
+            if(Key == TypeKey)
+            {
+            	ConsoleMenu.DoClose();
+            	return true;
             }
 
             //	Handle Auto Completion
@@ -246,9 +261,11 @@ function bool InputKey(int ControllerId, name Key, EInputEvent Event, optional f
                 PC.ForceDisconnect();                
             }            
         }
-        if(Key == ConsoleKey)
+        
+        if(Key == ConsoleKey || Key == TypeKey)
         {
             class'WorldInfo'.static.GetWorldInfo().TimerHelper.SetTimer(0.010, false, 'EnableCaptureInput', self);
+            bTyping = Key==TypeKey;
             return true;
         }
     }

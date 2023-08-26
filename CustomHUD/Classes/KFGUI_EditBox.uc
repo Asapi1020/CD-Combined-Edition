@@ -15,7 +15,7 @@ var Color FontColor, BackgroundColor, CursorColor;
 var string TextStr, AllowedCharSet;
 var bool bDrawBackground, bNoClearOnEnter, bMaskText, bIntOnly, bFloatOnly, bIncludeSign, bConvertSpaces, bCtrl, bAllSelected, bForceShowCaret;
 var int MaxWidth;
-var bool bReadOnly, bAlwaysNotify;
+var bool bReadOnly, bAlwaysNotify, bDrawHeadLine;
 var int CaretPos, FirstVis, LastSizeX, LastCaret, LastLength;
 var float TextScale;
 
@@ -421,6 +421,12 @@ function DrawMenu()
 	Canvas.DrawColor = FontColor;
 	Canvas.SetPos(BorderSize, (CompPos[3]/2) - (YL/2));
 	Canvas.DrawText(FinalDraw, ,FontScale, FontScale, FRI);
+
+	if(bDrawHeadLine)
+	{
+		Canvas.SetDrawColor(0, 255, 0, 255);
+		Owner.CurrentStyle.DrawRectBox(0, -CompPos[3]/16, CompPos[2], CompPos[3]/8, 1.f, 0);
+	}
 }
 
 function HandleMouseClick(bool bRight)

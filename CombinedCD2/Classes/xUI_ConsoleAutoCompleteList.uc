@@ -3,7 +3,7 @@ class xUI_ConsoleAutoCompleteList extends KFGUI_RightClickMenu;
 var KFGUI_Base BaseMenu;
 var byte CurrentAlpha;
 var int OldCurrentRow;
-var bool bForceKeyboardAction;
+var bool bForceKeyboardAction, bReverse;
 var IntPoint LastMousePos;
 
 function OpenMenu(KFGUI_Base menu)
@@ -18,7 +18,16 @@ function OpenMenu(KFGUI_Base menu)
 function ComputePosition()
 {
     XPosition = BaseMenu.XPosition;
-    YPosition = BaseMenu.YPosition + BaseMenu.YSize; 
+    YPosition = BaseMenu.YPosition;
+
+    if(bReverse && xUI_ConsoleMenu(BaseMenu) != none)
+    {
+    	YPosition += xUI_ConsoleMenu(BaseMenu).ChatBoxEdit.YPosition*BaseMenu.YSize - YSize;
+    }
+    else
+    {
+    	YPosition += BaseMenu.YSize;
+    }
 }
 
 function DrawMenu()

@@ -76,7 +76,7 @@ static function PrintSpawnDetails(
  * Also display a grand total line summing zed categories from
  * all waves (except the boss wave).
  */
-static function PrintSpawnSummaries(
+static function string PrintSpawnSummaries(
 	const out array<CD_AIWaveInfo> WaveInfos,
 	int PlayerCount,
 	const out CD_ConsolePrinter CDCP,
@@ -114,7 +114,7 @@ static function PrintSpawnSummaries(
 	OutputText $= " #{00ff00}>>#{NOPARSE} Projected Game Totals:\n" $
 				  "         " $ GameSummary.GetString() $ "\n" $
 				  " #{00ff00}>>#{NOPARSE} Boss wave not included in preceding tally.";
-	CDCP.Print(OutputText, false);
+	return OutputText;
 }
 
 private static function GetCDWaveSummary(
