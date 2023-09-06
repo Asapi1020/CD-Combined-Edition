@@ -184,7 +184,7 @@ function DrawMenu()
 	CloseButton.ButtonText=CloseButtonText;
 
 	MapVoteButton = KFGUI_Button(FindComponentID('MapVote'));
-	MapVoteButton.ButtonText=class'CombinedCD2.xUI_ResultMenu'.default.MapVoteButtonText;
+	MapVoteButton.ButtonText=class'CombinedCD2.xUI_MapVote'.default.MapVoteButtonText;
 
 	WeapSkinButton = KFGUI_Button(FindComponentID('WeapSkin'));
 	WeapSkinButton.ButtonText=WeaponSkinButtonText;

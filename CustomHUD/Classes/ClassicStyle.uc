@@ -192,16 +192,16 @@ function RenderCheckbox(KFGUI_CheckBox C)
 function RenderComboBox(KFGUI_ComboBox C)
 {
 	if (C.bDisabled)
-		Canvas.SetDrawColor(64, 64, 64, 255);
-	else if (C.bPressedDown)
-		Canvas.SetDrawColor(220, 220, 220, 255);
-	else if (C.bFocused)
-		Canvas.SetDrawColor(190, 190, 190, 255);
+		Canvas.SetDrawColor(10, 10, 10, 200);
+	else if (C.bPressedDown || C.bFocused || C.bSelectionStretched)
+		Canvas.SetDrawColor(250, 100, 0, 200);
+	else
+		Canvas.DrawColor = C.BoxColor;
 
 	Canvas.SetPos(0.f, 0.f);
-	Owner.CurrentStyle.DrawRectBox(0.f, 0.f, C.CompPos[2], C.CompPos[3], 2.5f, 0);
+	DrawOutlinedBox(0.f, 0.f, C.CompPos[2], C.CompPos[3], C.EdgeSize, Canvas.DrawColor, C.OutlineColor);
 
-	DrawArrowBox(3, C.CompPos[2]-32, 0.5f, 32, 32);
+//	DrawArrowBox(3, C.CompPos[2]-32, 0.5f, 32, 32);
 
 	if (C.SelectedIndex < C.Values.Length && C.Values[C.SelectedIndex] != "")
 	{
@@ -224,7 +224,7 @@ function RenderComboList(KFGUI_ComboSelector C)
 	// Draw background.
 	Edge = C.Combo.BorderSize;
 	Canvas.SetPos(0.f, 0.f);
-	Owner.CurrentStyle.DrawRectBox(0.f, 0.f, C.CompPos[2], C.CompPos[3], 2.5f, 0);
+	DrawOutlinedBox(0.f, 0.f, C.CompPos[2], C.CompPos[3], C.Combo.EdgeSize, C.Combo.BoxColor, C.Combo.OutlineColor);
 
 	// While rendering, figure out mouse focus row.
 	X = C.Owner.MousePosition.X - Canvas.OrgX;
@@ -246,7 +246,7 @@ function RenderComboList(KFGUI_ComboSelector C)
 			bCheckMouse = false;
 			C.CurrentRow = i;
 			Canvas.SetPos(4.f, YP);
-			Canvas.SetDrawColor(128, 48, 48, 255);
+			Canvas.SetDrawColor(250, 100, 0, 200); // (128, 48, 48, 255);
 			DrawWhiteBox(C.CompPos[2]-(Edge*2.f), YL);
 		}
 		Canvas.SetPos(Edge, YP);

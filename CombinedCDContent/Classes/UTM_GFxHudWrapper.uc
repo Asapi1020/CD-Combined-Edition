@@ -578,7 +578,7 @@ function RenderAccuracy()
 
         if(STMPC.ShotsFired != 0) f = float(STMPC.ShotsHit)/float(STMPC.ShotsFired) * 100;
         else f = 0;
-        S = class'CombinedCD2.xUI_ResultMenu'.default.HitAccuracyString $ ":" @ string(round(f)) $ "%" @ "(" $ string(STMPC.ShotsHit) $ "/" $ string(STMPC.ShotsFired) $ ")";
+        S = class'CombinedCD2.xUI_MapVote'.default.HitAccuracyString $ ":" @ string(round(f)) $ "%" @ "(" $ string(STMPC.ShotsHit) $ "/" $ string(STMPC.ShotsFired) $ ")";
         Canvas.SetPos(X, Y);
         Canvas.SetDrawColor(0, 255, 10, 255);
         Canvas.DrawText(S,,Sc,Sc);
@@ -586,7 +586,7 @@ function RenderAccuracy()
 
         if(STMPC.ShotsHit != 0) f = float(STMPC.ShotsHitHeadshot)/float(STMPC.ShotsHit) * 100;
         else f = 0;
-        S = class'CombinedCD2.xUI_ResultMenu'.default.HSAccuracyString $ ":" @ string(round(f)) $ "%" @ "(" $ string(STMPC.ShotsHitHeadshot) $ "/" $ string(STMPC.ShotsHit) $ ")";
+        S = class'CombinedCD2.xUI_MapVote'.default.HSAccuracyString $ ":" @ string(round(f)) $ "%" @ "(" $ string(STMPC.ShotsHitHeadshot) $ "/" $ string(STMPC.ShotsHit) $ ")";
         Canvas.SetPos(X, Y);
         Canvas.DrawText(S,,Sc,Sc);
     }

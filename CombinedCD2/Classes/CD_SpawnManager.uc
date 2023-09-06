@@ -189,7 +189,7 @@ function string GetWaveAverageSpawnrate()
 	return ZedCountString @ "<local>CD_SpawnManager.ZedString</local>" $ ", " $ SpawnEventsThisWave $ " " $ GroupName $ "\n" $ SpawnrateMsg;
 }
 
-private function string FormatFloatToOneDecimalPlace( const float f )
+static function string FormatFloatToOneDecimalPlace( const float f )
 {
 	local int l;
 	local string s;	

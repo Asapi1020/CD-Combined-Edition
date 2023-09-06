@@ -22,6 +22,12 @@ function HandleMouseClick(bool bRight)
 	}
 }
 
+function DropInputFocus()
+{
+	Combo.bSelectionStretched = false;
+	super.DropInputFocus();
+}
+
 defaultproperties
 {
 	CurrentRow=-1

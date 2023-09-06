@@ -54,3 +54,9 @@ struct LoadoutInfo
 	var class<KFPerk> Perk;
 	var array< class<KFWeaponDefinition> > WeapDef;
 };
+
+struct CDInfo
+{
+	var string SC, MM, CS, SP, WSF, SM, THPF, QPHPF, FPHPF, SCHPF;
+	var bool CHSPP;
+};

@@ -639,7 +639,7 @@ function DrawPlayerEntry(Canvas C, int Index, float YOffset, float Height, float
 	if (!KFPRI.bReadyToPlay && KFGRI.bMatchHasBegun)
 	{
 		SetDrawColor(C, Settings.Style.StateTextColorLobby);
-		S = class'KFGFxMenu_ServerBrowser'.default.InLobbyString;;
+		S = class'KFGFxMenu_ServerBrowser'.default.InLobbyString;
 	}
 	else if (!KFGRI.bMatchHasBegun || KFPRI.bWaitingPlayer)
 	{
