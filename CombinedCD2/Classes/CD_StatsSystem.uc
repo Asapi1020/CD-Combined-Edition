@@ -275,12 +275,12 @@ function string GetIndividualPlayerStats(KFPlayerController KFPC)
 			}
 		}
 		
-		PlayerStats = "<local>CD_StatsSystem.StatsForString</local>" $ KFPC.PlayerReplicationInfo.PlayerName $ ": \n" $
-					"<local>CD_StatsSystem.LargeKillsString</local>" $ LargeKills $ " (SC:" $ SCKills $ " FP:" $ FPKills $ " QP:" $ QPKills $ ")\n" $
-					"<local>CD_StatsSystem.HuskKillsString</local>" $ HUKills $ "\n" $
-					"<local>CD_StatsSystem.HealsString</local>" @ "-" @ "<local>CD_StatsSystem.GivenString</local>" $ HealsGiven @ "<local>CD_StatsSystem.ReceivedString</local>" $ HealsRecv $ "\n" $
-					"<local>CD_StatsSystem.DamageString</local>" @ "-" @ "<local>CD_StatsSystem.DealtString</local>" $ DamageDealt @ "<local>CD_StatsSystem.TakenString</local>" $ DamageTaken $ "\n" $
-					"<local>CD_StatsSystem.AccuracyString</local>" @ "-" @ "<local>CD_StatsSystem.HitString</local>";
+		// "<local>CD_StatsSystem.StatsForString</local>" $ KFPC.PlayerReplicationInfo.PlayerName $ ": \n" $
+		PlayerStats = "<local>CD_StatsSystem.LargeKillsString</local>" $ LargeKills $ " (SC:" $ SCKills $ " FP:" $ FPKills $ " QP:" $ QPKills $ ")\n" $
+					  "<local>CD_StatsSystem.HuskKillsString</local>" $ HUKills $ "\n" $
+					  "<local>CD_StatsSystem.HealsString</local>" @ "-" @ "<local>CD_StatsSystem.GivenString</local>" $ HealsGiven @ "<local>CD_StatsSystem.ReceivedString</local>" $ HealsRecv $ "\n" $
+					  "<local>CD_StatsSystem.DamageString</local>" @ "-" @ "<local>CD_StatsSystem.DealtString</local>" $ DamageDealt @ "<local>CD_StatsSystem.TakenString</local>" $ DamageTaken $ "\n" $
+					  "<local>CD_StatsSystem.AccuracyString</local>" @ "-" @ "<local>CD_StatsSystem.HitString</local>";
 		
 		// make sure we return a positive value or 0 for accuracy rather than attempting to divide with zero.
 		if (ShotsHit < 1 || ShotsFired == 0)

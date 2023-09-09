@@ -59,7 +59,7 @@ function PreDraw()
 	UpdateSizes();
 
 	Super.PreDraw();
-	if (TextLable != None)
+	if (TextLable != None && !bVisible)
 	{
 		TextLable.YSize = YSize;
 		TextLable.Canvas = Canvas;
