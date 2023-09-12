@@ -113,6 +113,8 @@ function LaunchHUDMenus()
 {
 	UTM_Scoreboard = UTM_OptionBoard(GUIController.InitializeHUDWidget(UTM_ScoreboardClass));
 	UTM_Scoreboard.SetVisibility(false);
+
+    InitializeHUD();
 }
 
 exec function SetShowScores(bool bNewValue)

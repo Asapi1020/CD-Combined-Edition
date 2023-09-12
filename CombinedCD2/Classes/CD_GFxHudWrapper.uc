@@ -124,8 +124,13 @@ function LaunchHUDMenus()
 
 function InitializeHUD()
 {
-    if(KFPlayerOwner == none || KFPlayerOwner.PlayerReplicationInfo == none || KFPlayerOwner.MyGFxManager == none || HudMovie == none || !KFPlayerOwner.PlayerReplicationInfo.bOnlySpectator && (KFPlayerOwner.MyGFxManager.PartyWidget == none) || KFPlayerOwner.MyGFxManager.PartyWidget.PartyChatWidget == none)
+    if(KFPlayerOwner == none || KFPlayerOwner.PlayerReplicationInfo == none || KFPlayerOwner.MyGFxManager == none || HudMovie == none)
     {
+        if(KFPlayerOwner.PlayerReplicationInfo.bOnlySpectator && (KFPlayerOwner.MyGFxManager.PartyWidget == none || KFPlayerOwner.MyGFxManager.PartyWidget.PartyChatWidget == none))
+        {
+        	KFPlayerOwner.MyGFxManager.ToggleMenus();
+        }
+
         SetTimer(1.0, false, 'InitializeHUD');
         return;
     }
