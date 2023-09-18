@@ -76,7 +76,7 @@ function bool MainMenuIsOpen()
 
 function PostRender()
 {
-	if(CDPC != none)
+	if(CDPC != none && CDGRI != none)
 	{
 		if(CDPC.bShowVolumes)
 			DrawVolumesNumber();
@@ -130,7 +130,6 @@ function InitializeHUD()
         {
         	KFPlayerOwner.MyGFxManager.ToggleMenus();
         }
-
         SetTimer(1.0, false, 'InitializeHUD');
         return;
     }
