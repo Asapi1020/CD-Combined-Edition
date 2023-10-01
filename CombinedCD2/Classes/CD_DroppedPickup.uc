@@ -1,22 +1,11 @@
 class CD_DroppedPickup extends KFDroppedPickup;
 
-/** Magazine and spare ammo */
 var int MagazineAmmo[2];
 var int SpareAmmo[2];
-
-/** Upgrade level (also used to calculate weight) */
 var byte UpgradeLevel;
-
-/** Cached text so we don't have to re-make it every frame */
 var string AmmoText, WeightText;
-
-/** Original owner of this weapon */
 var PlayerReplicationInfo OriginalOwner;
-
-/** Cached name (used for pickup HUD) */
 var string OriginalOwnerPlayerName;
-
-/** Pickup tracker reference (used for pickup registry) */
 var CD_DroppedPickupTracker PickupTracker;
 
 replication
@@ -176,6 +165,22 @@ simulated function SetEmptyMaterial()
 	return;
 }
 
+function bool IsLowAmmo()
+{
+	local KFWeapon KFW;
+	local int MaxAmmo, CurAmmo;
+
+	KFW = KFWeapon(Inventory);
+	if(KFW != none)
+	{
+		//	Ignore secondory ammo
+		MaxAmmo = KFW.MagazineCapacity[0] + KFW.SpareAmmoCapacity[0];
+		CurAmmo = KFW.AmmoCount[0] + KFW.SpareAmmoCount[0];
+		if(MaxAmmo > 4*CurAmmo) // less than 25%
+			return true;
+	}
+	return false;
+}
 
 defaultproperties
 {
@@ -185,6 +190,4 @@ defaultproperties
 	MagazineAmmo(1)=-1
 	SpareAmmo(0)=-1
 	SpareAmmo(1)=-1
-
-	EmptyPickupColor=(R=0, G=0, B=1)
 }

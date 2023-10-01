@@ -31,8 +31,6 @@ function DoAutoPurchase()
 	local bool bSuccess;
 	local string ClientMessage;
 
-	`cdlog("---Start logging auto purchase---");
-	`cdlog("LoadoutList.length=" $ string(LoadoutList.length));
 	GetTraderItems();
 	LoadoutIndex = LoadoutList.Find('Perk', CurrentPerk.GetPerkClass());
 
@@ -46,7 +44,6 @@ function DoAutoPurchase()
 	{
 		if(!Outer.IsAllowedWeapon(LoadoutList[LoadoutIndex].WeapDef[i], false, false))
 		{
-			`cdlog(string(LoadoutList[LoadoutIndex].WeapDef[i]) $ ": Restricted");
 			continue;
 		}
 
@@ -64,7 +61,6 @@ function DoAutoPurchase()
 	{
 		if(DoIOwnThisWeapon(LoadoutWeapons[i]))
 		{
-			`cdlog(string(i) $ ": Already Owned");
 			continue;
 		}
 
@@ -77,7 +73,6 @@ function DoAutoPurchase()
 		if(GetCanAfford( GetAdjustedBuyPriceFor(LoadoutWeapons[i]) + DoshBuffer ) && CanCarry( LoadoutWeapons[i] ))
 		{
 			PurchaseWeapon(LoadoutWeapons[i]);
-			`cdlog(string(i) $ ": Purchase Success");
 			Purchased += 1;
 			continue;
 		}
@@ -91,7 +86,6 @@ function DoAutoPurchase()
 			if (LoadoutWeapons.Find('WeaponDef', OwnedItemList[j].DefaultItem.WeaponDef) != INDEX_NONE ||
 				OwnedItemList[j].DefaultItem.WeaponDef == class'KFWeapDef_9mm')
 			{
-				`cdlog(string(i) $ ": " $string(OwnedItemList[j].DefaultItem.WeaponDef) $ ": necessary and unable to sell");
 				continue;
 			}
 
@@ -100,13 +94,11 @@ function DoAutoPurchase()
 			PotentialBlocks -= MyKFIM.GetDisplayedBlocksRequiredFor(TempTraderItem);
 			TempTraderItem = LoadoutWeapons[i];
 			IndexList.AddItem(j);
-			`cdlog(string(i) $ ": " $string(OwnedItemList[j].DefaultItem.WeaponDef) $ ": unncessary");
 
 			if(TempTraderItem.WeaponDef.default.BuyPrice <= PotentialDosh && PotentialBlocks + MyKFIM.GetDisplayedBlocksRequiredFor(TempTraderItem) <= MaxBlocks)
 			{
 				for(k=0; k<IndexList.length; k++)
 				{
-					`cdlog(string(i) $ ": " $string(OwnedItemList[IndexList[k]].DefaultItem.WeaponDef) $ ": sold");
 					SellWeapon(OwnedItemList[IndexList[k]], IndexList[k]);
 				}
 				bSuccess = true;
@@ -123,11 +115,7 @@ function DoAutoPurchase()
 
 		PurchaseWeapon(LoadoutWeapons[i]);
 		Purchased += 1;
-		`cdlog(string(i) $ ": Sale and Purchase Success");
 	}
-
-	StartAutoFill();
-	MyKFIM.ServerCloseTraderMenu();
 
 	if(Failed > 0)
 	{
@@ -138,15 +126,20 @@ function DoAutoPurchase()
 	}
 	else
 	{
-		if(Purchased > 0)
+		if(!StartAutoFill())
+			ClientMessage = "<local>CD_AutoPurchaseHelper.AutoFillFailMsg</local>";
+
+		else if(Purchased > 0)
 			ClientMessage = "<local>CD_AutoPurchaseHelper.AutoTraderCompleteSuccessMsg</local>";
 		else
 			ClientMessage = "<local>CD_AutoPurchaseHelper.AutoTraderNullMsg</local>";
 	}
-	
-	Outer.ShowMessageBar('Game', ClientMessage, , true);
-}	
 
+	MyKFIM.ServerCloseTraderMenu();	
+	Outer.ShowMessageBar('Game', ClientMessage, , true);
+}
+
+/* Loadout Registoration */
 function ServerReceiveLoadoutList(class<KFPerk> Perk, class<KFWeaponDefinition> WeapDef, bool bInit, int Priority, int DefLen)
 {
 	local int i;

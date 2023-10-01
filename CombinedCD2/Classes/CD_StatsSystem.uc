@@ -38,15 +38,13 @@ var array<StructCDPlayerStats> CDPlayerStats;
 var int StatsCount;
 
 // Called when !cdstats <stat> chat command is used
-function string CDStatsCommand(string CommandString)
+function string CDStatsCommand(array<string> params)
 {
-	local array<string> params;
 	local string Stat;
 	local string Output;
 	local int i;
 	
-	ParseStringIntoArray( CommandString, params, " ", true );
-	Stat = Locs(params[1]);
+	Stat = Locs(params[0]);
 	
 	// refresh CDPlayerStats array
 	GetCDPlayerStats();	

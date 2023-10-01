@@ -418,7 +418,7 @@ function bool GetChatWriteCommand( out StructChatCommand scc )
 	scc.ParamsImpl = ChatWriteCommand;
 	scc.CDSetting = self;
 	scc.Description = desc;
-	scc.AuthLevel = CDAUTH_WRITE;
+	scc.AuthLevel = 0;
 	scc.ModifiesConfig = true;
 
 	return true;

@@ -96,11 +96,6 @@ function InitMenu()
 	
 	MapRClicker = KFGUI_RightClickMenu(FindComponentID('RClick'));
 	
-	// TODO: i18n this
-	// I don't know why it's not working
-	// MapRClicker.ItemRows.AddItem(newFRowItem("Vote this map", false));
-	// MapRClicker.ItemRows.AddItem(newFRowItem("Admin force this map", true));
-	
 	MapList.Columns.AddItem(newFColumnItem(ColumnMapName,1.f));
 	GameModeList.Columns.AddItem(newFColumnItem(ColumnGameMode,1.f));
 	CurrentVotes.Columns.AddItem(newFColumnItem(ColumnGame,0.3));
@@ -722,6 +717,7 @@ defaultproperties
 		XSize=0.367
 		YSize=0.277
 		ID="WeapDmg"
+		bCanSortColumn=false
 		OnClickedItem=IgnoreClick
 		OnDblClickedItem=IgnoreClick
 	End Object
@@ -731,6 +727,7 @@ defaultproperties
 		XSize=0.183
 		YSize=0.660
 		ID="ZedKill"
+		bCanSortColumn=false
 		OnClickedItem=IgnoreClick
 		OnDblClickedItem=IgnoreClick
 	End Object
