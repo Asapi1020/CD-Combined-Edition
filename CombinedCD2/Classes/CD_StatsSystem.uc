@@ -77,7 +77,7 @@ function string CDStatsCommand(array<string> params)
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
-			Output = Output $ "\n" $ i+1 $ ") - " $ CDPlayerStats[i].DamageDealt $ " - " $ CDPlayerStats[i].PlayerName ;
+			Output = Output $ "\n" $ i+1 $ ") - " $ class'CD_Object'.static.AddCommaToInt(CDPlayerStats[i].DamageDealt) $ " - " $ CDPlayerStats[i].PlayerName ;
 		}
 	}
 	else if (Left( Stat, 7 ) == "damaget" || Left( Stat, 4 ) == "dmgt")

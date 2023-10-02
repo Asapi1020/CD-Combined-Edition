@@ -281,7 +281,7 @@ function CheckForTargets()
     
     foreach CollidingActors(class'KFPawn_Human', Target, EffectiveRadius, Location, true,, HitInfo)
     {
-        if (!Target.IsAliveAndWell())
+        if (Target == Instigator || !Target.IsAliveAndWell())
         {
             continue;
         }

@@ -73,3 +73,11 @@ function RecordZedKill(Class<Pawn> PawnClass, class<DamageType> DT)
 		TrashKills++;
 	}
 }
+
+function InternalRecordWeaponDamage(class<KFDamageType> KFDT, class<KFWeaponDefinition> WeaponDef, int Damage, KFPawn TargetPawn, int HitZoneIdx)
+{
+	if(!KFGameReplicationInfo(WorldInfo.GRI).bWaveIsActive)
+		return;
+
+	super.InternalRecordWeaponDamage(KFDT, WeaponDef, Damage, TargetPawn, HitZoneIdx);
+}

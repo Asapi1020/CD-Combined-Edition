@@ -617,7 +617,7 @@ function DrawPlayerEntry(Canvas C, int Index, float YOffset, float Height, float
 		SetDrawColor(C, CurrentRank.TextColor);
 	else
 		SetDrawColor(C, Settings.Style.AssistsTextColor);
-	DrawTextShadowHVCenter(string(CD_PlayerReplicationInfo(KFPRI).DmgD), AssistXPos, TextYOffset, AssistWBox, FontScalar);
+	DrawTextShadowHVCenter(class'CD_Object'.static.AddCommaToInt(CD_PlayerReplicationInfo(KFPRI).DmgD), AssistXPos, TextYOffset, AssistWBox, FontScalar);
 
 	// Cash
 	if (bIsZED)
