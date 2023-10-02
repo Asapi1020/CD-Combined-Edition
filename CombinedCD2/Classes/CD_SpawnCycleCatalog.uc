@@ -271,6 +271,7 @@ private function InitSpawnCyclePresetList()
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_dtf_pm');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_who_v1');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_ebr_hh_v1');
+		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_nt_v2');
 
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_gso_v1');
 		SpawnCyclePresetList.AddItem(new class'CD_SpawnCycle_Preset_aio_v1');
