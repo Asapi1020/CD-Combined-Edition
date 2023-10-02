@@ -438,9 +438,12 @@ function DrawMenu()
 	Owner.CurrentStyle.DrawRectBox(X, Y, W, H, 8.f, 153);
 
 	//	Server Name and IP
-	Y += H + 0.005 * Canvas.ClipY;
-	Canvas.SetDrawColor(250, 250, 250, 255);
-	DrawTextShadowHRightVCenter(class'WorldInfo'.static.GetWorldInfo().GetAddressURL(), X, Y, W, FontScalar);
+	if(GetCDPC().WorldInfo.NetMode != NM_StandAlone)
+	{
+		Y += H + 0.005 * Canvas.ClipY;
+		Canvas.SetDrawColor(250, 250, 250, 255);
+		DrawTextShadowHRightVCenter(class'WorldInfo'.static.GetWorldInfo().GetAddressURL(), X, Y, W, FontScalar);
+	}
 }
 
 final function ToggleComponents()
