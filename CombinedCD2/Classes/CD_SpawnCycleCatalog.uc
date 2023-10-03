@@ -220,7 +220,7 @@ private function InitSpawnCyclePresetList()
 
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.basic_heavy');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.dtf_v1');
-		SpawnCyclePresetList.AddItem(new class'SpawnCycle.nam_poundemonium');	
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.nam_poundemonium');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.nam_pro_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.nam_pro_v2');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.nam_pro_v3');
@@ -270,6 +270,7 @@ private function InitSpawnCyclePresetList()
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.poopro_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.dtf_pm');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.who_v1');
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.who_v2');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ebr_hh_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.nt_v2');
 
