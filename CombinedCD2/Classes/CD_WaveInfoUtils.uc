@@ -38,18 +38,7 @@ static function PrintSpawnDetails(
 
 			for ( ElemIndex = 0; ElemIndex < ss.CustomMonsterList.length; ElemIndex++ )
 			{
-				if ( Verbosity == "tiny" )
-				{
-					class'CD_ZedNameUtils'.static.GetZedTinyName( ss.CustomMonsterList[ElemIndex], ZedNameTmp );
-				}
-				else if ( Verbosity == "full" )
-				{
-					class'CD_ZedNameUtils'.static.GetZedFullName( ss.CustomMonsterList[ElemIndex], ZedNameTmp );
-				}
-				else
-				{
-					class'CD_ZedNameUtils'.static.GetZedShortName( ss.CustomMonsterList[ElemIndex], ZedNameTmp );
-				}
+				class'CD_ZedNameUtils'.static.GetZedName( Verbosity, ss.CustomMonsterList[ElemIndex], ZedNameTmp );
 
 				if ( ZedNameTmp == "" )
 				{

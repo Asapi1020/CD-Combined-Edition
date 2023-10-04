@@ -289,9 +289,19 @@ function int GetNumber(string s, out string ZedName)
 
 function bool HandleZedMod(out string ZedName, string Key)
 {
-	if(Right(ZedName, 1) ~= Key)
+	local int KeyLen;
+
+	KeyLen = Len(Key);
+
+	if(Right(ZedName, KeyLen) ~= Key)
 	{
-		ZedName = Left(ZedName, Len(ZedName)-1);
+		ZedName = Left(ZedName, Len(ZedName)-KeyLen);
+		return true;
+	}
+
+	if(Left(ZedName, KeyLen) ~= Key)
+	{
+		ZedName = Right(ZedName, Len(ZedName)-KeyLen);
 		return true;
 	}
 	return false;
