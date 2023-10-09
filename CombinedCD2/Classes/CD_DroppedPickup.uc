@@ -34,6 +34,40 @@ simulated function SetPickupMesh(PrimitiveComponent NewPickupMesh)
 	}
 }
 
+function RefreshGlowState()
+{
+	CD_Survival(WorldInfo.Game).CheckUnglowPickup(self);
+}
+
+unreliable client simulated function SwitchMaterialGlow(bool bGlow)
+{
+	local MaterialInstanceConstant MeshMIC;
+	local LinearColor UpdateColor;
+
+    if (MyMeshComp != None)
+    {
+        MeshMIC = MyMeshComp.CreateAndSetMaterialInstanceConstant(0);
+        if (MeshMIC != None)
+        {
+            if(bGlow)
+            {
+				UpdateColor.G=1;
+				MeshMIC.SetVectorParameterValue('GlowColor', UpdateColor);
+	        }
+	        else
+	        {
+				UpdateColor.A=0;
+				MeshMIC.SetVectorParameterValue('GlowColor', UpdateColor);
+	        }
+        }
+    }
+}
+
+unreliable client simulated function SetGlowMaterial()
+{
+	SetPickupSkin(SkinItemId);
+}
+
 /** Override to check dropped pickup registry on destroy */
 function GiveTo(Pawn P)
 {

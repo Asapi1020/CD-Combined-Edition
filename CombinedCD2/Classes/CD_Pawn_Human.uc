@@ -82,6 +82,11 @@ function bool IsGonnaBeDual(KFWeapon Weap)
     return false;
 }
 
+unreliable client simulated function SwitchMaterialGlow(bool PickupQuery, CD_DroppedPickup CDDP)
+{
+    CDDP.SwitchMaterialGlow(PickupQuery);
+}
+
 defaultproperties
 {
     //  Berserker

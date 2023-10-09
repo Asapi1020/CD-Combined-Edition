@@ -697,6 +697,14 @@ function DrawSpectatorsInfo()
 	DrawTitledInfoBox(SpectatorsString, s, Sc, XL, YL, X, Y, max(6, n));
 }
 
+function string TestSize(string S)
+{
+	local float XL, YL;
+
+	Canvas.TextSize(S, XL, YL);
+	return S @ string(XL);
+}
+
 defaultproperties
 {
 	ScoreboardClass=class'KFScoreBoard'
