@@ -354,3 +354,15 @@ function bool ExistThisCycle(string CycleName, out CD_SpawnCycle_Preset SCP)
 	SCP = none;
 	return false;
 }
+
+function ConvertShorterName(out string CycleName)
+{
+	if(CycleName == "doom_v2_plus_rmk")
+	{
+		CycleName = "doom_v2_p_rmk";
+	}
+	else if(CycleName == "nam_semi_pro_v2")
+	{
+		CycleName = "nam_semi_v2";
+	}
+}

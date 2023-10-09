@@ -52,13 +52,12 @@ unreliable client simulated function SwitchMaterialGlow(bool bGlow)
             if(bGlow)
             {
 				UpdateColor.G=1;
-				MeshMIC.SetVectorParameterValue('GlowColor', UpdateColor);
 	        }
 	        else
 	        {
 				UpdateColor.A=0;
-				MeshMIC.SetVectorParameterValue('GlowColor', UpdateColor);
 	        }
+			MeshMIC.SetVectorParameterValue('GlowColor', UpdateColor);
         }
     }
 }

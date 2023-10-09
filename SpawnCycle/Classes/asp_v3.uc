@@ -51,5 +51,5 @@ function string GetDate()
 
 function string GetAuthor()
 {
-	return "asapi_1020";
+	return "Asapi1020";
 }
