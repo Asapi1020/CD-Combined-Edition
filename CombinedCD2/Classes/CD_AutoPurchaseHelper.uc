@@ -84,7 +84,8 @@ function DoAutoPurchase()
 		for(j=0; j<OwnedItemList.length; ++j)
 		{
 			if (LoadoutWeapons.Find('WeaponDef', OwnedItemList[j].DefaultItem.WeaponDef) != INDEX_NONE ||
-				OwnedItemList[j].DefaultItem.WeaponDef == class'KFWeapDef_9mm')
+				OwnedItemList[j].DefaultItem.WeaponDef == class'KFWeapDef_9mm' ||
+				OwnedItemList[j].DefaultItem.WeaponDef == class'KFWeapDef_HRG_93R')
 			{
 				continue;
 			}

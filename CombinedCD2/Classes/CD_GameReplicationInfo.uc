@@ -87,6 +87,11 @@ function bool IsValidPRI(PlayerReplicationInfo SolePRI, class<KFPerk> Perk)
 	return false;
 }
 
+function bool BossWaveComes()
+{
+	return (WaveNum == WaveMax) || (WaveNum == WaveMax - 1 && bTraderIsOpen);
+}
+
 defaultproperties
 {
 	TraderDialogManagerClass=class'CD_TraderDialogManager'

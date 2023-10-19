@@ -1,0 +1,10 @@
+/* [Zed Name Utils] */
+`define RegularClass		0
+`define SpecialClass		1
+`define VersusClass			2
+`define RagedClass			2
+`define SpecialVersusClass	3
+
+`define FullName	0
+`define ShortName	1
+`define TinyName	2

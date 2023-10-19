@@ -269,6 +269,7 @@ private function InitSpawnCyclePresetList()
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.su_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.poopro_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.dtf_pm');
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.dtf_pm_plus');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.who_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.who_v2');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ebr_hh_v1');

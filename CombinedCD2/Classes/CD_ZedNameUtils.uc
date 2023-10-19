@@ -9,6 +9,7 @@ class CD_ZedNameUtils extends Object
 	Abstract;
 
 `include(CD_Log.uci)
+`include(CD_General.uci)
 
 /**
     Get a zed EAIType from the name.
@@ -44,7 +45,7 @@ enum ECDZedGroup
 	ZG_Robots,
 	ZG_Others
 };
-
+/*
 enum ECDClassSet
 {
 	RegularClass,
@@ -58,7 +59,7 @@ enum ECDNameLenSet
 	ShortName,
 	TinyName
 };
-
+*/
 struct RangeStr
 {
 	var byte min;
@@ -75,12 +76,12 @@ struct ZedInfo
 {
 	var array< class<KFPawn_Monster> >	OG_ZedClasses;
 	var array< class<KFPawn_Monster> >	CD_ZedClasses;
-	var EAIType							ZedType;
-	var EBossAIType						BossType;
-	var CycleName						ZedName_Cycle;
-	var array<string>					ZedName_Wave;
-	var ECDZedGroup						ZedGroup;
-	var bool							bAlbino;
+	var EAIType			ZedType;
+	var EBossAIType	BossType;
+	var CycleName		ZedName_Cycle;
+	var array<string>	ZedName_Wave;
+	var ECDZedGroup	ZedGroup;
+	var bool				bAlbino;
 };
 
 var array<ZedInfo> ZedInfoArray;
@@ -120,21 +121,21 @@ static function ECDZedNameResolv GetZedType(
 			ZedType = default.ZedInfoArray[i].ZedType;
 			if(default.ZedInfoArray[i].CD_ZedClasses.length == 0)
 			{
-				ZedClass = default.ZedInfoArray[i].OG_ZedClasses[RegularClass];
+				ZedClass = default.ZedInfoArray[i].OG_ZedClasses[`RegularClass];
 			}
 			else if(IsSpecial)
 			{
-				ZedClass = default.ZedInfoArray[i].CD_ZedClasses[SpecialClass];
+				ZedClass = default.ZedInfoArray[i].CD_ZedClasses[`SpecialClass];
 				ZedTypeCanBeSpecial = true;
 			}
 			else if(IsRagedOnSpawn)
 			{
-				ZedClass = default.ZedInfoArray[i].CD_ZedClasses[RagedClass];
+				ZedClass = default.ZedInfoArray[i].CD_ZedClasses[`RagedClass];
 				ZedTypeCanBeRaged = true;
 			}
 			else
 			{
-				ZedClass = default.ZedInfoArray[i].CD_ZedClasses[RegularClass];
+				ZedClass = default.ZedInfoArray[i].CD_ZedClasses[`RegularClass];
 			}
 			break;
 		}
@@ -181,15 +182,15 @@ static function GetZedName( const string Verbosity, const AISquadElement SquadEl
 
 	if(Verbosity == "full")
 	{
-		j = 0;
+		j = `FullName;
 	}
 	else if(Verbosity == "tiny")
 	{
-		j = 2;
+		j = `TinyName;
 	}
 	else
 	{
-		j = 1;
+		j = `ShortName;
 	}
 
 	j = Min(default.ZedInfoArray[i].ZedName_Wave.length-1, j);
@@ -212,29 +213,29 @@ static function class<KFPawn> GetZedClassFromName( string ZedName, bool albino, 
 				// This case may be only for Versus Rioter
 				if(albino)
 				{
-					return default.ZedInfoArray[i].OG_ZedClasses[3];
+					return default.ZedInfoArray[i].OG_ZedClasses[`SpecialVersusClass];
 				}
-				return default.ZedInfoArray[i].OG_ZedClasses[2];
+				return default.ZedInfoArray[i].OG_ZedClasses[`VersusClass];
 			}
 			if(albino)
 			{
 				// Albino Stalker and Husk are converted to random EDAR
-				if(default.ZedInfoArray[i].OG_ZedClasses[SpecialClass] == class'KFPawn_ZedDAR')
+				if(default.ZedInfoArray[i].OG_ZedClasses[`SpecialClass] == class'KFPawn_ZedDAR')
 				{
 					return RandEDAR();
 				}
 				// Generally returns original albio class
-				return default.ZedInfoArray[i].OG_ZedClasses[SpecialClass];
+				return default.ZedInfoArray[i].OG_ZedClasses[`SpecialClass];
 			}
 			if(rage)
 			{
-				return default.ZedInfoArray[i].CD_ZedClasses[RagedClass];
+				return default.ZedInfoArray[i].CD_ZedClasses[`RagedClass];
 			}
 			if(default.ZedInfoArray[i].CD_ZedClasses.length == 0)
 			{
-				return default.ZedInfoArray[i].OG_ZedClasses[RegularClass];
+				return default.ZedInfoArray[i].OG_ZedClasses[`RegularClass];
 			}
-			return default.ZedInfoArray[i].CD_ZedClasses[RegularClass];
+			return default.ZedInfoArray[i].CD_ZedClasses[`RegularClass];
 		}
 	}
 	return none;
@@ -315,9 +316,9 @@ static function class<KFPawn_Monster> CheckMonsterClassRemap( const class<KFPawn
 		if(j != INDEX_NONE)
 		{
 			// The origins of raged classes are regular classes.
-			if(j == RagedClass)
+			if(j == `RagedClass)
 			{
-				NewClass = default.ZedInfoArray[i].OG_ZedClasses[RegularClass];
+				NewClass = default.ZedInfoArray[i].OG_ZedClasses[`RegularClass];
 			}
 			else
 			{
@@ -347,6 +348,7 @@ static function class<KFPawn_Monster> CheckMonsterClassRemap( const class<KFPawn
 defaultproperties
 {
 	ZedInfoArray.Add((OG_ZedClasses=(class'KFPawn_ZedClot_Cyst'), ZedType=AT_Clot, ZedName_Cycle=(Names=("CLOTC", "CC"), RangeName=(min=2, val="CYST")),	ZedName_Wave=("Cyst", "CY")))
+	ZedInfoArray.Add((OG_ZedClasses=(class'KFPawn_ZedHansClot'), ZedType=AT_HansClot, ZedName_Cycle=(Names=("CLOTH", "HC", "CH")),	ZedName_Wave=("HansClot", "HC")))
 	ZedInfoArray.Add((OG_ZedClasses=(class'KFPawn_ZedClot_Slasher', none, class'KFPawn_ZedClot_Slasher_Versus'),ZedType=AT_SlasherClot,	ZedName_Cycle=(Names=("CLOTS", "CS"), RangeName=(min=2, val="SLASHER")),ZedName_Wave=("Slasher", "SL")))
 	ZedInfoArray.Add((OG_ZedClasses=(class'KFPawn_ZedBloat', none, class'KFPawn_ZedBloat_Versus'),				ZedType=AT_Bloat,		ZedName_Cycle=(RangeName=(min=1, val="BLOAT")),	ZedName_Wave=("Bloat", "BL", "B")))
 	ZedInfoArray.Add((OG_ZedClasses=(class'KFPawn_ZedSiren', none, class'KFPawn_ZedSiren_Versus'),				ZedType=AT_Siren,		ZedName_Cycle=(RangeName=(min=2, val="SIREN")),	ZedName_Wave=("Siren", "SI")))
