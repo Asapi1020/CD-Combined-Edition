@@ -6,16 +6,10 @@ var PlayerReplicationInfo FirstCommando;
 var PlayerReplicationInfo FirstMedic;
 
 var bool bEnableSolePerksSystem;
-//var bool bAllBoss;
 var int MaxUpgrade;
 
 var array<string> DebugTexts;
 
-struct CDInfo
-{
-	var string SC, MM, CS, SP, WSF, SM, THPF, QPHPF, FPHPF, SCHPF;
-	var bool CHSPP;
-};
 var CDInfo CDInfoParams;
 var CDInfo CDFinalParams;
 
@@ -91,6 +85,11 @@ function bool IsValidPRI(PlayerReplicationInfo SolePRI, class<KFPerk> Perk)
 			return true;
 	}
 	return false;
+}
+
+function bool BossWaveComes()
+{
+	return (WaveNum == WaveMax) || (WaveNum == WaveMax - 1 && bTraderIsOpen);
 }
 
 defaultproperties

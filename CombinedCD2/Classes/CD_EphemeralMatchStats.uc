@@ -14,11 +14,19 @@ class CD_EphemeralMatchStats extends EphemeralMatchStats;
 `include(CD_Log.uci)
 
 var array<PerkUseNum> PerkUseNums;
+var int TrashKills;
+var int MediumKills;
+var int RobotKills;
+var int BossKills;
 
 function RecordZedKill(Class<Pawn> PawnClass, class<DamageType> DT)
 {
 	local CD_Survival CDGameInfo;
 	local bool ShouldLog;
+	local class<KFPawn_Monster> MonsterClass;
+
+	if(!KFGameReplicationInfo(WorldInfo.GRI).bWaveIsActive)
+		return;
 
 	ShouldLog = true;
 
@@ -38,4 +46,38 @@ function RecordZedKill(Class<Pawn> PawnClass, class<DamageType> DT)
 	`cdlog("Recording stat: player killed a zed with PawnClass="$PawnClass, ShouldLog);
 
 	super.RecordZedKill( PawnClass, DT );
+
+	MonsterClass = class<KFPawn_Monster>(PawnClass);
+	if(MonsterClass != none)
+	{
+		if(MonsterClass.static.IsABoss())
+		{
+			BossKills++;
+			return;
+		}
+		if(ClassIsChildOf(MonsterClass, class'KFGameContent.KFPawn_ZedDAR'))
+		{
+			RobotKills++;
+			return;
+		}
+
+		switch(MonsterClass)
+		{
+			case class'KFGameContent.KFPawn_ZedBloat':
+			case class'KFGameContent.KFPawn_ZedHusk':
+			case class'KFGameContent.KFPawn_ZedSiren':
+				MediumKills++;
+				return;
+		}
+
+		TrashKills++;
+	}
+}
+
+function InternalRecordWeaponDamage(class<KFDamageType> KFDT, class<KFWeaponDefinition> WeaponDef, int Damage, KFPawn TargetPawn, int HitZoneIdx)
+{
+	if(!KFGameReplicationInfo(WorldInfo.GRI).bWaveIsActive)
+		return;
+
+	super.InternalRecordWeaponDamage(KFDT, WeaponDef, Damage, TargetPawn, HitZoneIdx);
 }

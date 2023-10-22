@@ -1,6 +1,6 @@
 class CD_GFxWeeklyObjectivesContainer extends KFGFxWeeklyObjectivesContainer
 	dependson(KFMission_LocalizedStrings);
-
+/*
 function bool PopulateData()
 {
 	local GFxObject DataObject;
@@ -121,7 +121,7 @@ function GFxObject CreateRewardItem(KFWeeklyOutbreakInformation WeeklyInfo,int I
 	return DataObject;
 }
 
-function LocalizeMenu()
+function LocalizeMenu(bool bIsCustomWeekly)
 {
     local GFxObject TextObject;
 
@@ -136,3 +136,4 @@ function LocalizeMenu()
 
     SetObject("localizedText", TextObject);
 }
+*/

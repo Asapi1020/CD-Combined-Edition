@@ -318,12 +318,14 @@ reliable server function StartTrashChallenge()
 reliable server function AddFakedPlayer()
 {
     local UTestMode STMGameInfo;
+    local array<string> params;
 
     STMGameInfo = UTestMode(WorldInfo.Game);
     if(STMGameInfo.MySTMGRI.nFakedPlayers < 32)
     {
         ++STMGameInfo.MySTMGRI.nFakedPlayers;
-        STMGameInfo.SetAllHPFakes(self, "!cdahpf" @ string(STMGameInfo.MySTMGRI.nFakedPlayers));
+        params.AddItem(string(STMGameInfo.MySTMGRI.nFakedPlayers));
+        STMGameInfo.ChatCommander.SetAllHPFakes(params, self);
         STMGameInfo.SaveConfig();
     }
 }
@@ -331,12 +333,14 @@ reliable server function AddFakedPlayer()
 reliable server function RemoveFakedPlayer()
 {
     local UTestMode STMGameInfo;
+    local array<string> params;
 
     STMGameInfo = UTestMode(WorldInfo.Game);
     if(STMGameInfo.MySTMGRI.nFakedPlayers > 1)
     {
         -- STMGameInfo.MySTMGRI.nFakedPlayers;
-        STMGameInfo.SetAllHPFakes(self, "!cdahpf" @ string(STMGameInfo.MySTMGRI.nFakedPlayers));
+        params.AddItem(string(STMGameInfo.MySTMGRI.nFakedPlayers));
+        STMGameInfo.ChatCommander.SetAllHPFakes(params, self);
         STMGameInfo.SaveConfig();
     }
 }

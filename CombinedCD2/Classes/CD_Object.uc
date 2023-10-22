@@ -49,3 +49,42 @@ static function string GetCustomMapName(string MapName)
 
 	return MapName;
 }
+
+static function string AddCommaToInt(int num)
+{
+	local int i, d;
+	local array<string> splitbuf;
+	local string s;
+
+	if(num == 0)
+	{
+		return "0";
+	}
+
+	i = 1;
+	d = num;
+	splitbuf.length = 0;
+
+	while(d>0)
+	{
+		if(splitbuf.length>0)
+		{
+			switch(Len(splitbuf[0]))
+			{
+				case 1:
+					splitbuf[0] = "00" $ splitbuf[0];
+					break;
+				case 2:
+					splitbuf[0] = "0" $ splitbuf[0];
+					break;
+			}
+		}
+		splitbuf.InsertItem(0, string(d%(1000*i)));
+		d /= (1000*i);
+		++i;
+	}
+
+	JoinArray(splitbuf, s);
+
+	return s;
+}

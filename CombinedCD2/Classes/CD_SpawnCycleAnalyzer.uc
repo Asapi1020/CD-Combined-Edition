@@ -13,33 +13,42 @@ struct BZNum
 };
 var array<BZNum> BZNumArray;
 
-var localized string MissCycleMsg;
-var localized string LengthMissMatchMsg;
-
 function TrySCA(string s, optional bool bBrief)
 {
 	//	s = "!cdsca cyclename wavex wsfxx"
 	local array<string> splitbuf;
-	local string CycleName, option;
-	local int TargetWave, TargetWSF, i;
+	local string CycleName;
+	local int TargetWave, TargetWSF;
+	
+	ParseStringIntoArray(s, splitbuf, " ", true);
+	SetSCAOption(splitbuf, CycleName, TargetWave, TargetWSF);
+	TrySCACore(CycleName, TargetWave, TargetWSF, bBrief);
+}
+
+function SetSCAOption(array<string> options, out string cycle, out int wave, out int wsf)
+{
+	local string option;
 	local CD_SpawnCycle_Preset SCP;
 
-	//	Define params
-	CycleName = SpawnCycle;
-	TargetWave = 0;
-	TargetWSF = Max(1, WaveSizeFakesInt);
-	ParseStringIntoArray(s, splitbuf, " ", true);
-
-	foreach splitbuf(option)
+	foreach options(option)
 	{
-		if (Left(option, 4) == "wave") TargetWave = Clamp(int(Mid(option, 4)), 0, 11);
-		else if (Left(option, 3) == "wsf") TargetWSF = Max(int(Mid(option, 3)), 1);
-		else if (SpawnCycleCatalog.ExistThisCycle(option, SCP)) CycleName = option;
+		if (Left(option, 4) == "wave") wave = Clamp(int(Mid(option, 4)), 0, 11);
+		else if (Left(option, 3) == "wsf") wsf = Max(int(Mid(option, 3)), 1);
+		else if (SpawnCycleCatalog.ExistThisCycle(option, SCP)) cycle = option;
 	}
+
+	if(cycle == "") cycle = SpawnCycle;
+	if(wsf < 1) wsf = Max(1, WaveSizeFakesInt);
+}
+
+function TrySCACore(string CycleName, int TargetWave, int TargetWSF, optional bool bBrief)
+{
+	local int i;
+	local CD_SpawnCycle_Preset SCP;
 
 	if(!(SpawnCycleCatalog.ExistThisCycle(CycleName, SCP)))
 	{
-		BroadcastCDEcho(MissCycleMsg);
+		BroadcastLocalizedEcho("<local>CD_SpawnCycleAnalyzer.MissCycleMsg</local>");
 		return;
 	}
 
@@ -150,7 +159,7 @@ function CycleAnalyzePerWave(CD_SpawnCycle_Preset SCP, int WaveIdx, int PlayerCo
 
 	if ( 0 == CycleDefs.length )
 	{
-		BroadcastCDEcho(LengthMissMatchMsg);
+		BroadcastLocalizedEcho("<local>CD_SpawnCycleAnalyzer.LengthMissMatchMsg</local>");
 		return;
 	}
 
@@ -280,9 +289,19 @@ function int GetNumber(string s, out string ZedName)
 
 function bool HandleZedMod(out string ZedName, string Key)
 {
-	if(Right(ZedName, 1) ~= Key)
+	local int KeyLen;
+
+	KeyLen = Len(Key);
+
+	if(Right(ZedName, KeyLen) ~= Key)
 	{
-		ZedName = Left(ZedName, Len(ZedName)-1);
+		ZedName = Left(ZedName, Len(ZedName)-KeyLen);
+		return true;
+	}
+
+	if(Left(ZedName, KeyLen) ~= Key)
+	{
+		ZedName = Right(ZedName, Len(ZedName)-KeyLen);
 		return true;
 	}
 	return false;

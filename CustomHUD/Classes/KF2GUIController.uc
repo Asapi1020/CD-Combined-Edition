@@ -37,6 +37,7 @@ var int CursorStep, FastCursorStep;
 var int FontBlurX, FontBlurX2, FontBlurY, FontBlurY2, FastFontBlurX, FastFontBlurX2, FastFontBlurY, FastFontBlurY2;
 
 var bool bMouseWasIdle, bIsInMenuState, bAbsorbInput, bIsInvalid, bHideCursor, bUsingGamepad, bForceEngineCursor, bNoInputReset;
+var bool bForceConsoleInput;
 
 static function KF2GUIController GetGUIController(PlayerController PC)
 {
@@ -475,7 +476,10 @@ simulated function KFGUI_Page OpenMenu(class<KFGUI_Page> MenuClass)
 		return None;
 
 	if (KeyboardFocus != None)
+	{
 		GrabInputFocus(None);
+	}
+
 	if (InputFocus != None)
 	{
 		InputFocus.LostInputFocus();
@@ -489,6 +493,7 @@ simulated function KFGUI_Page OpenMenu(class<KFGUI_Page> MenuClass)
 	if (MenuClass.Default.bUnique)
 	{
 		for (i=0; i < ActiveMenus.Length; ++i)
+		{
 			if (ActiveMenus[i].Class == MenuClass)
 			{
 				if (i > 0 && ActiveMenus[i].BringPageToFront() ) // Sort it upfront.
@@ -500,6 +505,7 @@ simulated function KFGUI_Page OpenMenu(class<KFGUI_Page> MenuClass)
 				}
 				return M;
 			}
+		}
 
 		if (MenuClass.Default.bPersistant)
 		{
@@ -803,11 +809,26 @@ simulated function bool ReceivedInputKey(int ControllerId, name Key, EInputEvent
 			return true;
 		}
 
+		//	Related to Console
+		if(bForceConsoleInput)
+        {
+            ClientViewport.ViewportConsole.OnReceivedNativeInputKey(ControllerId, Key, Event, AmountDepressed, bGamepad);
+            return true;
+        }
+        else
+        {
+            if(Key == ClientViewport.ViewportConsole.ConsoleKey && !ClientViewport.ViewportConsole.bCaptureKeyInput && Event == 0)
+            {
+                class'WorldInfo'.static.GetWorldInfo().TimerHelper.SetTimer(0.03750, false, 'EnableCaptureInput', ClientViewport.ViewportConsole);
+                return true;
+            }
+        }
 		return bAbsorbInput;
 	}
 
 	return true;
 }
+
 simulated function bool ReceivedInputAxis(int ControllerId, name Key, float Delta, float DeltaTime, bool bGamepad)
 {
 	local Vector2D V;
@@ -817,7 +838,12 @@ simulated function bool ReceivedInputAxis(int ControllerId, name Key, float Delt
 	if (!bIsInMenuState)
 		return false;
 
-	if (bGamepad )
+	if(bForceConsoleInput && ClientViewport.ViewportConsole.OnReceivedNativeInputAxis(ControllerId, Key, Delta, DeltaTime, bGamepad))
+    {
+        return true;
+    }
+
+	if (bGamepad)
 	{
 		if (Abs(Delta) > 0.2f)
 		{
@@ -862,6 +888,12 @@ simulated function bool ReceivedInputChar(int ControllerId, string Unicode)
 {
 	if (!bIsInMenuState)
 		return false;
+
+	if(bForceConsoleInput && ClientViewport.ViewportConsole.OnReceivedNativeInputChar(ControllerId, Unicode))
+    {
+        return true;
+    }
+
 	return OnReceivedInputChar(ControllerId, Unicode);
 }
 

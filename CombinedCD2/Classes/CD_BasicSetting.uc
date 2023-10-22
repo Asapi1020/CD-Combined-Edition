@@ -22,11 +22,6 @@ var const string ChatReadDescription;
 var const string ChatWriteDescription;
 var const array<string> ChatWriteParamHints;
 
-var localized string AlreadyMsg;
-var localized string StagedMsg;
-var localized string PendingMsg;
-var localized string OldMsg;
-
 function bool StageIndicator( const out string Raw, out string StatusMsg, const optional bool ForceOverwrite = false )
 {
 	local string Candidate;
@@ -36,7 +31,7 @@ function bool StageIndicator( const out string Raw, out string StatusMsg, const 
 
 	if ( Candidate != "" && Candidate == StagedIndicator && !ForceOverwrite )
 	{
-		StatusMsg = OptionName $ AlreadyMsg $ Candidate;
+		StatusMsg = OptionName $ "<local>CD_Setting.AlreadyMsg</local>" $ Candidate;
 		return false;
 	}
 
@@ -45,7 +40,7 @@ function bool StageIndicator( const out string Raw, out string StatusMsg, const 
 	`cdlog("Converted raw string "$ Raw $" to staged value "$ StagedIndicator,
 		bLogControlledDifficulty);
 	
-	StatusMsg = StagedMsg $ OptionName $"="$ StagedIndicator $ "\n" $ PendingMsg; 
+	StatusMsg = "<local>CD_Setting.StagedMsg</local>" $ OptionName $"="$ StagedIndicator $ "\n<local>CD_Setting.PendingMsg</local>"; 
 	
 	return true;
 }
@@ -92,7 +87,7 @@ private final function string GetChatLineInternal()
 
 	if ( HasStagedChanges() )
 	{
-		Result $= " (" $ StagedMsg $ StagedIndicator $ ")";
+		Result $= " (<local>CD_Setting.StagedMsg</local>" $ StagedIndicator $ ")";
 	}
 
 	return Result;
@@ -154,7 +149,7 @@ function string CommitStagedChangesBasic( const optional bool ForceOverwrite = f
 
 	WriteIndicator( StagedIndicator );
 
-	return OptionName $"="$ StagedIndicator $" ("$ OldMsg $ OldIndicator $")";
+	return OptionName $"="$ StagedIndicator $" (<local>CD_Setting.OldMsg</local>" $ OldIndicator $")";
 }
 
 function string GetOptionName()
@@ -209,7 +204,7 @@ function bool GetChatWriteCommand( out StructChatCommand scc )
 	scc.ParamsImpl = ChatWriteCommand;
 	scc.CDSetting = self;
 	scc.Description = desc;
-	scc.AuthLevel = CDAUTH_WRITE;
+	scc.AuthLevel = 0;
 	scc.ModifiesConfig = true;
 
 	return true;

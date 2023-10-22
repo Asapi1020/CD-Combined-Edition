@@ -38,18 +38,7 @@ static function PrintSpawnDetails(
 
 			for ( ElemIndex = 0; ElemIndex < ss.CustomMonsterList.length; ElemIndex++ )
 			{
-				if ( Verbosity == "tiny" )
-				{
-					class'CD_ZedNameUtils'.static.GetZedTinyName( ss.CustomMonsterList[ElemIndex], ZedNameTmp );
-				}
-				else if ( Verbosity == "full" )
-				{
-					class'CD_ZedNameUtils'.static.GetZedFullName( ss.CustomMonsterList[ElemIndex], ZedNameTmp );
-				}
-				else
-				{
-					class'CD_ZedNameUtils'.static.GetZedShortName( ss.CustomMonsterList[ElemIndex], ZedNameTmp );
-				}
+				class'CD_ZedNameUtils'.static.GetZedName( Verbosity, ss.CustomMonsterList[ElemIndex], ZedNameTmp );
 
 				if ( ZedNameTmp == "" )
 				{
@@ -76,7 +65,7 @@ static function PrintSpawnDetails(
  * Also display a grand total line summing zed categories from
  * all waves (except the boss wave).
  */
-static function PrintSpawnSummaries(
+static function string PrintSpawnSummaries(
 	const out array<CD_AIWaveInfo> WaveInfos,
 	int PlayerCount,
 	const out CD_ConsolePrinter CDCP,
@@ -87,7 +76,7 @@ static function PrintSpawnSummaries(
 	local int WaveIndex;
 	local CD_AIWaveInfo WaveInfo;
 	local CD_WaveSummary WaveSummary, GameSummary;
-	local string WaveSummaryString;
+	local string WaveSummaryString, OutputText;
 
 	if ( PlayerCount <= 0 )
 	{
@@ -95,6 +84,7 @@ static function PrintSpawnSummaries(
 	}
 
 	GameSummary = new class'CD_WaveSummary';
+	OutputText = "";
 
 	for ( WaveIndex = 0; WaveIndex < WaveInfos.length; WaveIndex++ )
 	{
@@ -108,12 +98,12 @@ static function PrintSpawnSummaries(
 		GameSummary.AddParamToSelf( WaveSummary );
 		WaveSummaryString = WaveSummary.GetString();
 
-		CDCP.Print( "["$class'CD_StringUtils'.static.GetShortWaveNameByIndex( WaveIndex )$"] "$WaveSummaryString, false );
+		OutputText $= "["$class'CD_StringUtils'.static.GetShortWaveNameByIndex( WaveIndex )$"] "$WaveSummaryString$"\n";
 	}
-
-	CDCP.Print( " >> Projected Game Totals:", false );
-	CDCP.Print( "         "$GameSummary.GetString(), false );
-	CDCP.Print( " >> Boss wave not included in preceding tally.", false );
+	OutputText $= " #{00ff00}>>#{NOPARSE} Projected Game Totals:\n" $
+				  "         " $ GameSummary.GetString() $ "\n" $
+				  " #{00ff00}>>#{NOPARSE} Boss wave not included in preceding tally.";
+	return OutputText;
 }
 
 private static function GetCDWaveSummary(

@@ -9,6 +9,7 @@ struct FColumnItem
 	var() string Text;
 	var() float Width;
 	var() bool bOnlyTextures;
+	var() bool bRightAligned;
 
 	var transient bool bHidden;
 	var transient int X, XSize;

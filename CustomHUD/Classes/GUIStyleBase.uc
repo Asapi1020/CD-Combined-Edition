@@ -350,6 +350,7 @@ final function DrawTextShadow(coerce string S, float X, float Y, float ShadowSiz
 	Canvas.DrawColor = OldDrawColor;
 	Canvas.DrawText(S, , Scale, Scale);
 }
+
 final function DrawTexturedString(coerce string S, float X, float Y, optional float TextScaler=1.f, optional FontRenderInfo FRI, optional bool bUseOutline, optional bool bOnlyTexture)
 {
 	local Texture2D Mat;
@@ -390,7 +391,7 @@ final function DrawTexturedString(coerce string S, float X, float Y, optional fl
 		Mat = FindNextTexture(S);
 	}
 
-	DrawColoredText(S, X,Y, TextScaler, bUseOutline);
+	DrawColoredText(S, X, Y, TextScaler, bUseOutline);
 }
 final function Texture2D FindNextTexture(out string S)
 {
@@ -1457,31 +1458,8 @@ static final function string Trim(coerce string S)
 defaultproperties
 {
 	// Font'UI_Canvas_Fonts.Font_Main'
-	//MainFont=Font'KFYAS_Assets.Font.KFMainFont'
-	//InfiniteFont=Font'KFYAS_Assets.Font.KFInfiniteFont'
 	
-	MainFont=Font'UI_Canvas_Fonts.Font_Main'
+	MainFont=Font'UI_Canvas_Fonts.Font_Main' // Main
 	NumberFont=Font'UI_Canvas_Fonts.Font_General'
-	InfiniteFont=Font'UI_Canvas_Fonts.Font_Main'
-
-/*	BorderTextures(0)=Texture2D'KFModifications_HUD.HUD.Innerborder'
-	BorderTextures(1)=Texture2D'KFModifications_HUD.HUD.Innerborder_transparent'
-	BorderTextures(2)=Texture2D'KFModifications_HUD.HUD.Med_border'
-	BorderTextures(3)=Texture2D'KFModifications_HUD.HUD.Med_border_SlightTransparent'
-	BorderTextures(4)=Texture2D'KFModifications_HUD.HUD.Med_border_Transparent'
-	BorderTextures(5)=Texture2D'KFModifications_HUD.HUD.Thick_border'
-	BorderTextures(6)=Texture2D'KFModifications_HUD.HUD.Thick_border_SlightTransparent'
-	BorderTextures(7)=Texture2D'KFModifications_HUD.HUD.Thick_border_Transparent'
-	BorderTextures(8)=Texture2D'KFModifications_HUD.HUD.Thin_border'
-	BorderTextures(9)=Texture2D'KFModifications_HUD.HUD.Thin_border_SlightTransparent'
-	BorderTextures(10)=Texture2D'KFModifications_HUD.HUD.Thin_border_Transparent'
-	ArrowTextures(0)=Texture2D'KFModifications_HUD.HUD.DownMark'
-	ArrowTextures(1)=Texture2D'KFModifications_HUD.HUD.LeftMark'
-	ArrowTextures(2)=Texture2D'KFModifications_HUD.HUD.RightMark'
-	ButtonTextures(0)=Texture2D'KFModifications_HUD.HUD.Button'
-	ButtonTextures(1)=Texture2D'KFModifications_HUD.HUD.BUTTON_DISABLED'
-	ButtonTextures(2)=Texture2D'KFModifications_HUD.HUD.button_Highlight'
-	ButtonTextures(3)=Texture2D'KFModifications_HUD.HUD.BUTTON_PRESSED'
-	TabTextures(0)=Texture2D'KFModifications_HUD.HUD.Tabdark'
-    TabTextures(1)=Texture2D'KFModifications_HUD.HUD.Tabdark_Bottom'*/
+	InfiniteFont=Font'UI_Canvas_Fonts.Font_Main' // Main
 }

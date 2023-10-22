@@ -9,7 +9,10 @@ var float BorderSize;
 var() array<string> Values;
 var() int SelectedIndex;
 var() color SelectedTextColor, TextColor;
-var() bool bButtonStretched;
+var() bool bSelectionStretched;
+
+var int EdgeSize;
+var Color BoxColor, OutlineColor;
 
 function UpdateSizes()
 {
@@ -40,6 +43,7 @@ function HandleMouseClick(bool bRight)
 	if ((Selection.YPosition+Selection.YSize) > 1.f)
 		Selection.YPosition -= ((Selection.YPosition+Selection.YSize)-1.f);
 	Selection.GetInputFocus();
+	bSelectionStretched = true;
 }
 final function string GetCurrent()
 {
@@ -61,7 +65,10 @@ Delegate OnComboChanged(KFGUI_ComboBox Sender);
 
 defaultproperties
 {
-	SelectedTextColor=(R=255, G=128, B=128, A=255)
+	SelectedTextColor=(R=255, G=255, B=255, A=255)
 	TextColor=(R=255, G=255, B=255, A=255)
 	BorderSize=4
+	EdgeSize=2
+	BoxColor=(R=5, G=5, B=5, A=200)
+	OutlineColor=(R=115, G=115, B=115, A=255)
 }

@@ -37,45 +37,14 @@ var array<StructCDPlayerStats> CDPlayerStats;
 
 var int StatsCount;
 
-var localized string BeforeStartError;
-var localized string AccuracyHeader;
-var localized string DamageDealtHeader;
-var localized string DamageTakenHeader;
-var localized string DoshEarnedHeader;
-var localized string HSAccuracyHeader;
-var localized string HSHeader;
-var localized string HealsGivenHeader;
-var localized string HealsReceivedHeader;
-var localized string LargeKillsHeader;
-var localized string ShotsFiredHeader;
-var localized string ShotsHitHeader;
-var localized string HuskKillsHeader;
-var localized string InputErrorMsg;
-var localized string InputExampleMsg;
-var localized string StatsForString;
-var localized string LargeKillsString;
-var localized string HuskKillsString;
-var localized string HealsString;
-var localized string GivenString;
-var localized string ReceivedString;
-var localized string DamageString;
-var localized string DealtString;
-var localized string TakenString;
-var localized string AccuracyString;
-var localized string HitString;
-var localized string HSString;
-var localized string SpectatorsMsg;
-
 // Called when !cdstats <stat> chat command is used
-function string CDStatsCommand(string CommandString)
+function string CDStatsCommand(array<string> params)
 {
-	local array<string> params;
 	local string Stat;
 	local string Output;
 	local int i;
 	
-	ParseStringIntoArray( CommandString, params, " ", true );
-	Stat = Locs(params[1]);
+	Stat = Locs(params[0]);
 	
 	// refresh CDPlayerStats array
 	GetCDPlayerStats();	
@@ -85,14 +54,14 @@ function string CDStatsCommand(string CommandString)
 	
 	if ( WaveNum < 1 )
 	{
-		return (BeforeStartError);
+		return ("<local>CD_StatsSystem.BeforeStartError</local>");
 	}
 	
 	if (Left( Stat, 3 ) == "acc")
 	{
 		CDPlayerStats.Sort(ByAccuracy);
 		
-		Output = AccuracyHeader;
+		Output = "<local>CD_StatsSystem.AccuracyHeader</local>";
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -104,18 +73,18 @@ function string CDStatsCommand(string CommandString)
 	{		
 		CDPlayerStats.Sort(ByDamageDealt);
 		
-		Output = DamageDealtHeader;
+		Output = "<local>CD_StatsSystem.DamageDealtHeader</local>";
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
-			Output = Output $ "\n" $ i+1 $ ") - " $ CDPlayerStats[i].DamageDealt $ " - " $ CDPlayerStats[i].PlayerName ;
+			Output = Output $ "\n" $ i+1 $ ") - " $ class'CD_Object'.static.AddCommaToInt(CDPlayerStats[i].DamageDealt) $ " - " $ CDPlayerStats[i].PlayerName ;
 		}
 	}
 	else if (Left( Stat, 7 ) == "damaget" || Left( Stat, 4 ) == "dmgt")
 	{		
 		CDPlayerStats.Sort(ByDamageTaken);
 		
-		Output = DamageTakenHeader;
+		Output = "<local>CD_StatsSystem.DamageTakenHeader</local>";
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -126,7 +95,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByDoshEarned);
 		
-		Output = DoshEarnedHeader;
+		Output = "<local>CD_StatsSystem.DoshEarnedHeader</local>";
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{		
@@ -137,7 +106,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByHeadshotAccuracy);
 		
-		Output = HSAccuracyHeader;
+		Output = "<local>CD_StatsSystem.HSAccuracyHeader</local>";
 
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -148,7 +117,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByHeadshots);
 		
-		Output = HSHeader;
+		Output = "<local>CD_StatsSystem.HSHeader</local>";
 
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -159,7 +128,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByHealsGiven);
 		
-		Output = HealsGivenHeader;
+		Output = "<local>CD_StatsSystem.HealsGivenHeader</local>";
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -170,7 +139,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByHealsReceived);
 		
-		Output = HealsReceivedHeader;
+		Output = "<local>CD_StatsSystem.HealsReceivedHeader</local>";
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -181,7 +150,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByLargeKills);
 		
-		Output = LargeKillsHeader;
+		Output = "<local>CD_StatsSystem.LargeKillsHeader</local>";
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -192,7 +161,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByShotsFired);
 		
-		Output = ShotsFiredHeader;
+		Output = "<local>CD_StatsSystem.ShotsFiredHeader</local>";
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -203,7 +172,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByShotsHit);
 		
-		Output = ShotsHitHeader;
+		Output = "<local>CD_StatsSystem.ShotsHitHeader</local>";
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -214,7 +183,7 @@ function string CDStatsCommand(string CommandString)
 	{
 		CDPlayerStats.Sort(ByHUKills);
 		
-		Output = HuskKillsHeader;
+		Output = "<local>CD_StatsSystem.HuskKillsHeader</local>";
 		
 		for (i = 0; i < CDPlayerStats.Length; i++)
 		{
@@ -224,7 +193,7 @@ function string CDStatsCommand(string CommandString)
 	
 	else
 	{
-		Output = InputErrorMsg $ "\n" $ InputExampleMsg;
+		Output = "<local>CD_StatsSystem.InputErrorMsg</local>\n<local>CD_StatsSystem.InputExampleMsg</local>";
 	}
 	
 	return Output;
@@ -304,22 +273,21 @@ function string GetIndividualPlayerStats(KFPlayerController KFPC)
 			}
 		}
 		
-		PlayerStats = StatsForString $ KFPC.PlayerReplicationInfo.PlayerName $ ": \n" $
-					LargeKillsString $ LargeKills $ " (SC:" $ SCKills $ " FP:" $ FPKills $ " QP:" $ QPKills $ ")\n" $
-					HuskKillsString $ HUKills $ "\n" $
-					HealsString @ "-" @ GivenString $ HealsGiven @ ReceivedString $ HealsRecv $ "\n" $
-					DamageString @ "-" @ DealtString $ DamageDealt @ TakenString $ DamageTaken $ "\n" $
-//					"Shots - Fired: " $ ShotsFired $ " Hit: " $ ShotsHit $ "HS: " $ HeadShots $ "\n" $
-					AccuracyString @ "-" @ HitString;
+		// "<local>CD_StatsSystem.StatsForString</local>" $ KFPC.PlayerReplicationInfo.PlayerName $ ": \n" $
+		PlayerStats = "<local>CD_StatsSystem.LargeKillsString</local>" $ LargeKills $ " (SC:" $ SCKills $ " FP:" $ FPKills $ " QP:" $ QPKills $ ")\n" $
+					  "<local>CD_StatsSystem.HuskKillsString</local>" $ HUKills $ "\n" $
+					  "<local>CD_StatsSystem.HealsString</local>" @ "-" @ "<local>CD_StatsSystem.GivenString</local>" $ HealsGiven @ "<local>CD_StatsSystem.ReceivedString</local>" $ HealsRecv $ "\n" $
+					  "<local>CD_StatsSystem.DamageString</local>" @ "-" @ "<local>CD_StatsSystem.DealtString</local>" $ DamageDealt @ "<local>CD_StatsSystem.TakenString</local>" $ DamageTaken $ "\n" $
+					  "<local>CD_StatsSystem.AccuracyString</local>" @ "-" @ "<local>CD_StatsSystem.HitString</local>";
 		
 		// make sure we return a positive value or 0 for accuracy rather than attempting to divide with zero.
 		if (ShotsHit < 1 || ShotsFired == 0)
 		{
-			PlayerStats = PlayerStats $ "0%" @ HSString;
+			PlayerStats = PlayerStats $ "0%" @ "<local>CD_StatsSystem.HSString</local>";
 		}
 		else
 		{
-			PlayerStats = PlayerStats $ round(Float(ShotsHit)/Float(ShotsFired) * 100.0) $ "%" @ HSString;
+			PlayerStats = PlayerStats $ round(Float(ShotsHit)/Float(ShotsFired) * 100.0) $ "%" @ "<local>CD_StatsSystem.HSString</local>";
 		}
 		// make sure we return a positive value or 0 for headshot accuracy rather than attempting to divide with zero.
 		if (ShotsHit < 1 || ShotsFired == 0 || HeadShots < 1)
@@ -335,7 +303,7 @@ function string GetIndividualPlayerStats(KFPlayerController KFPC)
 	}
 	else
 	{	// Provide obligatory sass to people using this command when they shouldn't.
-		return SpectatorsMsg;
+		return "<local>CD_StatsSystem.SpectatorsMsg</local>";
 	}
 }
 

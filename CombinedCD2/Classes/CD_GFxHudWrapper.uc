@@ -7,12 +7,12 @@ var transient OnlineSubsystem OnlineSub;
 var transient array<byte> WasNewlyAdded;
 var transient array<string> NewItems;
 var transient bool bLoadedInitItems;
-/*
+
 var class<xUI_Console> ConsoleClass;
 var transient GameViewportClient ClientViewport;
 var transient Console OrgConsole;
 var transient xUI_Console NewConsole;
-*/
+
 var CD_PlayerController CDPC;
 var CD_GameReplicationInfo CDGRI;
 var CD_DroppedPickup WeaponPickup;
@@ -27,7 +27,7 @@ var const float WeaponIconSize;
 var const float WeaponFontScale;
 var const color WeaponIconColor,WeaponOverweightIconColor;
 
-var Vector2D WaveInfoLoc, WaveInfoSize, NoContainerLoc;
+var Vector2D WaveInfoLoc, WaveInfoSize;
 var float TextScale;
 
 var string MyStats;
@@ -76,7 +76,7 @@ function bool MainMenuIsOpen()
 
 function PostRender()
 {
-	if(CDPC != none)
+	if(CDPC != none && CDGRI != none)
 	{
 		if(CDPC.bShowVolumes)
 			DrawVolumesNumber();
@@ -101,9 +101,12 @@ function PostRender()
 			}
 		}
 
-		if (!CDPC.PlayerReplicationInfo.bWaitingPlayer)
+		else if (!CDPC.PlayerReplicationInfo.bWaitingPlayer)
 		{
-			DrawMyStats();
+			if(!CDGRI.bWaveIsActive && CDPC.WaveEndStats && MyStats != "")
+			{
+				DrawExtraContainer(class'KFGame.KFGFxMenu_PostGameReport'.default.PlayerStatsString, MyStats);
+			}
 			DrawVoteLeftTime();
 		}
 	}
@@ -116,13 +119,17 @@ function LaunchHUDMenus()
 	Scoreboard = KFScoreBoard(GUIController.InitializeHUDWidget(ScoreboardClass));
 	Scoreboard.SetVisibility(false);
 
-//	InitializeHUD();
+	InitializeHUD();
 }
-/*
+
 function InitializeHUD()
 {
-    if(KFPlayerOwner == none || KFPlayerOwner.PlayerReplicationInfo == none) || KFPlayerOwner.MyGFxManager == none) || HudMovie == none) || !KFPlayerOwner.PlayerReplicationInfo.bOnlySpectator && (KFPlayerOwner.MyGFxManager.PartyWidget == none) || KFPlayerOwner.MyGFxManager.PartyWidget.PartyChatWidget == none)
+    if(KFPlayerOwner == none || KFPlayerOwner.PlayerReplicationInfo == none || KFPlayerOwner.MyGFxManager == none || HudMovie == none)
     {
+        if(KFPlayerOwner.PlayerReplicationInfo.bOnlySpectator && (KFPlayerOwner.MyGFxManager.PartyWidget == none || KFPlayerOwner.MyGFxManager.PartyWidget.PartyChatWidget == none))
+        {
+        	KFPlayerOwner.MyGFxManager.ToggleMenus();
+        }
         SetTimer(1.0, false, 'InitializeHUD');
         return;
     }
@@ -130,7 +137,9 @@ function InitializeHUD()
     ClientViewport = LocalPlayer(PlayerOwner.Player).ViewportClient;
     
     if(ClientViewport != none)
+    {
     	CreateAndSetConsoleReplacment();
+    }
 }
 
 final function CreateAndSetConsoleReplacment()
@@ -148,7 +157,7 @@ final function CreateAndSetConsoleReplacment()
     OrgConsole.__OnReceivedNativeInputChar__Delegate = NewConsole.InputChar;
     ClientViewport.ViewportConsole = NewConsole;   
 }
-*/
+
 exec function SetShowScores(bool bNewValue)
 {
 	if (Scoreboard != None)
@@ -164,7 +173,24 @@ exec function SetShowScores(bool bNewValue)
 simulated function Destroyed()
 {
 	Super.Destroyed();
+	ResetConsole();
+	if(GUIController != none)
+	{
+		GUIController.Destroy();
+	}
+
 	NotifyLevelChange();
+}
+
+final function ResetConsole()
+{
+    if(OrgConsole == none || ClientViewport.ViewportConsole == OrgConsole)
+    {
+        return;
+    }
+    ClientViewport.ViewportConsole = OrgConsole;
+    OrgConsole.__OnReceivedNativeInputKey__Delegate = OrgConsole.InputKey;
+    OrgConsole.__OnReceivedNativeInputChar__Delegate = OrgConsole.InputChar;  
 }
 
 simulated final function NotifyLevelChange()
@@ -581,43 +607,6 @@ function string GetTimeString(int TotalSeconds)
 	 Special HUD
 	==================================================================== */
 
-function DrawMyStats()
-{
-	local float Sc, XL, YL, T, X, Y;
-	local array<string> splitbuf;
-	local int i;
-	local string s;
-
-    T = WorldInfo.TimeSeconds - ReceivedTime;
-    if(T > 15) return;
-
-    Canvas.Font = GUIStyle.PickFont(Sc);
-    ParseStringIntoArray(MyStats,splitbuf,"\n",true);
-
-    if(splitbuf.length <= 1) return;
-
-    s = splitbuf[0];
-    for(i=1; i<splitbuf.length; i++)
-    {
-    	if(Len(s) < Len(splitbuf[i]))
-    		s = splitbuf[i];
-    }
-
-    Canvas.TextSize(s, XL, YL, Sc, Sc);
-    X = Canvas.ClipX * default.NoContainerLoc.X;
-    Y = Canvas.ClipY * default.NoContainerLoc.Y;
-    Canvas.SetDrawColor(10, 10, 10, byte(Max(0, (1.0 - ((T / 15.0) ** float(3))) * 200.0)));
-	GUIStyle.DrawRectBox(X - (YL/2), Y - (YL/2), XL+YL, YL*7, 8.f, 0);
-	Canvas.SetPos(X, Y);
-	Canvas.SetDrawColor(0, 255, 10, 255);
-	if(T > 10)
-	{
-		T = (1.0 - (((T-10) / 5.0) ** float(3))) * 255.0;
-	    Canvas.DrawColor.A = byte(T);
-	}
-    Canvas.DrawText(MyStats,,Sc,Sc);
-}
-
 function DrawVoteLeftTime()
 {
 	local float Sc, XL, YL, X, Y;
@@ -708,31 +697,18 @@ function DrawSpectatorsInfo()
 	DrawTitledInfoBox(SpectatorsString, s, Sc, XL, YL, X, Y, max(6, n));
 }
 
-function DrawTitledInfoBox(string title, string body, float Sc, float XL, float YL, float X, float Yb, int LineNum)
+function string TestSize(string S)
 {
-	local float Y, a, h, w;
+	local float XL, YL;
 
-	a = YL/2;
-	h = YL*(LineNum+1);
-	Y = Yb - h;
-	Canvas.SetDrawColor(0, 0, 0, 250);
-	GUIStyle.DrawRectBox(X-a, Y-a, XL+YL, h, 8.f, 152);
-	Canvas.SetDrawColor(250, 250, 250, 255);
-	GUIStyle.DrawTextShadow(body, X, Y, 1, Sc);
-
-	Canvas.TextSize(title, w, YL, Sc, Sc);
-	h = YL + ScaledBorderSize*2;
-	Y -= (h+a-ScaledBorderSize);
-	Canvas.SetDrawColor(75, 0, 0, 200);
-	GUIStyle.DrawRectBox(X-a, Y-ScaledBorderSize, XL+YL, h, 8.f, 0);
-	Canvas.SetDrawColor(250, 250, 250, 255);
-	GUIStyle.DrawTextShadow(title, X + (XL-w)/2, Y, 1, Sc);	
+	Canvas.TextSize(S, XL, YL);
+	return S @ string(XL);
 }
 
 defaultproperties
 {
 	ScoreboardClass=class'KFScoreBoard'
-//	ConsoleClass=class'xUI_Console'
+	ConsoleClass=class'CombinedCD2.xUI_Console'
 	BackgroundTexture=Texture2D'EngineResources.WhiteSquareTexture'
 
 	MyFontRenderInfo=(bClipText=true)
@@ -746,7 +722,6 @@ defaultproperties
 
 	WaveInfoLoc=(X=1456, Y=704)
 	WaveInfoSize=(X=250, Y=48)
-	NoContainerLoc=(X=0.023, Y=0.36)
 	TextScale=1.35
 
 	VoteLeftTime=-1

@@ -33,7 +33,7 @@ var transient KFGUI_Base MouseArea; // Next in recurse line of the mouse pointer
 var() bool bDisabled, bClickable, bCanFocus;
 var bool bFocusedPostDrawItem; // If this component has been given input focus, should it receive draw menu call after everything else been drawn?
 var transient bool bFocused, bTextureInit, bVisible;
-var bool bIsHUDWidget, bEnableInputs, bNoLookInputs;
+var bool bIsHUDWidget, bEnableInputs, bNoLookInputs, bForceInput;
 var array<name> TimerNames;
 
 function InitMenu(); // Menu was initialized for the first time.
@@ -229,7 +229,7 @@ function LostKeyFocus();
 
 function bool NotifyInputKey(int ControllerId, name Key, EInputEvent Event, float AmountDepressed, bool bGamepad)
 {
-	if (bIsHUDWidget && bEnableInputs)
+	if ((bIsHUDWidget && bEnableInputs) || bForceInput)
 	{
 		switch (Key)
 		{

@@ -50,6 +50,7 @@ function Callback_SkillSelected( byte TierIndex, byte SkillIndex )
 		if( CD_PlayerController(KFPC).IsRestrictedSkill(Perk, index) )
 		{
 			KFPC.ShowConnectionProgressPopup(PMT_AdminMessage, class'CombinedCD2.CD_PlayerController'.default.SkillRestrictionMsg, class'CD_PlayerController'.static.SkillBanMessage(Perk, index) @ class'CombinedCD2.CD_PlayerController'.default.BannedString);
+			DetailsContainer.UpdateDetails( KFPC.CurrentPerk.Class, SelectedSkillsHolder, false, false, true );
 			return;
 		}
 	  	
@@ -63,4 +64,40 @@ function Callback_ReadyClicked( bool bReady )
 
 	CDPC = CD_PlayerController(GetPC());
 	CD_GFxManager(CDPC.MyGFxManager).ReadyFilter(CDPC, bReady);
+}
+
+function OnPrevSecondaryWeaponPressed()
+{
+	local CD_PlayerController CDPC;
+	local CD_GameReplicationInfo CDGRI;
+
+	CDPC = CD_PlayerController(GetPC());
+	CDGRI = CD_GameReplicationInfo(CDPC.WorldInfo.GRI);
+
+	if(CDPC.IsAllowedWeapon(class'KFGame.KFWeapDef_HRG_93R', CDGRI.BossWaveComes(), false))
+	{
+		super.OnPrevSecondaryWeaponPressed();
+	}
+	else
+	{
+		KFPC.ShowConnectionProgressPopup(PMT_AdminMessage, class'CombinedCD2.CD_PlayerController'.default.WeaponRestrictionMsg, class'CombinedCD2.CD_PlayerController'.default.AuthorityErrorMsg $ class'KFGameContent.KFWeap_HRG_93R'.default.ItemName);
+	}
+}
+
+function OnNextSecondaryWeaponPressed()
+{
+	local CD_PlayerController CDPC;
+	local CD_GameReplicationInfo CDGRI;
+
+	CDPC = CD_PlayerController(GetPC());
+	CDGRI = CD_GameReplicationInfo(CDPC.WorldInfo.GRI);
+
+	if(CDPC.IsAllowedWeapon(class'KFGame.KFWeapDef_HRG_93R', CDGRI.BossWaveComes(), false))
+	{
+		super.OnNextSecondaryWeaponPressed();
+	}
+	else
+	{
+		KFPC.ShowConnectionProgressPopup(PMT_AdminMessage, class'CombinedCD2.CD_PlayerController'.default.WeaponRestrictionMsg, class'CombinedCD2.CD_PlayerController'.default.AuthorityErrorMsg $ class'KFGameContent.KFWeap_HRG_93R'.default.ItemName);
+	}
 }
