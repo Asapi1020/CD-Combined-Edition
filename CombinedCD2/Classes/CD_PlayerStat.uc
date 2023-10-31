@@ -1,12 +1,11 @@
 class CD_PlayerStat extends Object;
 
+`include(CD_Log.uci);
+
 struct WeapDmgStruct
 {
-	var string WeapDefPath;
-	var int Dmg;
-	var int HS;
-	var int LargeKills;
-	var int Kills;
+	var array<byte> Key;
+	var WeaponDamage WeapDmg;
 };
 
 var int RecentSaveVer;
@@ -38,21 +37,67 @@ function FlushData()
 	ZedKillsArray.length = 0;
 }
 
-function SetWeapDmgData(WeaponDamage WeapDmg)
+function PackString(out string S, out array<byte> Bytes)
 {
 	local int i;
 
-	i = WeaponDamageList.Find('WeapDefPath', PathName(WeapDmg.WeaponDef));
+	Bytes.length = 0;
+	
+	for(i=0; i<Len(S); i++)
+	{
+		Bytes.AddItem(Asc(Mid(S, i, 1)));
+	}
+}
+
+function UnpackString(out string S, out array<byte> Bytes)
+{
+	local int i;
+	local array<string> splitbuf;
+
+	for(i=0; i<Bytes.length; i++)
+	{
+		splitbuf.AddItem(Chr(Bytes[i]));
+	}
+
+	JoinArray(splitbuf, S, "");
+}
+
+function SetWeapDmgData(WeaponDamage WD)
+{
+	local int i;
+	local array<byte> Bytes;
+	local string s;
+
+	for(i=WeaponDamageList.length-1; i>INDEX_NONE; i--)
+	{
+		if(WeaponDamageList[i].WeapDmg.WeaponDef == WD.WeaponDef)
+			break;
+	}
 
 	if(i == INDEX_NONE)
 	{
 		i = WeaponDamageList.length;
 		WeaponDamageList.Add(1);
-		WeaponDamageList[i].WeapDefPath = PathName(WeapDmg.WeaponDef);
+		WeaponDamageList[i].WeapDmg.WeaponDef = WD.WeaponDef;
+		s = PathName(WD.WeaponDef);
+		PackString(s, Bytes);
+		WeaponDamageList[i].Key = Bytes;
+	}
+	else
+	{
+		Bytes = WeaponDamageList[i].Key;
+		UnpackString(s, Bytes);
+		if(PathName(WD.WeaponDef) != s)
+		{
+			`cdlog("BROKEN DATA DETECTED");
+			WeaponDamageList.length=0;
+			SetWeapDmgData(WD);
+			return;
+		}
 	}
 
-	WeaponDamageList[i].Dmg			+= WeapDmg.DamageAmount;
-	WeaponDamageList[i].HS			+= WeapDmg.HeadShots;
-	WeaponDamageList[i].LargeKills	+= WeapDmg.LargeZedKills;
-	WeaponDamageList[i].Kills		+= WeapDmg.Kills;
+	WeaponDamageList[i].WeapDmg.DamageAmount	+= WD.DamageAmount;
+	WeaponDamageList[i].WeapDmg.HeadShots		+= WD.HeadShots;
+	WeaponDamageList[i].WeapDmg.LargeZedKills	+= WD.LargeZedKills;
+	WeaponDamageList[i].WeapDmg.Kills			+= WD.Kills;
 }
