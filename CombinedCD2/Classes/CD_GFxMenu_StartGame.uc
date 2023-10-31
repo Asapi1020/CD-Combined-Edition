@@ -12,4 +12,10 @@ function Callback_ReadyClicked( bool bReady )
 defaultproperties
 {
 	SubWidgetBindings.(3)=(WidgetName="overviewContainer",WidgetClass=class'CD_GFxStartContainer_InGameOverview')
+	// SubWidgetBindings.Remove((WidgetName="dailyContainerMC",WidgetClass=class'KFGFxDailyObjectivesContainer'))
+	// SubWidgetBindings.Remove((WidgetName="weeklyContainerMC",WidgetClass=class'KFGFxWeeklyObjectivesContainer'))
+	// SubWidgetBindings.Remove((WidgetName="missionObjectivesContainerMC",WidgetClass=class'KFGFxMissionObjectivesContainer'))
+	// SubWidgetBindings.Remove((WidgetName="collapsedMissionObjectivesMC",WidgetClass=class'KFGFxCollapsedObjectivesContainer'))
+   	// SubWidgetBindings.Remove((WidgetName="specialEventContainerMC",WidgetClass=class'KFGFxSpecialeventObjectivesContainer'))
+	// SubWidgetBindings.Remove((WidgetName="expandedMissionObjectivesMC",WidgetClass=class'KFGFxExpandedObjectivesContainer'))
 }

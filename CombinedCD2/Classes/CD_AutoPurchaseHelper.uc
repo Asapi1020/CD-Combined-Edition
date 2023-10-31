@@ -148,7 +148,6 @@ function ServerReceiveLoadoutList(class<KFPerk> Perk, class<KFWeaponDefinition> 
 	if(bInit)
 	{
 		LoadoutList.Remove(0, LoadoutList.length);
-		`cdlog("Load Stage: 0");
 	}
 
 	i = LoadoutList.Find('Perk', Perk);
@@ -157,20 +156,17 @@ function ServerReceiveLoadoutList(class<KFPerk> Perk, class<KFWeaponDefinition> 
 		LoadoutList.Add(1);
 		i = LoadoutList.length-1;
 		LoadoutList[i].Perk = Perk;
-		`cdlog("Load Stage: 1");
 	}
 
 	if(Priority == 0)
 	{
 		LoadoutList[i].WeapDef.Remove(0, LoadoutList[i].WeapDef.length);
 		LoadoutList[i].WeapDef.Add(DefLen);
-		`cdlog("Load Stage: 2 - " $ string(Perk));
 	}
 
 	if(Priority < DefLen)
 	{
 		LoadoutList[i].WeapDef[Priority] = WeapDef;
-		`cdlog("Load Stage: 3 - " $ string(WeapDef));
 	}
 }
 
