@@ -17,22 +17,6 @@ var array<ZedKillType> ZedKillsArray;
 const StatFileDir = "../../KFGame/Script/CD_PlayerStat.usa";
 const CurrentSaveVer = 0;
 
-public simulated function bool SafeDestroy()
-{
-	return (bPendingDelete || bDeleteMe || Destroy());
-}
-
-public event PreBeginPlay()
-{
-	if (WorldInfo.NetMode == NM_Client)
-	{
-		SafeDestroy();
-		return;
-	}
-
-	super.PreBeginPlay();
-}
-
 final function bool LoadStatFile()
 {
 	FlushData();

@@ -4,12 +4,20 @@ class nt_v2
 
 function GetShortSpawnCycleDefs( out array<string> sink )
 {
-	sink.length = 0;
+	GetLongSpawnCycleDefs( sink ); 
+	sink.Remove(1, 2); 
+	sink.Remove(2, 2); 
+	sink.remove(3, 2); 
+	sink.Length = 4; 
 }
 
 function GetNormalSpawnCycleDefs( out array<string> sink )
 {
-	sink.length = 0;
+	GetLongSpawnCycleDefs(sink);
+	sink.Remove(2, 1);
+	sink.Remove(3, 1);
+	sink.Remove(5, 1);
+	sink.Length = 7;
 }
 
 function GetLongSpawnCycleDefs( out array<string> sink )

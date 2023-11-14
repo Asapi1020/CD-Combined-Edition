@@ -135,7 +135,7 @@ function InitMapvote(xVotingReplication R)
 
 function DrawMenu()
 {
-	local float X, Y, W, H, XL, YL, FontScalar, BorderSize, gap;
+	local float X, Y, W, H, XL, YL, FontScalar, BorderSize, gap, sc;
 	local string S;
 	local string WeapName;
 	local CDInfo CDI;
@@ -161,7 +161,6 @@ function DrawMenu()
 	W = 0.352 * Canvas.ClipX;
 	H = 0.097 * Canvas.ClipY;
 	FontScalar = H / (5.5*YL);
-	gap = 6 * YL;
 	Canvas.SetDrawColor(30, 30, 30, 200);
 	Owner.CurrentStyle.DrawRectBox(X, Y, W, H+BorderSize, 8.f, 151);
 	S = class'KFCommon_LocalizedStrings'.static.GetFriendlyMapName(GetCDPC().WorldInfo.GetMapName(true));
@@ -169,11 +168,11 @@ function DrawMenu()
 	Canvas.SetDrawColor(250, 250, 250, 255);
 	DrawTextShadowHLeftVCenter(S, X+YL, Y+(BorderSize/2), FontScalar);
 	CDI = GetCDGRI().bMatchIsOver ? GetCDGRI().CDFinalParams : GetCDGRI().CDInfoParams;
-	DrawTextShadowHLeftVCenter(CDI.SC, X+YL, Y+(BorderSize/2)+YL, FontScalar);
-	DrawTextShadowHLeftVCenter( "MaxMonsters -"   @ CDI.MM, X+YL, Y+(BorderSize/2)+(YL*2), FontScalar );
+	DrawTextShadowHLeftVCenter(CDI.SC, X+YL, Y+(BorderSize/2)+(H*0.25), FontScalar);
+	DrawTextShadowHLeftVCenter( "MaxMonsters -"   @ CDI.MM, X+YL, Y+(BorderSize/2)+(H*0.5), FontScalar );
 	DrawTextShadowHLeftVCenter( "CohortSize -"    @ CDI.CS @ "|" @
 								"SpawnPoll -"     @ CDI.SP @ "|" @
-								"WaveSizeFakes -" @ CDI.WSF, X+YL, Y+(BorderSize/2)+(YL*3), FontScalar);
+								"WaveSizeFakes -" @ CDI.WSF, X+YL, Y+(BorderSize/2)+(H*0.75), FontScalar);
 	X += W;
 	W = 0.224 * Canvas.ClipX;
 	Canvas.SetDrawColor(0, 0, 0, 200);
@@ -224,6 +223,7 @@ function DrawMenu()
 	H = 0.896 * Canvas.ClipY - YL - Y;
 	Canvas.SetDrawColor(0, 0, 0, 200);
 	Owner.CurrentStyle.DrawRectBox(X, Y, W, H+BorderSize, 8.f, 0);
+
 	X += YL;
 	Y += YL;
 	if(CurState == 'TeamAward')        S = TeamAwardButtonText;
@@ -240,57 +240,59 @@ function DrawMenu()
 	{
 		X += YL;
 		Y += 3 * YL;
+		gap = (H+BorderSize)/4 - YL;
+		sc = gap/6;
 
-		DrawAwardFrame(X, Y, YL);
-		DrawAwardFrame(X, Y+gap, YL);
-		DrawAwardFrame(X, Y+2*gap, YL);
-		DrawAwardFrame(X, Y+3*gap, YL);
+		DrawAwardFrame(X, Y, sc);
+		DrawAwardFrame(X, Y+gap, sc);
+		DrawAwardFrame(X, Y+2*gap, sc);
+		DrawAwardFrame(X, Y+3*gap, sc);
 		Canvas.SetDrawColor(250, 250, 250, 255);
-		DrawTeamAwardIcon("UI_Award_Team.UI_Award_Team-Damage", X, Y, YL);
-		DrawTeamAwardIcon("UI_Award_Team.UI_Award_Team-Headshots", X, Y+gap, YL);
-		DrawTeamAwardIcon("UI_Award_Team.UI_Award_Team-Kills", X, Y+2*gap, YL);
-		DrawTeamAwardIcon("UI_Endless_TEX.ZEDs.UI_ZED_Endless_Husk", X, Y+3*gap, YL);
+		DrawTeamAwardIcon("UI_Award_Team.UI_Award_Team-Damage", X, Y, sc);
+		DrawTeamAwardIcon("UI_Award_Team.UI_Award_Team-Headshots", X, Y+gap, sc);
+		DrawTeamAwardIcon("UI_Award_Team.UI_Award_Team-Kills", X, Y+2*gap, sc);
+		DrawTeamAwardIcon("UI_Endless_TEX.ZEDs.UI_ZED_Endless_Husk", X, Y+3*gap, sc);
 		
-		X += YL*5;
-		DrawTextShadowHLeftVCenter(GetCDGRI().DamageDealer.PlayerName, X, Y+YL*2, FontScalar);
-		DrawTextShadowHLeftVCenter(string(GetCDGRI().DamageDealer.Value)@DamageDealtString, X, Y+YL*3, FontScalar);
-		DrawTextShadowHLeftVCenter(GetCDGRI().Precision.PlayerName, X, Y+YL*2+gap, FontScalar);
-		DrawTextShadowHLeftVCenter(HitAccuracyString$":"@string(GetCDGRI().Precision.Value)$"%", X, Y+YL*3+gap, FontScalar);
-		DrawTextShadowHLeftVCenter(GetCDGRI().ZedSlayer.PlayerName, X, Y+YL*2+2*gap, FontScalar);
-		DrawTextShadowHLeftVCenter(string(GetCDGRI().ZedSlayer.Value)@KillsString, X, Y+YL*3+2*gap, FontScalar);
-		DrawTextShadowHLeftVCenter(GetCDGRI().HuskKiller.PlayerName, X, Y+YL*2+3*gap, FontScalar);
-		DrawTextShadowHLeftVCenter(string(GetCDGRI().HuskKiller.Value)@HuskKillsString, X, Y+YL*3+3*gap, FontScalar);
+		X += sc*5;
+		DrawTextShadowHLeftVCenter(GetCDGRI().DamageDealer.PlayerName, X, Y+sc*2, FontScalar);
+		DrawTextShadowHLeftVCenter(string(GetCDGRI().DamageDealer.Value)@DamageDealtString, X, Y+sc*3, FontScalar);
+		DrawTextShadowHLeftVCenter(GetCDGRI().Precision.PlayerName, X, Y+sc*2+gap, FontScalar);
+		DrawTextShadowHLeftVCenter(HitAccuracyString$":"@string(GetCDGRI().Precision.Value)$"%", X, Y+sc*3+gap, FontScalar);
+		DrawTextShadowHLeftVCenter(GetCDGRI().ZedSlayer.PlayerName, X, Y+sc*2+2*gap, FontScalar);
+		DrawTextShadowHLeftVCenter(string(GetCDGRI().ZedSlayer.Value)@KillsString, X, Y+sc*3+2*gap, FontScalar);
+		DrawTextShadowHLeftVCenter(GetCDGRI().HuskKiller.PlayerName, X, Y+sc*2+3*gap, FontScalar);
+		DrawTextShadowHLeftVCenter(string(GetCDGRI().HuskKiller.Value)@HuskKillsString, X, Y+sc*3+3*gap, FontScalar);
 		Canvas.SetDrawColor(255, 213, 0, 255);
-		DrawTextShadowBoxLeft(DamageDealerString, X, Y, YL*2, FontScalar*1.5);
-		DrawTextShadowBoxLeft(PrecisionString, X, Y+gap, YL*2, FontScalar*1.5);
-		DrawTextShadowBoxLeft(ZedSlayerString, X, Y+2*gap, YL*2, FontScalar*1.5);
-		DrawTextShadowBoxLeft(HuskSlayerString, X, Y+3*gap, YL*2, FontScalar*1.5);
+		DrawTextShadowBoxLeft(DamageDealerString, X, Y, sc*2, FontScalar*1.5);
+		DrawTextShadowBoxLeft(PrecisionString, X, Y+gap, sc*2, FontScalar*1.5);
+		DrawTextShadowBoxLeft(ZedSlayerString, X, Y+2*gap, sc*2, FontScalar*1.5);
+		DrawTextShadowBoxLeft(HuskSlayerString, X, Y+3*gap, sc*2, FontScalar*1.5);
 
 		X = 0.62 * Canvas.ClipX + YL;
-		DrawAwardFrame(X, Y, YL);
-		DrawAwardFrame(X, Y+gap, YL);
-		DrawAwardFrame(X, Y+2*gap, YL);
-		DrawAwardFrame(X, Y+3*gap, YL);
+		DrawAwardFrame(X, Y, sc);
+		DrawAwardFrame(X, Y+gap, sc);
+		DrawAwardFrame(X, Y+2*gap, sc);
+		DrawAwardFrame(X, Y+3*gap, sc);
 		Canvas.SetDrawColor(250, 250, 250, 255);
-		DrawTeamAwardIcon("UI_Award_Team.UI_Award_Team-Healing", X, Y, YL);
-		DrawTeamAwardIcon("WeeklyObjective_UI.UI_Weeklies_Zombies", X, Y+gap, YL);
-		DrawTeamAwardIcon("UI_Award_Team.UI_Award_Team-Giants", X, Y+2*gap, YL);
-		DrawTeamAwardIcon("UI_Award_ZEDs.UI_Award_ZED_RawDmg", X, Y+3*gap, YL);
+		DrawTeamAwardIcon("UI_Award_Team.UI_Award_Team-Healing", X, Y, sc);
+		DrawTeamAwardIcon("WeeklyObjective_UI.UI_Weeklies_Zombies", X, Y+gap, sc);
+		DrawTeamAwardIcon("UI_Award_Team.UI_Award_Team-Giants", X, Y+2*gap, sc);
+		DrawTeamAwardIcon("UI_Award_ZEDs.UI_Award_ZED_RawDmg", X, Y+3*gap, sc);
 		
-		X += YL*5;
-		DrawTextShadowHLeftVCenter(GetCDGRI().Healer.PlayerName, X, Y+YL*2, FontScalar);
-		DrawTextShadowHLeftVCenter(string(GetCDGRI().Healer.Value)@HealthString, X, Y+YL*3, FontScalar);
-		DrawTextShadowHLeftVCenter(GetCDGRI().HeadPopper.PlayerName, X, Y+YL*8, FontScalar);
-		DrawTextShadowHLeftVCenter(HSAccuracyString$":"@string(GetCDGRI().HeadPopper.Value)$"%", X, Y+YL*9, FontScalar);
-		DrawTextShadowHLeftVCenter(GetCDGRI().LargeKiller.PlayerName, X, Y+YL*14, FontScalar);
-		DrawTextShadowHLeftVCenter(string(GetCDGRI().LargeKiller.Value)@ParseLocalizedPropertyPath("CombinedCD2.CD_StatsSystem.LargeKillsString"), X, Y+YL*15, FontScalar);
-		DrawTextShadowHLeftVCenter(GetCDGRI().Guardian.PlayerName, X, Y+YL*20, FontScalar);
-		DrawTextShadowHLeftVCenter(string(GetCDGRI().Guardian.Value)@DamageTakenString, X, Y+YL*21, FontScalar);
+		X += sc*5;
+		DrawTextShadowHLeftVCenter(GetCDGRI().Healer.PlayerName, X, Y+sc*2, FontScalar);
+		DrawTextShadowHLeftVCenter(string(GetCDGRI().Healer.Value)@HealthString, X, Y+sc*3, FontScalar);
+		DrawTextShadowHLeftVCenter(GetCDGRI().HeadPopper.PlayerName, X, Y+sc*8, FontScalar);
+		DrawTextShadowHLeftVCenter(HSAccuracyString$":"@string(GetCDGRI().HeadPopper.Value)$"%", X, Y+sc*9, FontScalar);
+		DrawTextShadowHLeftVCenter(GetCDGRI().LargeKiller.PlayerName, X, Y+sc*14, FontScalar);
+		DrawTextShadowHLeftVCenter(string(GetCDGRI().LargeKiller.Value)@ParseLocalizedPropertyPath("CombinedCD2.CD_StatsSystem.LargeKillsString"), X, Y+sc*15, FontScalar);
+		DrawTextShadowHLeftVCenter(GetCDGRI().Guardian.PlayerName, X, Y+sc*20, FontScalar);
+		DrawTextShadowHLeftVCenter(string(GetCDGRI().Guardian.Value)@DamageTakenString, X, Y+sc*21, FontScalar);
 		Canvas.SetDrawColor(255, 213, 0, 255);
-		DrawTextShadowBoxLeft(MedicineMasterString, X, Y, YL*2, FontScalar*1.5);
-		DrawTextShadowBoxLeft(HeadPopperString, X, Y+gap, YL*2, FontScalar*1.5);
-		DrawTextShadowBoxLeft(GiantSlayerString, X, Y+2*gap, YL*2, FontScalar*1.5);
-		DrawTextShadowBoxLeft(GuardianString, X, Y+3*gap, YL*2, FontScalar*1.5);
+		DrawTextShadowBoxLeft(MedicineMasterString, X, Y, sc*2, FontScalar*1.5);
+		DrawTextShadowBoxLeft(HeadPopperString, X, Y+gap, sc*2, FontScalar*1.5);
+		DrawTextShadowBoxLeft(GiantSlayerString, X, Y+2*gap, sc*2, FontScalar*1.5);
+		DrawTextShadowBoxLeft(GuardianString, X, Y+3*gap, sc*2, FontScalar*1.5);
 	}
 
 	//	Player Stats

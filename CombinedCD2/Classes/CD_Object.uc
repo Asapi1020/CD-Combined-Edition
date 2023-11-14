@@ -50,6 +50,13 @@ static function string GetCustomMapName(string MapName)
 	return MapName;
 }
 
+static function string GetFriendlyMapName(string MapName)
+{
+	MapName = class'KFCommon_LocalizedStrings'.static.GetFriendlyMapName(MapName);
+	MapName = GetCustomMapName(MapName);
+	return MapName;
+}
+
 static function string AddCommaToInt(int num)
 {
 	local int i, d;
