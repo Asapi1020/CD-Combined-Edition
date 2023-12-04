@@ -34,6 +34,8 @@ var string MyStats;
 var float ReceivedTime;
 var int VoteLeftTime;
 
+var array<KFPathnode> PathnodeCache;
+
 var localized string ItemDropPrefix;
 var localized string WaveInfoBasic;
 var localized string WaveInfoTrader;
@@ -221,7 +223,7 @@ simulated function SearchInventoryForNewItem()
 			{
 				NewItems.Insert(0,1);
 				NewItems[0] = OnlineSub.ItemPropertiesList[j].Name;
-				CD_PlayerController(Owner).TeamMessage(none, ItemDropPrefix @ NewItems[0], 'System');
+				CDPC.TeamMessage(none, ItemDropPrefix @ NewItems[0], 'System');
 			}
 		}
 	}
@@ -230,7 +232,7 @@ simulated function SearchInventoryForNewItem()
 
 simulated function CheckForItems()
 {
-	if (CD_PlayerController(Owner).DropItem && CDGRI!=none)
+	if (CDPC.DropItem && CDGRI!=none)
 		CDGRI.ProcessChanceDrop();
 	SetTimer(240.f,false,'CheckForItems');
 }
@@ -252,30 +254,50 @@ function DrawVolumesNumber()
 function DrawPathsNumber()
 {
 	local KFPathnode N;
+
+	if(PathnodeCache.length == 0)
+	{
+		CachePathnodes();
+	}
 	
-	ForEach AllActors( class 'KFPathnode', N )
+	foreach PathnodeCache(N)
 	{
 		DrawActorNumber(N);
 	}
 }
 
+function CachePathnodes()
+{
+	local KFPathnode N;
+	
+	ForEach WorldInfo.AllNavigationPoints( class 'KFPathnode', N )
+	{
+		PathnodeCache.AddItem(N);
+	}
+}
+
 function DrawActorNumber(Actor A)
 {
-	local vector ScreenPos;
-	local float Sc, Hight, Width, MarginX, MarginY;
+	local vector ScreenPos, CamLoc;
+	local rotator CamRot;
+	local float Sc, Hight, Width, MarginX, MarginY, CamDot;
 	local string S;
 	local Canvas C;
 
 	C = Canvas;
 	ScreenPos = C.Project(A.Location);
 
-	if(ScreenPos.X < 0 || ScreenPos.X > C.ClipX || ScreenPos.Y < 0 || ScreenPos.Y > C.ClipY)
-		return;
-	if(VSize(A.Location - KFPlayerController(Owner).Pawn.Location) > 600)
-		return;
+	if(ScreenPos.X < 0.f || ScreenPos.X > C.ClipX || ScreenPos.Y < 0.f || ScreenPos.Y > C.ClipY)
+		return; // Draw only in screen
 
-	if(KFPathNode(A) != none && (A.Location - KFPlayerController(Owner).Pawn.Location).Z > 100)
-		return;
+	CDPC.GetPlayerViewPoint(CamLoc, CamRot);
+
+	if(VSizeSq(A.location - CamLoc) > 1.5*(10**6))
+		return; // Skip distant actors
+
+	CamDot = vector(CamRot) Dot (A.location - CamLoc);
+	if(CamDot < 0.5)
+		return; // Skip actors out of cam range
 
 	S = string(A.name);
 
