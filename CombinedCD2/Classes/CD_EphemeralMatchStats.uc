@@ -81,3 +81,11 @@ function InternalRecordWeaponDamage(class<KFDamageType> KFDT, class<KFWeaponDefi
 
 	super.InternalRecordWeaponDamage(KFDT, WeaponDef, Damage, TargetPawn, HitZoneIdx);
 }
+
+static function RecordWeaponHeadShot(Controller InstigatedBy, class<DamageType> WeaponDamageType)
+{
+	if(KFGameReplicationInfo(InstigatedBy.WorldInfo.GRI).bWaveIsActive)
+	{
+		super.RecordWeaponHeadShot(InstigatedBy, WeaponDamageType);
+	}
+}

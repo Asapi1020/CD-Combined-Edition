@@ -95,3 +95,98 @@ static function string AddCommaToInt(int num)
 
 	return s;
 }
+
+static function int HexToInt(string HexStr)
+{
+	local int i, multiplier, value;
+
+	HexStr = Locs(HexStr);
+	multiplier = 1;
+	value = 0;
+
+	for ( i = Len(HexStr)-1 ; 0 <= i ; i-- )
+	{
+		switch (Mid(HexStr, i, 1))
+		{
+			case "0": break;
+			case "1": value += multiplier; break;
+			case "2": value += (multiplier * 2);  break;
+			case "3": value += (multiplier * 3);  break;
+			case "4": value += (multiplier * 4);  break;
+			case "5": value += (multiplier * 5);  break;
+			case "6": value += (multiplier * 6);  break;
+			case "7": value += (multiplier * 7);  break;
+			case "8": value += (multiplier * 8);  break;
+			case "9": value += (multiplier * 9);  break;
+			case "a": value += (multiplier * 10); break;
+			case "b": value += (multiplier * 11); break;
+			case "c": value += (multiplier * 12); break;
+			case "d": value += (multiplier * 13); break;
+			case "e": value += (multiplier * 14); break;
+			case "f": value += (multiplier * 15); break;
+			default: return -1;
+		}
+
+		multiplier *= 16; 
+	}
+
+	return value;
+}
+
+static function string HexToBinary(string HexStr)
+{
+	HexStr = Locs(HexStr);
+	
+	switch(Left(HexStr,1))
+	{
+		case "0": return "0000";
+		case "1": return "0001";
+		case "2": return "0010";
+		case "3": return "0011";
+		case "4": return "0100";
+		case "5": return "0101";
+		case "6": return "0110";
+		case "7": return "0111";
+		case "8": return "1000";
+		case "9": return "1001";
+		case "a": return "1010";
+		case "b": return "1011";
+		case "c": return "1100";
+		case "d": return "1101";
+		case "e": return "1110";
+		case "f": return "1111";
+		default: return "";
+	}
+}
+
+static function string ByteToBinary(byte b, optional int L=8)
+{
+	local int i, p, q;
+	local string s;
+
+	s = "";
+	p = int(b);
+
+	for(i=0; i<L; i++)
+	{
+		q = p % 2;
+		p /= 2;
+		s = string(q) $ s;
+	}
+
+	return s;
+}
+
+static function int BinaryToInt(string Binary)
+{
+	local int i, r;
+
+	r = 0;
+
+	for(i=0; i<Len(Binary); i++)
+	{
+		r += int(Mid(Binary, i, 1)) * (2**(Len(Binary)-1-i));
+	}
+
+	return r;
+}

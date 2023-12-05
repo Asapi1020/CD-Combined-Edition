@@ -60,3 +60,11 @@ struct CDInfo
 	var string SC, MM, CS, SP, WSF, SM, THPF, QPHPF, FPHPF, SCHPF;
 	var bool CHSPP;
 };
+
+struct MatchInfo
+{
+	var string SC;
+	var int MM, WSF, CS, ZTSM, THPF, QPHPF, FPHPF, SCHPF, End;
+	var float SP, SM, ZTSSD;
+	var bool AA, AC, AG, DR, DS, FPRS, SWFA, SWFAR, SWFG, ZTC;
+};
