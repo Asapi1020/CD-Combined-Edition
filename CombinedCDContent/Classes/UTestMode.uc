@@ -501,6 +501,7 @@ defaultproperties
 
     bDamageTracking = true
     bAllowKillZeds = true;
+    bIsUTM = true;
 
     CDGameModes.Add((FriendlyName="UTestMode",ClassNameAndPath="CombinedCDContent.UTestMode",bSoloPlaySupported=True,DifficultyLevels=4,Lengths=4,LocalizeID=0))
 

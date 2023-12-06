@@ -27,7 +27,7 @@ var int RecentSaveVer;
 var private array<int>		Data_00;
 var private array<Data_A>	Data_01;
 var private array<Data_B>	Data_02;
-var private array<int>		Data_03;
+var private string			Data_03;
 var private array<Data_C>	Data_04;
 var private string			Data_05;
 
@@ -54,7 +54,7 @@ function FlushData()
 	Data_00.length = 0;
 	Data_01.length = 0;
 	Data_02.length = 0;
-	Data_03.length = 0;
+	Data_03 = "";
 	Data_04.length = 0;
 	Data_05 = "";
 }
@@ -210,14 +210,31 @@ function SetZedKillsData(ZedKillType ZKT, int i)
 	Data_02[i].Data_1 = Encode(s);
 }
 
-function SetPerkUseNum(byte index)
+function SetPerkUseNum(int index)
 {
-	if(index > 6)
+	local int i, L;
+	local string s;
+	local array<string> values;
+
+	L = class'CD_PlayerController'.default.PerkList.length;
+
+	if(index >= L)
 	{
 		`cdlog("Failed to save perk use num because of invalid perk index!");
 		return;
 	}
-	Data_03[index] += 1;
+
+	s = Decode(Data_03);
+	ParseStringIntoArray(s, values, ",", false);
+
+	for(i=values.length; i < L; i++)
+	{
+		values.AddItem("0");
+	}
+
+	values[index] = StringAdd(values[index], 1);
+	JoinArray(values, s);
+	Data_03 = Encode(s);
 }
 
 function SetMatchRec(MatchInfo MI)
@@ -303,6 +320,8 @@ function LogData()
 	{
 		`cdlog(Decode(Data_02[i].Data_0) $ ":" @ Decode(Data_02[i].Data_1));
 	}
+
+	`cdlog(Decode(Data_03));
 
 	`cdlog(Decode(Data_05));
 }

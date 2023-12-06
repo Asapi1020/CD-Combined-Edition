@@ -84,6 +84,21 @@ function InternalRecordWeaponDamage(class<KFDamageType> KFDT, class<KFWeaponDefi
 
 static function RecordWeaponHeadShot(Controller InstigatedBy, class<DamageType> WeaponDamageType)
 {
+	`cdlog("InstigatedBy="$InstigatedBy.name);
+	if(InstigatedBy.WorldInfo == none)
+	{
+		`cdlog("Failed to access WorldInfo");
+	}
+	if(InstigatedBy.WorldInfo.GRI == none)
+	{
+		`cdlog("Failed to access GRI");
+	}
+	if(KFGameReplicationInfo(InstigatedBy.WorldInfo.GRI) == none)
+	{
+		`cdlog("Failed to access KFGameReplicationInfo");
+	}
+	`cdlog("bWaveIsActive="$string(KFGameReplicationInfo(InstigatedBy.WorldInfo.GRI).bWaveIsActive));
+	
 	if(KFGameReplicationInfo(InstigatedBy.WorldInfo.GRI).bWaveIsActive)
 	{
 		super.RecordWeaponHeadShot(InstigatedBy, WeaponDamageType);
