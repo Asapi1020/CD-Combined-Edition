@@ -19,6 +19,14 @@ var int MediumKills;
 var int RobotKills;
 var int BossKills;
 
+function RecordIntStat(int StatID, int Value)
+{
+	if(KFGameReplicationInfo(WorldInfo.GRI).bWaveIsActive)
+	{
+		super.RecordIntStat(StatID, Value);
+	}
+}
+
 function RecordZedKill(Class<Pawn> PawnClass, class<DamageType> DT)
 {
 	local CD_Survival CDGameInfo;
@@ -76,31 +84,19 @@ function RecordZedKill(Class<Pawn> PawnClass, class<DamageType> DT)
 
 function InternalRecordWeaponDamage(class<KFDamageType> KFDT, class<KFWeaponDefinition> WeaponDef, int Damage, KFPawn TargetPawn, int HitZoneIdx)
 {
+	local int i;
+
 	if(!KFGameReplicationInfo(WorldInfo.GRI).bWaveIsActive)
+	{
+		// Cancel Headshot increament here
+		// because it is difficult to override function which controls weapons' headshots amount.
+		if(HitZoneIdx == HZI_HEAD)
+		{
+			i = WeaponDamageList.Find('WeaponDef', WeaponDef);
+			WeaponDamageList[i].HeadShots--;
+		}
 		return;
+	}
 
 	super.InternalRecordWeaponDamage(KFDT, WeaponDef, Damage, TargetPawn, HitZoneIdx);
-}
-
-static function RecordWeaponHeadShot(Controller InstigatedBy, class<DamageType> WeaponDamageType)
-{
-	`cdlog("InstigatedBy="$InstigatedBy.name);
-	if(InstigatedBy.WorldInfo == none)
-	{
-		`cdlog("Failed to access WorldInfo");
-	}
-	if(InstigatedBy.WorldInfo.GRI == none)
-	{
-		`cdlog("Failed to access GRI");
-	}
-	if(KFGameReplicationInfo(InstigatedBy.WorldInfo.GRI) == none)
-	{
-		`cdlog("Failed to access KFGameReplicationInfo");
-	}
-	`cdlog("bWaveIsActive="$string(KFGameReplicationInfo(InstigatedBy.WorldInfo.GRI).bWaveIsActive));
-	
-	if(KFGameReplicationInfo(InstigatedBy.WorldInfo.GRI).bWaveIsActive)
-	{
-		super.RecordWeaponHeadShot(InstigatedBy, WeaponDamageType);
-	}
 }
