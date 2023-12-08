@@ -10,21 +10,15 @@ struct SimpleUserInfo
 };
 
 */
-enum ResultState
-{
-	RS_Null,
-	RS_Win,
-	RS_Defeat,
-	RS_Leave
-};
 
 struct MatchResult
 {
+	var string TimeStamp;
 	var string MapName;
 	var string SpawnCycle;
 	var string MaxMonsters;
 	var string UniqueSettings;
-	var ResultState Result;
+	var int Result;
 //	var array<SimpleUserInfo> Team;
 };
 
@@ -113,7 +107,7 @@ function InitConfig()
 		IniVer=1;
 	}
 }
-
+/*
 function SaveUserStats(CD_PlayerController CDPC, CD_Survival CD, ResultState RS)
 {
 	local int i, j;
@@ -179,3 +173,4 @@ function SaveUserStats(CD_PlayerController CDPC, CD_Survival CD, ResultState RS)
 	SaveConfig();
 	SavedPlayers.AddItem(CDPRI);
 }
+*/

@@ -8,3 +8,9 @@
 `define FullName	0
 `define ShortName	1
 `define TinyName	2
+
+/* [Result State] */
+`define RS_NULL		0
+`define RS_LEAVE	1
+`define RS_DEFEAT	2
+`define RS_WIN		3
