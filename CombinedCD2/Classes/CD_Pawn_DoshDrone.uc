@@ -246,7 +246,7 @@ simulated state Detonate
         //  spawn dosh effect
         if(WorldInfo.NetMode != NM_DedicatedServer)
         {
-            WorldInfo.MyEmitterPool.SpawnEmitter(ParticleSystem'FX_Headshot_Alt_EMIT.FX_Headshot_Alt_Dosh_01', Location);
+            //WorldInfo.MyEmitterPool.SpawnEmitter(ParticleSystem'FX_Headshot_Alt_EMIT.FX_Headshot_Alt_Dosh_01', Location);
             class'KFPawn_Monster'.default.HeadShotAkComponent.PlayEvent(AkEvent'WW_Headshot_Packs.Play_WEP_Dosh_Headshot', true, true);
         }
 		
