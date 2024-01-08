@@ -241,6 +241,32 @@ static function class<KFPawn> GetZedClassFromName( string ZedName, bool albino, 
 	return none;
 }
 
+static function string GetCycleNameFromOGClass(class<KFPawn_Monster> ZedClass)
+{
+	local int index;
+
+	for(index=0; index<default.ZedInfoArray.length; index++)
+	{
+		if(ZedClass == default.ZedInfoArray[index].OG_ZedClasses[`RegularClass])
+			break;
+	}
+
+	return GetCycleNameFromIndex(index);
+}
+
+static function string GetCycleNameFromIndex(int index)
+{
+	local int L;
+
+	L = default.ZedInfoArray[index].ZedName_Cycle.Names.length;
+	if(L == 0)
+	{
+		return Left(default.ZedInfoArray[index].ZedName_Cycle.RangeName.val, default.ZedInfoArray[index].ZedName_Cycle.RangeName.min);
+	}
+
+	return default.ZedInfoArray[index].ZedName_Cycle.Names[L-1];
+}
+
 static function class<KFPawn> RandEDAR()
 {
 	local float RandV;

@@ -53,6 +53,8 @@ var config array<string> CDRecords;
 var config int MaxStrage;
 var config int IniVer;
 
+var config CDSettingCond RecordConditions;
+
 var array<PlayerReplicationInfo> SavedPlayers;
 
 public simulated function bool SafeDestroy()
