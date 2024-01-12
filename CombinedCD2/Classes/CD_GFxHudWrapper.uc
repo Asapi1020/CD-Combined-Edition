@@ -80,14 +80,17 @@ function PostRender()
 {
 	if(CDPC != none && CDGRI != none)
 	{
-		if(CDPC.bShowVolumes)
-			DrawVolumesNumber();
+		if(CDPC.myHUD.bShowHUD)
+		{
+			if(CDPC.bShowVolumes)
+				DrawVolumesNumber();
 
-		if(CDPC.bShowPathNodes)
-			DrawPathsNumber();
+			if(CDPC.bShowPathNodes)
+				DrawPathsNumber();
 
-		if( !CDPC.bCinematicMode && WeaponPickup != none && CDGRI.bTraderIsOpen )
-			DrawWeaponPickupInfo(WeaponPickup, CDPC.Pawn);
+			if( !CDPC.bCinematicMode && WeaponPickup != none && CDGRI.bTraderIsOpen )
+				DrawWeaponPickupInfo(WeaponPickup, CDPC.Pawn);
+		}
 
 		if(MainMenuIsOpen())
 		{
@@ -102,8 +105,7 @@ function PostRender()
 				DrawWaveInfo();
 			}
 		}
-
-		else if (!CDPC.PlayerReplicationInfo.bWaitingPlayer)
+		else if (!CDPC.PlayerReplicationInfo.bWaitingPlayer && CDPC.myHUD.bShowHUD)
 		{
 			if(!CDGRI.bWaveIsActive && CDPC.WaveEndStats && MyStats != "")
 			{
