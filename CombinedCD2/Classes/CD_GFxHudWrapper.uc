@@ -43,6 +43,8 @@ var localized string WaveInfoBoss;
 var localized string CDSettingsString;
 var localized string SpectatorsString;
 
+const MAX_DRAW_DISTANCE = 15;
+
 simulated function PostBeginPlay()
 {
 	Super.PostBeginPlay();	
@@ -58,7 +60,7 @@ simulated function PostBeginPlay()
 	}
 	
 	SetTimer(240.f,false,'CheckForItems');
-	SetTimer(0.1, true, 'CheckForWeaponPickup');
+//	SetTimer(0.1, true, 'CheckForWeaponPickup');
 }
 
 function SetupCDGRI()
@@ -88,8 +90,8 @@ function PostRender()
 			if(CDPC.bShowPathNodes)
 				DrawPathsNumber();
 
-			if( !CDPC.bCinematicMode && WeaponPickup != none && CDGRI.bTraderIsOpen )
-				DrawWeaponPickupInfo(WeaponPickup, CDPC.Pawn);
+			if( !CDPC.bCinematicMode && CDGRI.bTraderIsOpen )
+				DrawWeaponPickupInfo();
 		}
 
 		if(MainMenuIsOpen())
@@ -280,27 +282,17 @@ function CachePathnodes()
 
 function DrawActorNumber(Actor A)
 {
-	local vector ScreenPos, CamLoc;
-	local rotator CamRot;
-	local float Sc, Hight, Width, MarginX, MarginY, CamDot;
+	local vector ScreenPos;
+	local float Sc, Hight, Width, MarginX, MarginY;
 	local string S;
 	local Canvas C;
 
+	if(!InDrawRange(A, ScreenPos))
+	{
+		return;
+	}
+
 	C = Canvas;
-	ScreenPos = C.Project(A.Location);
-
-	if(ScreenPos.X < 0.f || ScreenPos.X > C.ClipX || ScreenPos.Y < 0.f || ScreenPos.Y > C.ClipY)
-		return; // Draw only in screen
-
-	CDPC.GetPlayerViewPoint(CamLoc, CamRot);
-
-	if(VSizeSq(A.location - CamLoc) > 1.5*(10**6))
-		return; // Skip distant actors
-
-	CamDot = vector(CamRot) Dot (A.location - CamLoc);
-	if(CamDot < 0.5)
-		return; // Skip actors out of cam range
-
 	S = string(A.name);
 
 	C.Font = GUIStyle.PickFont(Sc);
@@ -325,238 +317,229 @@ function DrawTextShadowHVCenter(string Str, float XPos, float YPos, float BoxWid
 	GUIStyle.DrawTextShadow(Str, XPos + (BoxWidth - TextWidth)/2 , YPos, 1, FontScalar);
 }
 
+function bool InDrawRange(Actor A, out vector ScreenPos, optional vector PosOffset)
+{
+	local Canvas C;
+	local vector CamLoc;
+	local rotator CamRot;
+	local float CamDot;
+
+	C = Canvas;
+	ScreenPos = C.Project(A.Location + PosOffset);
+
+	if(ScreenPos.X < 0.f || ScreenPos.X > C.ClipX || ScreenPos.Y < 0.f || ScreenPos.Y > C.ClipY)
+		return false;
+
+	CDPC.GetPlayerViewPoint(CamLoc, CamRot);
+
+	if(VSizeSq(A.location - CamLoc) > MAX_DRAW_DISTANCE*(10**5))
+		return false; // Skip distant actors
+
+	CamDot = vector(CamRot) Dot (A.location - CamLoc);
+	if(CamDot < 0.5)
+		return false; // Skip actors out of cam range
+
+	return true;
+}
+
 /* ====================================================================
 	 Weapon Pickup
 	==================================================================== */
 
-	// ToDo: Lots of wastes are remaining. should deleted
-
-function DrawWeaponPickupInfo(CD_DroppedPickup CDDP, Pawn P)
+function DrawWeaponPickupInfo()
 {
-	local vector ScreenPos;
-	local bool bHasAmmo, bCanCarry;
-	local Inventory Inv;
-	local KFInventoryManager KFIM;
-	local string AmmoText, WeightText;
-	local class<KFWeapon> KFWC;
-	local color CanCarryColor;
-	local float FontScale, ResModifier, IconSize;
-	local float AmmoTextWidth, WeightTextWidth, TextWidth, TextHeight, TextYOffset;
-	local float InfoBaseX, InfoBaseY;
-	local float BGX, BGY, BGWidth, BGHeight;
-	local float WeaponTextBGX, WeaponTextBGY;
 	local Canvas C;
+	local CD_DroppedPickup CDDP;
+	local vector ScreenPos, CamLoc;
+	local rotator CamRot;
+	local bool bHasAmmo, bCanCarry;
+	local string WeapText, AmmoText, WeightText, OwnerText;
+	local color IconColor, TextColor;
+	local float IconSize, XL, YL, Sc, defaultSc;
+	local array<float> tempXL, tempYL;
+	local float PosX, PosY, Width, Height, OffsetX, OffsetY;
+	local string WeapIconPath;
+	local Texture2D WeapIcon, AmmoIcon, Avatar;
+	local KFInventoryManager KFIM;
+	local Inventory Inv;
+	local class<KFWeapon> WeapClass;
 
 	C = Canvas;
+	C.Font = GUIStyle.PickFont(defaultSc);
+	CDPC.GetPlayerViewPoint(CamLoc, CamRot);
 
-	// Lift this a bit off of the ground
-	ScreenPos = C.Project(CDDP.Location + vect(0,0,25));
-	if (ScreenPos.X < 0 || ScreenPos.X > C.ClipX || ScreenPos.Y < 0 || ScreenPos.Y > C.ClipY)
-		return;
-		
-	bHasAmmo = CDDP.MagazineAmmo[0] >= 0;
-
-	AmmoText = CDDP.GetAmmoText();
-	WeightText = CDDP.GetWeightText(P);
-
-	// This is only set to false on living
-	// players who cannot pick up the weapon
-	if (P != None && KFInventoryManager(P.InvManager) != None)
+	foreach CollidingActors(class'CombinedCD2.CD_DroppedPickup', CDDP, MAX_DRAW_DISTANCE*100, CamLoc)
 	{
-		KFIM = KFInventoryManager(P.InvManager);
-		KFWC = class<KFWeapon>(CDDP.InventoryClass);
-		if (KFIM.CanCarryWeapon(KFWC, CDDP.UpgradeLevel))
+		if(CDDP.Velocity.Z == 0 && InDrawRange(CDDP, ScreenPos, vect(0,0,25)) && CDDP.bGlowRef)
 		{
-			if (KFWC.default.DualClass != None)
-				bCanCarry = !KFIM.ClassIsInInventory(KFWC.default.DualClass, Inv);
-			else
-				bCanCarry = !KFIM.ClassIsInInventory(KFWC, Inv);
-		}
-	}
-	else
-		bCanCarry = true;
+			// Intro
+			tempXL.length=0;
+			tempYL.length=0;
+			Sc = defaultSc * Lerp(1, 0.3, VSizeSq(CDDP.location - CamLoc)/(MAX_DRAW_DISTANCE*(10**5)));
+			bHasAmmo = CDDP.MagazineAmmo[0] >= 0;
+			C.TextSize("ABC", XL, IconSize, Sc, Sc);
+			//ResModifier = CDDP.WorldInfo.static.GetResolutionBasedHUDScale();
+			//IconSize = WeaponIconSize * WeaponFontScale * ResModifier * (Sc);
+			Height = 0;
 
-	CanCarryColor = (bCanCarry ? WeaponIconColor : WeaponOverweightIconColor);
-
-	// TODO?: Check for scaling, maybe make WeaponFontScale configurable
-	ResModifier = CDDP.WorldInfo.static.GetResolutionBasedHUDScale();
-	FontScale = class'KFGame.KFGameEngine'.static.GetKFFontScale() * WeaponFontScale;
-	C.Font = class'KFGame.KFGameEngine'.static.GetKFCanvasFont();
-	// We don't draw the ammo text or icon if it's not relevant, so check this
-	if (bHasAmmo)
-	{
-		// Grab the wider of the two strings
-		// Text height should be the same for both
-		C.TextSize(AmmoText, AmmoTextWidth, TextHeight, FontScale, FontScale);
-		C.TextSize(WeightText, WeightTextWidth, TextHeight, FontScale, FontScale);
-		TextWidth = FMax(AmmoTextWidth, WeightTextWidth);
-	}
-	else
-		C.TextSize(WeightText, TextWidth, TextHeight, FontScale, FontScale);
-
-	IconSize = WeaponIconSize * WeaponFontScale * ResModifier;
-	InfoBaseX = ScreenPos.X - ((IconSize * 1.5 + TextWidth) * 0.5);
-	InfoBaseY = ScreenPos.Y;
-	TextYOffset = (IconSize - TextHeight) * 0.5;
-
-	// Setup the background
-	BGWidth = IconSize * 2.0 + TextWidth;
-	BGX = InfoBaseX - (IconSize * 0.25);
-	if (bHasAmmo)
-	{
-		BGHeight = (IconSize * 2.5) * 1.25;
-		BGY = InfoBaseY - (BGHeight * 0.125);
-	}
-	else
-	{
-		BGHeight = IconSize * 1.5;
-		BGY = InfoBaseY + IconSize * 1.5 - (BGHeight * 0.125);
-	}
-
-	C.EnableStencilTest(true);
-
-	// Background
-	C.DrawColor = class'KFGame.KFHUDBase'.default.PlayerBarBGColor;
-	C.SetPos(BGX, BGY);
-	C.DrawTile(BackgroundTexture, BGWidth, BGHeight, 0, 0, 32, 32);
-
-	// We only draw ammo if it's relevant
-	if (bHasAmmo)
-	{
-		// Ammo icon
-		C.DrawColor = WeaponIconColor;
-		C.SetPos(InfoBaseX, InfoBaseY);
-		C.DrawTile(WeaponAmmoIcon, IconSize, IconSize, 0, 0, 256, 256);
-	
-		// Ammo text
-		C.SetPos(InfoBaseX + IconSize * 1.5, InfoBaseY + TextYOffset);
-		C.DrawText(AmmoText, , FontScale, FontScale, MyFontRenderInfo);
-	}
-
-	// Weight icon
-	C.DrawColor = CanCarryColor;
-	C.SetPos(InfoBaseX, InfoBaseY + IconSize * 1.5);
-	C.DrawTile(WeaponWeightIcon, IconSize, IconSize, 0, 0, 256, 256);
-
-	// Weight (and upgrade level if applicable) text
-	C.SetPos(InfoBaseX + IconSize * 1.5, InfoBaseY + IconSize * 1.5 + TextYOffset);
-	C.DrawText(WeightText, , FontScale, FontScale, MyFontRenderInfo);
-	
-	// Weapon name
-	if (CDDP.InventoryClass.default.ItemName != "")
-	{
-		C.TextSize(CDDP.InventoryClass.default.ItemName, TextWidth, TextHeight, FontScale, FontScale);
-		
-		WeaponTextBGX = ScreenPos.X - (TextWidth * 0.5625);
-		WeaponTextBGY = BGY - TextHeight * 1.25;
-
-		C.DrawColor = class'KFGame.KFHUDBase'.default.PlayerBarBGColor;
-		C.SetPos(WeaponTextBGX, WeaponTextBGY);
-		C.DrawTile(BackgroundTexture, TextWidth * 1.125, TextHeight * 1.125, 0, 0, 32, 32);
-	
-		C.DrawColor = WeaponIconColor;
-		C.SetPos(WeaponTextBGX + TextWidth * 0.0625, WeaponTextBGY + TextHeight * 0.0625);
-		C.DrawText(CDDP.InventoryClass.default.ItemName, , FontScale, FontScale, MyFontRenderInfo);
-	}
-
-	// Owner's name
-	if (CDDP.OriginalOwnerPlayerName != "")
-	{
-		C.TextSize(CDDP.OriginalOwnerPlayerName, TextWidth, TextHeight, FontScale, FontScale);
-	
-		BGX += (BGWidth * 0.5 - TextWidth * 0.5625);
-		BGY += (BGHeight + TextHeight * 0.25);
-		BGWidth = TextWidth * 1.125;
-		BGHeight = TextHeight * 1.125;
-	
-		C.DrawColor = class'KFGame.KFHUDBase'.default.PlayerBarBGColor;
-		C.SetPos(BGX, BGY);
-		C.DrawTile(BackgroundTexture, BGWidth, BGHeight, 0, 0, 32, 32);
-	
-		C.DrawColor = WeaponIconColor;
-		C.SetPos(BGX + TextWidth * 0.0625, BGY + TextHeight * 0.0625);
-		C.DrawText(CDDP.OriginalOwnerPlayerName, , FontScale, FontScale, MyFontRenderInfo);
-	}
-
-	C.EnableStencilTest(false);
-}
-
-
-function CheckForWeaponPickup()
-{
-	local CD_DroppedPickup CDDP, BestCDDP;
-	local int CDDPCount, ZedCount;
-	local vector StartTrace, EndTrace, HitLocation, HitNormal;
-	local rotator AimRot;
-	local Actor HitActor;
-	local float DistSq, BestDistSq;
-	local KFPawn_Monster KFPM;
-
-	if (CDPC == None || CDGRI == None || !CDGRI.bMatchHasBegun)
-	{
-		WeaponPickup = None;
-		return;
-	}
-
-	CDPC.GetPlayerViewPoint(StartTrace, AimRot);
-	EndTrace = StartTrace + vector(AimRot) * MaxWeaponPickupDist;
-	
-	HitActor = Trace(HitLocation, HitNormal, EndTrace, StartTrace);
-	
-	if (HitActor == None)
-	{
-		WeaponPickup = None;
-		return;
-	}
-		
-	// Check for living zeds in small radius
-	// This prevents pickup info from blocking
-	// sightlines to certain zeds (e.g. Crawlers)
-	foreach CollidingActors(class'KFGame.KFPawn_Monster', KFPM, ZedScanRadius, HitLocation)
-	{
-		if (KFPM.IsAliveAndWell())
-		{
-			WeaponPickup = None;
-			return;
-		}
-
-		// We limit this to 20 zeds for time reasons
-		// This usually won't happen, but better safe than sorry
-		ZedCount++;
-		if (ZedCount > 20)
-		{
-			WeaponPickup = None;
-			return;
-		}
-	}
-
-	BestDistSq = WeaponPickupScanRadius * WeaponPickupScanRadius;
-
-	// Check for dropped pickups in small radius
-	foreach CollidingActors(class'CombinedCD2.CD_DroppedPickup', CDDP, WeaponPickupScanRadius, HitLocation)
-	{
-		if (CDDP.Velocity.Z == 0)
-		{
-			// We get the weapon closest to HitLocation
-			DistSq = VSizeSq(CDDP.Location - HitLocation);
-			if (DistSq < BestDistSq)
+			// Weapon
+			if(CDDP.InventoryClass.default.ItemName != "")
 			{
-				BestCDDP = CDDP;
-				BestDistSq = DistSq;
+				WeapText = CDDP.InventoryClass.default.ItemName;
+				C.TextSize(WeapText, XL, YL, Sc, Sc);
+				tempXL.AddItem(XL);
+				Width = XL;
+				tempYL.AddItem(FMax(IconSize, YL));
+				Height += tempYL[tempYL.length-1];
+			}
+			// Ammo
+			if (bHasAmmo)
+			{
+				AmmoText = CDDP.GetAmmoText();
+				C.TextSize(AmmoText, XL, YL, Sc, Sc);
+				tempXL.AddItem(XL);
+				Width = FMax(Width, XL);
+				tempYL.AddItem(FMax(IconSize, YL));
+				Height += tempYL[tempYL.length-1];
+			}
+			// Weight
+			WeightText = CDDP.GetWeightText(CDPC.Pawn);
+			C.TextSize(WeightText, XL, YL, Sc, Sc);
+			tempXL.AddItem(XL);
+			Width = FMax(Width, XL);
+			tempYL.AddItem(FMax(IconSize, YL));
+			Height += tempYL[tempYL.length-1];
+			// Owner
+			if (CDDP.OriginalOwnerPlayerName != "")
+			{
+				OwnerText = CDDP.OriginalOwnerPlayerName;
+				C.TextSize(OwnerText, XL, YL, Sc, Sc);
+				tempXL.AddItem(XL);
+				Width = FMax(Width, XL);
+				tempYL.AddItem(FMax(IconSize, YL));
+				Height += tempYL[tempYL.length-1];
+			}
+
+			// Background
+			Width += IconSize*2.5;
+			OffsetX = Width * 0.125;
+			OffsetY = Height * 0.125;
+			Width += OffsetX*2;
+			Height += OffsetY*2;
+			PosX = ScreenPos.X - Width*0.5;
+			PosY = ScreenPos.Y - Height*0.5;
+			if(C.ClipX < PosX + Width || PosX < 0)
+			{
+				continue;
+			}
+
+			C.SetDrawColor(0, 0, 0, 180);
+			GUIStyle.DrawRectBox(PosX, PosY, Width, Height, 8.f, 0);
+
+			PosY += OffsetY;
+			// Weapon
+			if(CDDP.InventoryClass.default.ItemName != "")
+			{
+				PosX = ScreenPos.X - (tempXL[0] + IconSize*2.5)*0.5;
+				C.DrawColor = WeaponIconColor;
+				C.SetPos(PosX, PosY);
+				WeapIconPath = class'CD_Object'.static.GetWeapDef(KFWeapon(CDDP.Inventory)).static.GetImagePath();
+				WeapIcon = Texture2D(class'CD_Object'.static.SafeLoadObject(WeapIconPath, class'Texture2D'));
+				C.DrawTile(WeapIcon, IconSize*2, IconSize, 0, 0, 256, 128);
+
+				C.SetDrawColor(250, 250, 250, 255);
+				GUIStyle.DrawTextShadow(WeapText, PosX + IconSize*2.5, PosY, 1, Sc);
+				tempXL.Remove(0,1);
+				PosY += tempYL[0];
+				tempYL.Remove(0,1);
+			}
+
+			// Ammo
+			if(bHasAmmo)
+			{
+				if(CDDP.IsLowAmmo())
+				{
+					IconColor = WeaponOverweightIconColor;
+					TextColor = WeaponOverweightIconColor;
+				}
+				else
+				{
+					IconColor = WeaponIconColor;
+					TextColor = MakeColor(250, 250, 250, 255);
+				}
+
+				PosX = ScreenPos.X - (tempXL[0] + IconSize*1.5)*0.5;
+				C.DrawColor = IconColor;
+				C.SetPos(PosX, PosY + IconSize*0.25);
+				if(KFWeapon(CDDP.Inventory) != none)
+				{
+					AmmoIcon = KFWeapon(CDDP.Inventory).FireModeIconPaths[0];
+				}
+				else
+				{
+					AmmoIcon = WeaponAmmoIcon;
+				}
+				C.DrawTile(AmmoIcon, IconSize, IconSize*0.5, 0, 0, 256, 128);
+
+				C.DrawColor = TextColor;
+				GUIStyle.DrawTextShadow(AmmoText, PosX + IconSize*1.5, PosY, 1, Sc);
+				tempXL.Remove(0,1);
+				PosY += tempYL[0];
+				tempYL.Remove(0,1);
+			}
+
+			// Weight
+			PosX = ScreenPos.X - (tempXL[0] + IconSize*1.5)*0.5;
+			bCanCarry = true;
+			if(CDPC.Pawn != none)
+			{
+				KFIM = KFInventoryManager(CDPC.Pawn.InvManager);
+				if(KFIM != none)
+				{
+					WeapClass = class<KFWeapon>(CDDP.InventoryClass);
+					if (KFIM.CanCarryWeapon(WeapClass, CDDP.UpgradeLevel))
+					{
+						if (WeapClass.default.DualClass != None)
+							bCanCarry = !KFIM.ClassIsInInventory(WeapClass.default.DualClass, Inv);
+						else
+							bCanCarry = !KFIM.ClassIsInInventory(WeapClass, Inv);
+					}
+					else
+					{
+						bCanCarry = false;
+					}
+				}
+			}
+
+			C.DrawColor = bCanCarry ? WeaponIconColor : WeaponOverweightIconColor;
+			C.SetPos(PosX, PosY);
+			C.DrawTile(WeaponWeightIcon, IconSize, IconSize, 0, 0, 256, 256);
+
+			C.DrawColor = bCanCarry ? MakeColor(250, 250, 250, 255) : WeaponOverweightIconColor;
+			GUIStyle.DrawTextShadow(WeightText, PosX + IconSize*1.5, PosY, 1, Sc);
+			tempXL.Remove(0,1);
+			PosY += tempYL[0];
+			tempYL.Remove(0,1);
+
+			// Owner
+			if (CDDP.OriginalOwnerPlayerName != "")
+			{
+				C.SetDrawColor(250, 250, 250, 255);
+				Avatar = CDDP.OriginalOwner.Avatar;
+				if( (Avatar != none && Avatar == class'KFScoreBoard'.default.DefaultAvatar) ||
+					(Avatar == none && !CDDP.OriginalOwner.bBot) )
+				{
+					class'KFScoreBoard'.static.CheckAvatar(KFPlayerReplicationInfo(CDDP.OriginalOwner), CDPC);
+				}
+
+				PosX = ScreenPos.X - (tempXL[0] + IconSize*1.5)*0.5;
+				C.SetPos(PosX, PosY);
+				C.DrawTile(Avatar, IconSize, IconSize, 0, 0, CDDP.OriginalOwner.Avatar.SizeX, CDDP.OriginalOwner.Avatar.SizeY);
+				GUIStyle.DrawTextShadow(OwnerText, PosX + IconSize*1.5, PosY, 1, Sc);
 			}
 		}
-
-		CDDPCount++;
-		// We limit this to only 3 total KFDroppedPickup_UM
-		// to limit potential time cost in case a bunch of
-		// dropped pickups are dropped in one place
-		// This usually won't happen, but better safe than sorry
-		if (CDDPCount > 2)
-			break;
 	}
-
-	WeaponPickup = BestCDDP;
-}
+}	
 
 /* ====================================================================
 	 Wave Info
@@ -566,7 +549,6 @@ function DrawWaveInfo()
 {
 	local float RX, RY;
 	local string WaveInfoText;
-	local FontRenderInfo FRI;
 	local float FontScale, TextWidth, TextHeight, TextOffsetY;
 	local Canvas C;
 
@@ -597,21 +579,18 @@ function DrawWaveInfo()
 	}
 	
 	// Setup the font and scaling
-	FRI = C.CreateFontRenderInfo(true);
+	C.Font = GUIStyle.PickFont(FontScale);
 	FontScale = class'KFGame.KFGameEngine'.static.GetKFFontScale() * TextScale;
-	C.Font = class'KFGame.KFGameEngine'.static.GetKFCanvasFont();
 	C.TextSize(WaveInfoText, TextWidth, TextHeight, FontScale, FontScale);
 	TextOffsetY = (WaveInfoSize.Y - TextHeight) * 0.5;
 
 	// Draw the info box
 	C.SetDrawColor(0, 0, 0, 255);
-	C.SetPos(WaveInfoLoc.X, WaveInfoLoc.Y);
-	C.DrawTile(Texture2D'EngineResources.WhiteSquareTexture', WaveInfoSize.X, WaveInfoSize.Y, 0, 0, 32, 32);
+	GUIStyle.DrawRectBox(WaveInfoLoc.X, WaveInfoLoc.Y, WaveInfoSize.X, WaveInfoSize.Y, 8.f, 0);
 	
 	// And the text
 	C.SetDrawColor(255, 255, 255, 255);
-	C.SetPos(WaveInfoLoc.X + (0.04 * WaveInfoSize.X), WaveInfoLoc.Y + TextOffsetY);
-	C.DrawText(WaveInfoText, , FontScale, FontScale, FRI);
+	GUIStyle.DrawTextShadow(WaveInfoText, WaveInfoLoc.X + (0.04 * WaveInfoSize.X), WaveInfoLoc.Y + TextOffsetY, 1, FontScale);
 }
 
 function string GetTimeString(int TotalSeconds)
@@ -734,6 +713,8 @@ defaultproperties
 	ScoreboardClass=class'KFScoreBoard'
 	ConsoleClass=class'CombinedCD2.xUI_Console'
 	BackgroundTexture=Texture2D'EngineResources.WhiteSquareTexture'
+	WeaponAmmoIcon=Texture2D'UI_FireModes_TEX.UI_FireModeSelect_BulletSingle'
+	WeaponWeightIcon=Texture2D'UI_Menus.TraderMenu_SWF_I26'
 
 	MyFontRenderInfo=(bClipText=true)
 	MaxWeaponPickupDist=1000

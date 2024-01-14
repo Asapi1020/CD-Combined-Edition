@@ -7,6 +7,7 @@ var string AmmoText, WeightText;
 var PlayerReplicationInfo OriginalOwner;
 var string OriginalOwnerPlayerName;
 var CD_DroppedPickupTracker PickupTracker;
+var bool bGlowRef;
 
 replication
 {
@@ -52,11 +53,12 @@ unreliable client simulated function SwitchMaterialGlow(bool bGlow)
             if(bGlow)
             {
 				UpdateColor.G=1;
-	        }
-	        else
-	        {
+			}
+			else
+			{
 				UpdateColor.A=0;
-	        }
+			}
+			bGlowRef = bGlow;
 			MeshMIC.SetVectorParameterValue('GlowColor', UpdateColor);
         }
     }
@@ -94,6 +96,7 @@ function UpdateInformation()
 {
 	local KFWeapon KFW;
 
+	AmmoText = "";
 	KFW = KFWeapon(Inventory);
 	if (KFW != None)
 	{
