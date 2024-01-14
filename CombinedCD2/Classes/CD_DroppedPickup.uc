@@ -57,6 +57,10 @@ unreliable client simulated function SwitchMaterialGlow(bool bGlow)
 			else
 			{
 				UpdateColor.A=0;
+				if(bUpgradedPickup)
+				{
+					MeshMIC.SetScalarParameterValue('Upgrade', 0);
+				}
 			}
 			bGlowRef = bGlow;
 			MeshMIC.SetVectorParameterValue('GlowColor', UpdateColor);
