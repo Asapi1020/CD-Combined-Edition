@@ -161,6 +161,7 @@ function RenderComboList(KFGUI_ComboSelector C);
 function Font PickFont(out float Scaler, optional bool bNumbersOnly, optional bool bInfinite)
 {
 	Scaler = GetFontScaler();
+//	AdjustScale(Scaler);
 
 	if (bNumbersOnly)
 		return NumberFont;
@@ -168,6 +169,14 @@ function Font PickFont(out float Scaler, optional bool bNumbersOnly, optional bo
 		return InfiniteFont;
 
 	return MainFont;
+}
+
+function AdjustScale(out float Scaler)
+{
+	local float XL, YL;
+	Canvas.TextSize("ABC", XL, YL, Scaler, Scaler);
+	`log("YL=" $ string(YL) @ "SizeY=" $ string(Canvas.SizeY),true,'HUD');
+	Scaler *= (26/1080) / (YL/HUDOwner.SizeY);
 }
 
 function PickDefaultFontSize(float YRes)

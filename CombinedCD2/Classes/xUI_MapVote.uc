@@ -160,7 +160,7 @@ function DrawMenu()
 	Y = 0.059 * Canvas.ClipY;
 	W = 0.352 * Canvas.ClipX;
 	H = 0.097 * Canvas.ClipY;
-	FontScalar = H / (5.5*YL);
+	FontScalar = (H / (4.5*YL))*FontScalar;
 	Canvas.SetDrawColor(30, 30, 30, 200);
 	Owner.CurrentStyle.DrawRectBox(X, Y, W, H+BorderSize, 8.f, 151);
 	S = class'KFCommon_LocalizedStrings'.static.GetFriendlyMapName(GetCDPC().WorldInfo.GetMapName(true));

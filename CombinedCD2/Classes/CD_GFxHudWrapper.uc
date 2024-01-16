@@ -33,6 +33,8 @@ var float TextScale;
 var string MyStats;
 var float ReceivedTime;
 var int VoteLeftTime;
+var int CurTipIndex;
+var float LastTipReloadTime;
 
 var array<KFPathnode> PathnodeCache;
 
@@ -42,8 +44,10 @@ var localized string WaveInfoTrader;
 var localized string WaveInfoBoss;
 var localized string CDSettingsString;
 var localized string SpectatorsString;
+var localized array<string> CDTips;
 
 const MAX_DRAW_DISTANCE = 15;
+const TIP_REFRESH_DELAY = 5.f;
 
 simulated function PostBeginPlay()
 {
@@ -96,6 +100,8 @@ function PostRender()
 
 		if(MainMenuIsOpen())
 		{
+			DrawTips();
+
 			if(CD_GFxMenu_StartGame(CDPC.MyGFxManager.CurrentMenu) != none)
 			{
 				DrawCDSettings();
@@ -700,12 +706,53 @@ function DrawSpectatorsInfo()
 	DrawTitledInfoBox(SpectatorsString, s, Sc, XL, YL, X, Y, max(6, n));
 }
 
+function DrawTips()
+{
+	local float Sc, XL, YL, X, Y, W;
+
+	Canvas.Font = GUIStyle.PickFont(Sc);
+
+	if(CurTipIndex == INDEX_NONE)
+	{
+		CurTipIndex = 0;
+		LastTipReloadTime = WorldInfo.TimeSeconds;
+	}
+	if(WorldInfo.TimeSeconds - LastTipReloadTime > TIP_REFRESH_DELAY)
+	{
+		CurTipIndex = Rand(CDTips.length);
+		LastTipReloadTime = WorldInfo.TimeSeconds;
+	}
+
+	Canvas.TextSize(CDTips[CurTipIndex], XL, YL, Sc, Sc);
+	X = Canvas.ClipX * 0.333;
+	Y = Canvas.ClipY * 0.92;
+	W = Canvas.ClipX * 0.401;
+	Canvas.SetDrawColor(0, 0, 0, 250);
+	GUIStyle.DrawRectBox(X, Y, W, YL*1.5, 8.f, 0);
+	Canvas.SetDrawColor(250, 250, 250, 255);
+	DrawTextShadowHVCenter(CDTips[CurTipIndex], X, Y+YL*0.25, W, Sc);
+}
+
 function string TestSize(string S)
 {
 	local float XL, YL;
 
 	Canvas.TextSize(S, XL, YL);
 	return S @ string(XL);
+}
+
+function string test()
+{
+	local float XL, YL, Sc;
+	local string s;
+	GUIStyle.PickFont(Sc);
+	s = "Scalar=" $ string(Sc);
+	Canvas.TextSize("ABC", XL, YL, Sc, Sc);
+	s $= "\nYL=" $ string(YL);
+	s $= "\nCanvas.ClipY=" $ string(Canvas.ClipY);
+	s $= "\nHUD.SizeY=" $ string(SizeY);
+	s $= "\nDefaultHeight=" $ string(GUIStyle.DefaultHeight);
+	return s;
 }
 
 defaultproperties
@@ -730,6 +777,7 @@ defaultproperties
 	TextScale=1.35
 
 	VoteLeftTime=-1
+	CurTipIndex=INDEX_NONE
 
 	HUDClass=class'CD_GFxMoviePlayer_HUD'
 }
