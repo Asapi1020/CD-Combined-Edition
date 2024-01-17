@@ -94,7 +94,7 @@ function PostRender()
 			if(CDPC.bShowPathNodes)
 				DrawPathsNumber();
 
-			if( !CDPC.bCinematicMode && CDGRI.bTraderIsOpen )
+			if( !CDPC.bCinematicMode && CDGRI.bTraderIsOpen && CDPC.ShowPickupInfo )
 				DrawWeaponPickupInfo();
 		}
 

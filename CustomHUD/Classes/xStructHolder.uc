@@ -75,9 +75,7 @@ struct CDSettingCond
 {
 	var array<int> MinMM;
 	var array<int> MinWSF;
-	var int MinSCHPF;
-	var int MinFPHPF;
-	var int MinQPHPF;
+	var int MinHPFakes;
 	var float MaxSP;
 	var float MaxSM;
 	var int MinCS;
@@ -86,9 +84,7 @@ struct CDSettingCond
 	{
 		MinMM=(16,24,32,36,40,44)
 		MinWSF=(2,3,5,6,8,9)
-		MinSCHPF=6
-		MinFPHPF=6
-		MinQPHPF=6
+		MinHPFakes=6
 		MaxSP=1.0
 		MaxSM=0.0
 		MinCS=4

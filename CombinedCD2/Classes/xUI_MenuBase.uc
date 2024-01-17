@@ -18,9 +18,24 @@ function CD_GameReplicationInfo GetCDGRI()
 	return CD_GameReplicationInfo(GetCDPC().WorldInfo.GRI);
 }
 
-function DrawControllerInfo(string InfoTitle, string Value, KFGUI_Button LB, KFGUI_Button RB, float YL, float FontScalar, float BorderSize, int ValueDarkness, optional float SizeRate=1.f, optional bool bHeaderLess=false)
+function DrawControllerInfo(string InfoTitle,
+							string Value,
+							KFGUI_Button LB,
+							KFGUI_Button RB,
+							float YL,
+							float FontScalar,
+							float BorderSize,
+							int ValueDarkness,
+							optional float SizeRate=1.f,
+							optional bool bHeaderLess=false,
+							optional bool bDrawCond=true)
 {
 	local float XPos, YPos, BoxW, sc;
+
+	if(!bDrawCond)
+	{
+		return;
+	}
 
 	//	Header
 	if(!bHeaderLess)

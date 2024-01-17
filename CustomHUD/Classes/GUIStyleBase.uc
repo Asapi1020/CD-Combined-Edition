@@ -195,7 +195,11 @@ final function float ScreenScale(float Size, optional float MaxRes=1080.f)
 }
 final function float GetFontScaler(optional float Scaler=0.750f, optional float Min=0.175f, optional float Max=1.0f)
 {
-	return FClamp((HUDOwner.SizeY / 1080.f) * Scaler, Min, Max);
+	if(HUDOwner.SizeY > 1080.f)
+		return Scaler;
+
+	return (HUDOwner.SizeY / 1080.f) * Scaler;
+	//return FClamp((HUDOwner.SizeY / 1080.f) * Scaler, Min, Max);
 }
 final function DrawText(coerce string S)
 {
