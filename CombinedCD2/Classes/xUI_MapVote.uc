@@ -308,8 +308,7 @@ function DrawMenu()
 			if(GetCDPC().ShotsFired > 0)
 			{
 				StatsList.AddLine(HitAccuracyString $ "\n" $
-					class'CD_SpawnManager'.static.FormatFloatToTwoDecimalPlaces(100*(float(GetCDPC().ShotsHit))/(float(GetCDPC().ShotsFired))) $ "%" @
-					"(" $ string(GetCDPC().ShotsHit) $ "/" $ string(GetCDPC().ShotsFired) $ ")");
+					class'CD_SpawnManager'.static.FormatFloatToTwoDecimalPlaces(100*(float(GetCDPC().ShotsHit))/(float(GetCDPC().ShotsFired))) $ "%");
 			}
 			if(GetCDPC().ShotsHit > 0)
 			{
@@ -317,8 +316,7 @@ function DrawMenu()
 				else Headshots = GetCDPC().MatchStats.TotalHeadShots + GetCDPC().MatchStats.GetHeadShotsInWave();
 				
 				StatsList.AddLine(HSAccuracyString $ "\n" $
-					class'CD_SpawnManager'.static.FormatFloatToTwoDecimalPlaces(100*float(Headshots)/float(GetCDPC().ShotsFired)) $ "%" @
-					"(" $ string(Headshots) $ "/" $ string(GetCDPC().ShotsFired) $ ")");
+					class'CD_SpawnManager'.static.FormatFloatToTwoDecimalPlaces(100*float(Headshots)/float(GetCDPC().ShotsFired)) $ "%");
 			}
 			StatsList.AddLine(DamageDealtString $ "\n" $
 				class'CD_Object'.static.AddCommaToInt( GetCDPC().MatchStats.TotalDamageDealt + GetCDPC().MatchStats.GetDamageDealtInWave() ));

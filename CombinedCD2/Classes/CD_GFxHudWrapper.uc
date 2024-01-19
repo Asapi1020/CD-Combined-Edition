@@ -33,7 +33,8 @@ var float TextScale;
 var string MyStats;
 var float ReceivedTime;
 var int VoteLeftTime;
-var int CurTipIndex;
+var array<string> DefaultCDTips;
+var string CurTip;
 var float LastTipReloadTime;
 
 var array<KFPathnode> PathnodeCache;
@@ -712,25 +713,25 @@ function DrawTips()
 
 	Canvas.Font = GUIStyle.PickFont(Sc);
 
-	if(CurTipIndex == INDEX_NONE)
+	if(CurTip == "")
 	{
-		CurTipIndex = 0;
+		CurTip = CDTips.length > 0 ? CDTips[0] : DefaultCDTips[0];
 		LastTipReloadTime = WorldInfo.TimeSeconds;
 	}
 	if(WorldInfo.TimeSeconds - LastTipReloadTime > TIP_REFRESH_DELAY)
 	{
-		CurTipIndex = Rand(CDTips.length);
+		CurTip = CDTips.length>0 ? CDTips[Rand(CDTips.length)] : DefaultCDTips[Rand(DefaultCDTips.length)];
 		LastTipReloadTime = WorldInfo.TimeSeconds;
 	}
 
-	Canvas.TextSize(CDTips[CurTipIndex], XL, YL, Sc, Sc);
+	Canvas.TextSize(CurTip, XL, YL, Sc, Sc);
 	X = Canvas.ClipX * 0.333;
 	Y = Canvas.ClipY * 0.92;
 	W = Canvas.ClipX * 0.401;
 	Canvas.SetDrawColor(0, 0, 0, 250);
 	GUIStyle.DrawRectBox(X, Y, W, YL*1.5, 8.f, 0);
 	Canvas.SetDrawColor(250, 250, 250, 255);
-	DrawTextShadowHVCenter(CDTips[CurTipIndex], X, Y+YL*0.25, W, Sc);
+	DrawTextShadowHVCenter(CurTip, X, Y+YL*0.25, W, Sc);
 }
 
 function string TestSize(string S)
@@ -777,7 +778,60 @@ defaultproperties
 	TextScale=1.35
 
 	VoteLeftTime=-1
-	CurTipIndex=INDEX_NONE
 
 	HUDClass=class'CD_GFxMoviePlayer_HUD'
+
+	DefaultCDTips.Add("Type '!cdh' to see help.")
+	DefaultCDTips.Add("'!cdpi' displays players' skills and weapons info")
+	DefaultCDTips.Add("'!cdinfo' displays CD game settings")
+	DefaultCDTips.Add("(e.g)'!cdsca asp_v1 wave10 wsf12' displays spawn cycle analysis")
+	DefaultCDTips.Add("'!cdscp' displays the list of spawn cycle presets")
+	DefaultCDTips.Add("'!cds' displays players' stats")
+	DefaultCDTips.Add("'!rpwinfo' displays restrictions info")
+	DefaultCDTips.Add("'!cdal' displays your authority level")
+	DefaultCDTips.Add("'!cdpt' pause trader time countdown")
+	DefaultCDTips.Add("'!cdupt' unpause trader time countdown")
+	DefaultCDTips.Add("Admin can skip trader by '!cdst'")
+	DefaultCDTips.Add("Type '!cdr' to ready up.")
+	DefaultCDTips.Add("Type '!cdur' to cancell ready")
+	DefaultCDTips.Add("'!cdahpf': You can controls all zeds HP Fakes.")
+	DefaultCDTips.Add("'!cdsr': You can switch roles between spectator and active player")
+	DefaultCDTips.Add("'!cdfs': You can buy ammo for dropped spare weapons")
+	DefaultCDTips.Add("'!cdfs fal': Commando can fill everyone's spare Fal")
+	DefaultCDTips.Add("'!tdd' toggles if you disable to pickup dual pistols")
+	DefaultCDTips.Add("'!cdmuc': Max Upgrade Count")
+	DefaultCDTips.Add("'!cdaoc': Anti Over Capacity")
+	DefaultCDTips.Add("'!cdat': You can automatically purchase registered loadout")
+	DefaultCDTips.Add("Type '!ot' to open the trader menu")
+	DefaultCDTips.Add("'!cdm' or console command 'ClientOption' opens the client menu")
+	DefaultCDTips.Add("'!cdam' or console command 'AdminMenu' opens the Admin menu")
+	DefaultCDTips.Add("'!cdwho' opens the participants menu.")
+	DefaultCDTips.Add("'!cdms', '!mv' or '!mr' opens the post game menu.")
+	DefaultCDTips.Add("Console Command 'SwitchSkill' literally switch your skills")
+	DefaultCDTips.Add("Restriction system disables to choose certain items")
+	DefaultCDTips.Add("Perk and skill switches are unlimited during trader time")
+	DefaultCDTips.Add("Flash light battery is infinite.")
+	DefaultCDTips.Add("You receive 3 times amount of Starting Dosh for late arrival")
+	DefaultCDTips.Add("You drop all weapons on death")
+	DefaultCDTips.Add("You can move quite fast with equipping a knife during trader time")
+	DefaultCDTips.Add("AlbinoAlphas=False: Rioters are replaced with Alpha Clots")
+	DefaultCDTips.Add("AlbinoCrawlers=False: Elite Crawlers are replaced with Crawlers")
+	DefaultCDTips.Add("AlbinoGorefasts=False: Gorefiends are replaced with Gorefasts")
+	DefaultCDTips.Add("Fakes value means players num. HPFakes=6 means 6PHP")
+	DefaultCDTips.Add("Boss=CY: You can choose cyst as a boss.")
+	DefaultCDTips.Add("CohortSize is the maximum number of zeds to spawn at one time.")
+	DefaultCDTips.Add("CountHeadshotsPerPellet defines the way to count headshot")
+	DefaultCDTips.Add("FleshpoundRageSpawns=True means vanilla rage spawn chance")
+	DefaultCDTips.Add("MaxMonsters is the maximum number of zeds allowed on the map at one time.")
+	DefaultCDTips.Add("SpawnMod modifies the spawn interval. 0 does nothing.")
+	DefaultCDTips.Add("SpawnPoll is the spawn interval (seconds)")
+	DefaultCDTips.Add("ZedsTeleportCloser=False disables zeds teleport.")
+	DefaultCDTips.Add("ZTSpawnSlowdown defines zed time spawn interval if ZTSpawnMode=clockwork")
+	DefaultCDTips.Add("No Racists Allowed.")
+	DefaultCDTips.Add("A god cycle 'nam_pro_v5' suits for solo, duo or beginner's play")
+	DefaultCDTips.Add("'bl_light' or 'su_v1' is recommended as light cycle.")
+	DefaultCDTips.Add("'bl_v2' and 'ts_mig_v1' are very standard cycles")
+	DefaultCDTips.Add("'osffi_v1', 'nt_v2' and 'dtf_pm' are difficult cycles")
+	DefaultCDTips.Add("'ts_mig_v2', 'doom_v2_plus_rmk' and 'asp_v2' are quite difficult")
+	DefaultCDTips.Add("You should play 'ts_mig_v3' or 'asp_v3' with well trained veteran players")
 }
