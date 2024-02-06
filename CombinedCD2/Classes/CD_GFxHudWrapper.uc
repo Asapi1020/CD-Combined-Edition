@@ -99,10 +99,11 @@ function PostRender()
 				DrawWeaponPickupInfo();
 		}
 
-		if(MainMenuIsOpen())
-		{
+		if(Scoreboard.bVisible || MainMenuIsOpen())
 			DrawTips();
 
+		if(MainMenuIsOpen())
+		{
 			if(CD_GFxMenu_StartGame(CDPC.MyGFxManager.CurrentMenu) != none)
 			{
 				DrawCDSettings();
