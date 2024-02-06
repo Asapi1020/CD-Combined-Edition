@@ -2,16 +2,6 @@ class ts_mig_v3_plus
 	extends CD_SpawnCycle_PresetBase
 	implements (CD_SpawnCycle_Preset);
 
-function GetShortSpawnCycleDefs( out array<string> sink )
-{
-	sink.length = 0;
-}
-
-function GetNormalSpawnCycleDefs( out array<string> sink )
-{
-	sink.length = 0;
-}
-
 function GetLongSpawnCycleDefs( out array<string> sink )
 {
 	local int i;

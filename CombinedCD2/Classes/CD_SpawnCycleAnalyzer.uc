@@ -45,7 +45,6 @@ function SetSCAOption(array<string> options, out string cycle, out int wave, out
 
 function TrySCACore(string CycleName, int TargetWave, int TargetWSF, optional bool bBrief)
 {
-	local int i;
 	local CD_SpawnCycle_Preset SCP;
 
 	if(!(SpawnCycleCatalog.ExistThisCycle(CycleName, SCP)))
@@ -54,14 +53,21 @@ function TrySCACore(string CycleName, int TargetWave, int TargetWSF, optional bo
 		return;
 	}
 
+	AnalyzeSpawnCycle(SCP, TargetWave, TargetWSF, GameLength);
+	PrintAnalisis(CycleName, TargetWave, TargetWSF, bBrief);
+}
+
+function AnalyzeSpawnCycle(CD_SpawnCycle_Preset SCP, int TargetWave, int TargetWSF, int GL)
+{
+	local int i;
+
 	Count.length=0;
 	Count.length=default.CDZedClass.Length;
 	if(TargetWave > 0) CycleAnalyzePerWave(SCP, TargetWave-1, TargetWSF);
 	else if(TargetWave == 0)
 	{
-		for(i=0; i<((GameLength*3)+4); i++) CycleAnalyzePerWave(SCP, i, TargetWSF);
+		for(i=0; i<((GL*3)+4); i++) CycleAnalyzePerWave(SCP, i, TargetWSF);
 	}
-	PrintAnalisis(CycleName, TargetWave, TargetWSF, bBrief);
 }
 
 function PrintAnalisis(string Cycle, int Wave, int WSF, optional bool bBrief)
@@ -520,19 +526,6 @@ function string SpawnOrderOverview(string CycleName)
 	return Result;
 }
 
-function int GetNumber(string s, out string ZedName)
-{
-	local int i, UnicodePoint;
-
-	for(i=0; i<Len(s); i++)
-	{
-		UnicodePoint = Asc( Mid( s, i, 1 ) );
-		if ( !( 48 <= UnicodePoint && UnicodePoint <= 57 ) ) break;
-	}
-	ZedName = Mid(s,i);
-	return (i == 0) ? 0 : int(Mid(s, 0, i));
-}
-
 function bool HandleZedMod(out string ZedName, string Key)
 {
 	local int KeyLen;
@@ -564,6 +557,28 @@ function int GetWaveSize(int WaveIdx, int PlayerCount)
 	DifficultyMod = DMod[GameDifficulty];
 
 	return Round(BaseZedNum * DifficultyMod * WaveSizeMulti);
+}
+
+function int GetNumber(string s, out string ZedName)
+{
+	local int i, UnicodePoint;
+
+	for(i=0; i<Len(s); i++)
+	{
+		UnicodePoint = Asc( Mid( s, i, 1 ) );
+		if ( !( 48 <= UnicodePoint && UnicodePoint <= 57 ) ) break;
+	}
+	ZedName = Mid(s,i);
+	return (i == 0) ? 0 : int(Mid(s, 0, i));
+}
+
+function SyncResults(CD_PlayerController CDPC)
+{
+	local int i;
+	for(i=0; i<Count.length; i++)
+	{
+		CDPC.SyncAnalysis(i, Count[i]);
+	}
 }
 
 defaultproperties

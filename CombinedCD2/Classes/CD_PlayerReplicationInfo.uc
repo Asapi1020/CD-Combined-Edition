@@ -3,14 +3,14 @@ class CD_PlayerReplicationInfo extends KFPlayerReplicationInfo;
 var int DmgD;
 var int AuthorityLevel;
 var bool bIsReadyForNextWave;
-var bool bAllReceived;
-var array<string> CycleNames;
+//var bool bAllReceived;
+//var array<string> CycleNames;
 var float PlayTimeSeconds;
 
 replication
 {
 	if(bNetDirty)
-		DmgD, AuthorityLevel, bIsReadyForNextWave, bAllReceived;
+		DmgD, AuthorityLevel, bIsReadyForNextWave/*, bAllReceived*/;
 }
 
 defaultproperties
@@ -18,7 +18,7 @@ defaultproperties
 	bIsReadyForNextWave=false
 	AuthorityLevel=0
 }
-
+/*
 reliable client simulated function ReceiveCycle(int index, string CycleName)
 {
     if(CycleNames.length <= index)
@@ -26,3 +26,4 @@ reliable client simulated function ReceiveCycle(int index, string CycleName)
 
     CycleNames[index] = CycleName;
 }
+*/
