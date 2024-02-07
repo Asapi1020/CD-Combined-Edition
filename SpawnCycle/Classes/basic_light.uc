@@ -2,29 +2,6 @@ class basic_light
 	extends CD_SpawnCycle_PresetBase
 	implements (CD_SpawnCycle_Preset);
 
-// TODO needs overhaul, see basic_moderate for a template
-
-function GetShortSpawnCycleDefs( out array<string> sink )
-{
-	GetLongSpawnCycleDefs( sink ); 
-
-	// keep waves 1, 4, 7, 10 
-	sink.Remove(1, 2); 
-	sink.Remove(2, 2); 
-	sink.remove(3, 2); 
-	
-	sink.length = 4;
-}
-
-function GetNormalSpawnCycleDefs( out array<string> sink )
-{
-	GetLongSpawnCycleDefs(sink);
-    sink.Remove(2, 1);
-    sink.Remove(3, 1);
-    sink.Remove(5, 1);
-    sink.Length = 7;
-}
-
 function GetLongSpawnCycleDefs( out array<string> sink )
 {
 	local int i;

@@ -2,6 +2,8 @@ class CD_SpawnCycleAnalyzer extends Object
 	within CD_Survival
 	DependsOn(CD_Survival);
 
+`include(CD_Log.uci)
+
 var array< class<KFPawn_Monster> > CDZedClass;
 var array<int> Count;
 var array<float> WSMulti, DMod;
@@ -43,7 +45,6 @@ function SetSCAOption(array<string> options, out string cycle, out int wave, out
 
 function TrySCACore(string CycleName, int TargetWave, int TargetWSF, optional bool bBrief)
 {
-	local int i;
 	local CD_SpawnCycle_Preset SCP;
 
 	if(!(SpawnCycleCatalog.ExistThisCycle(CycleName, SCP)))
@@ -52,14 +53,21 @@ function TrySCACore(string CycleName, int TargetWave, int TargetWSF, optional bo
 		return;
 	}
 
+	AnalyzeSpawnCycle(SCP, TargetWave, TargetWSF, GameLength);
+	PrintAnalisis(CycleName, TargetWave, TargetWSF, bBrief);
+}
+
+function AnalyzeSpawnCycle(CD_SpawnCycle_Preset SCP, int TargetWave, int TargetWSF, int GL)
+{
+	local int i;
+
 	Count.length=0;
 	Count.length=default.CDZedClass.Length;
 	if(TargetWave > 0) CycleAnalyzePerWave(SCP, TargetWave-1, TargetWSF);
 	else if(TargetWave == 0)
 	{
-		for(i=0; i<((GameLength*3)+4); i++) CycleAnalyzePerWave(SCP, i, TargetWSF);
+		for(i=0; i<((GL*3)+4); i++) CycleAnalyzePerWave(SCP, i, TargetWSF);
 	}
-	PrintAnalisis(CycleName, TargetWave, TargetWSF, bBrief);
 }
 
 function PrintAnalisis(string Cycle, int Wave, int WSF, optional bool bBrief)
@@ -139,32 +147,16 @@ function PrintAnalisis(string Cycle, int Wave, int WSF, optional bool bBrief)
 	}
 }
 
-function CycleAnalyzePerWave(CD_SpawnCycle_Preset SCP, int WaveIdx, int PlayerCount)
+function AnalyzeDef(string Def, int WaveSize)
 {
-	local int WaveSize, i, j, k, ElemCount, TotalCount;
-	local array<string> CycleDefs, SquadDefs, Group;
-	local string TargetDef, ZedName;
+	local int i, j, k, ElemCount, TotalCount;
+	local array<string> SquadDefs, Group;
+	local string ZedName;
 	local bool bSpecial, bRage;
 	local EAIType ZedType;
 	local class<KFPawn_Monster> ZedClass;
 
-	WaveSize = GetWaveSize(WaveIdx, PlayerCount);
-
-	switch( GameLength )
-	{
-		case GL_Short:  SCP.GetShortSpawnCycleDefs( CycleDefs );  break;
-		case GL_Normal: SCP.GetNormalSpawnCycleDefs( CycleDefs ); break;
-		case GL_Long:   SCP.GetLongSpawnCycleDefs( CycleDefs );   break;
-	};
-
-	if ( 0 == CycleDefs.length )
-	{
-		BroadcastLocalizedEcho("<local>CD_SpawnCycleAnalyzer.LengthMissMatchMsg</local>");
-		return;
-	}
-
-	TargetDef = CycleDefs[WaveIdx];
-	ParseStringIntoArray(TargetDef, SquadDefs, ",", true);
+	ParseStringIntoArray(Def, SquadDefs, ",", true);
 	TotalCount = 0;
 
 	do
@@ -199,6 +191,266 @@ function CycleAnalyzePerWave(CD_SpawnCycle_Preset SCP, int WaveIdx, int PlayerCo
 			}
 		}
 	}until(TotalCount >= WaveSize);
+}
+
+function CycleAnalyzePerWave(CD_SpawnCycle_Preset SCP, int WaveIdx, int PlayerCount)
+{
+	local int WaveSize;
+	local array<string> CycleDefs;
+
+	WaveSize = GetWaveSize(WaveIdx, PlayerCount);
+
+	switch( GameLength )
+	{
+		case GL_Short:  SCP.GetShortSpawnCycleDefs( CycleDefs );  break;
+		case GL_Normal: SCP.GetNormalSpawnCycleDefs( CycleDefs ); break;
+		case GL_Long:   SCP.GetLongSpawnCycleDefs( CycleDefs );   break;
+	};
+
+	if ( 0 == CycleDefs.length )
+	{
+		BroadcastLocalizedEcho("<local>CD_SpawnCycleAnalyzer.LengthMissMatchMsg</local>");
+		return;
+	}
+
+	AnalyzeDef(CycleDefs[WaveIdx], WaveSize);
+}
+
+function VanillaAnalyze(int WaveIdx, int PlayerCount, optional int TryNum=1)
+{
+	local int i, j;
+	local float TimeSeconds;
+
+	TryNum = Max(1, TryNum);
+
+	Count.length=0;
+	Count.length=default.CDZedClass.Length;
+	TimeSeconds = WorldInfo.TimeSeconds;
+
+	for(i=0; i<TryNum; i++)
+	{
+		if(WaveIdx > 0)
+		{
+			VanillaAnalyzePerWave(WaveIdx-1, PlayerCount);
+		}
+		else if(WaveIdx == 0)
+		{
+			for(j=0; j<((GameLength*3)+4); j++)
+			{
+				VanillaAnalyzePerWave(j, PlayerCount);
+			}
+		}
+		`cdlog("Analyzing..." @ string(100*(float(i)/float(TryNum))) $ "%");
+	}
+	TimeSeconds = WorldInfo.TimeSeconds - TimeSeconds;
+	`cdlog("Analysis took" @ string(TimeSeconds) $ "s.");
+
+	PrintAnalisis("vanilla (" $ string(TryNum) $ ")", WaveIdx, PlayerCount, false);
+}
+
+function VanillaAnalyzePerWave(int WaveIdx, int PlayerCount)
+{
+	local int WaveSize;
+	local string VanillaCycle;
+
+	VanillaCycle = GetVanillaCycle(WaveIdx, PlayerCount, WaveSize);
+	AnalyzeDef(VanillaCycle, WaveSize);
+}
+
+function string GetVanillaCycle(int WaveIdx, int PlayerCount, out int WaveSize)
+{
+	local int LeftSize, NumCycles, NumSpecialRecycles, TotalCount, TotalZedsInSquads;
+	local int i, j, RandNum;
+	local bool bNeedsSpecial, bForceSpecial;
+	local KFAIWaveInfo WaveInfo;
+	local array<KFAISpawnSquad> AvailableSquads;
+	local array< class<KFPawn_Monster> > NewSquad, SpecialSquad;
+	local array<string> Squads;
+	local string Cycle;
+
+	// Setup Wave Info
+	WaveSize = GetWaveSize(WaveIdx, PlayerCount);
+	TotalCount = 0;
+	NumCycles = 0;
+	WaveInfo = class'KFGameInfo_Survival'.default.SpawnManagerClasses[GameLength].default.DifficultyWaveSettings[GameDifficulty].Waves[WaveIdx-1];
+
+	do
+	{
+		if(AvailableSquads.length == 0)
+		{
+			// Call AI Wave Info
+			bNeedsSpecial = class'KFGame.KFAISpawnManager'.default.RecycleSpecialSquad[GameDifficulty] && NumCycles % 2 == 1;
+			NumCycles++;
+			WaveInfo.GetNewSquadList(AvailableSquads);
+			if(bNeedsSpecial)
+			{
+				WaveInfo.GetSpecialSquad(AvailableSquads);
+				for(i=0; i<AvailableSquads.length; i++)
+				{
+					for(j=0; j<AvailableSquads[i].MonsterList.length; j++)
+					{
+						TotalZedsInSquads += AvailableSquads[i].MonsterList[j].Num;
+					}
+				}
+
+				if(WaveSize < TotalZedsInSquads)
+				{
+					bForceSpecial = true;
+				}
+				++NumSpecialRecycles;
+			}
+		}
+
+		// Setup Squad by random choosing
+		RandNum = Rand(AvailableSquads.length);
+		if(bForceSpecial && RandNum == (AvailableSquads.Length - 1))
+		{
+			bForceSpecial = false;
+		}
+
+		GetListFromSquad(RandNum, AvailableSquads, NewSquad);
+
+		// Special Squad Chance
+		if(bForceSpecial)
+		{
+			GetListFromSquad(AvailableSquads.Length-1, AvailableSquads, SpecialSquad);
+			if(TotalCount + NewSquad.length + SpecialSquad.length > WaveSize)
+			{
+				NewSquad = SpecialSquad;
+				RandNum = AvailableSquads.Length-1;
+				bForceSpecial = false;
+			}
+		}
+
+		AvailableSquads.Remove(RandNum, 1);
+		LeftSize = WaveSize - TotalCount;
+
+		if(LeftSize < NewSquad.length)
+		{
+			NewSquad.length = LeftSize;
+		}
+
+		Squads.AddItem(GetSquadDefFromPawn(NewSquad));
+		TotalCount += NewSquad.length;
+	}until(TotalCount >= WaveSize);
+
+	JoinArray(Squads, Cycle, ",");
+	//`cdlog("Cycle=" $ Cycle);
+	return Cycle;
+}
+
+function GetListFromSquad(byte SquadIdx, out array<KFAISpawnSquad> SquadsList, out array< class<KFPawn_Monster> > PawnList)
+{
+	local KFAISpawnSquad Squad;
+	local int i, j;
+	local array< class<KFPawn_Monster> > TempList;
+
+	// Read squad as Pawn Class
+	Squad = SquadsList[SquadIdx];
+
+	for(i=0; i<Squad.MonsterList.length; i++)
+	{
+		for(j=0; j<Squad.MonsterList[i].Num; j++)
+		{
+			if( Squad.MonsterList[i].CustomClass != None )
+			{
+				TempList.AddItem(Squad.MonsterList[i].CustomClass);
+			}
+			else
+			{
+				TempList.AddItem(GetAISpawnType(Squad.MonsterList[i].Type));
+			}
+		}
+	}
+
+	// Shuffle
+	while(TempList.length > 0)
+	{
+		i = Rand(TempList.length);
+		PawnList.AddItem(TempList[i]);
+		TempList.Remove(i, 1);
+	}
+}
+
+function string GetSquadDefFromPawn(out array< class<KFPawn_Monster> > Squad)
+{
+	local int i, RandNum, GroupSize;
+	local string ZedCode, Def;
+	local array<string> Elements;
+
+	for(i=0; i<Squad.length; i++)
+	{
+		ZedCode = "";
+		if( Squad[i].default.ElitePawnClass.length > 0 && FRand() < Squad[i].default.DifficultySettings.default.ChanceToSpawnAsSpecial[GameDifficulty])
+		{
+			if(Squad[i].default.ElitePawnClass.length == 1)
+			{
+				ZedCode = "*";
+			}
+			else
+			{
+				RandNum = Rand(Squad[i].default.ElitePawnClass.length);
+				Squad[i] = Squad[i].default.ElitePawnClass[RandNum];
+			}
+		}
+		ZedCode = class'CD_ZedNameUtils'.static.GetCycleNameFromOGClass(Squad[i]) $ ZedCode;
+		Elements.AddItem(ZedCode);
+	}
+
+	GroupSize = 1;
+	for(i=Elements.length-1; i>=0; i--)
+	{
+		if(i != 0 && Elements[i] ~= Elements[i-1])
+		{
+			++GroupSize;
+		}
+		else
+		{
+			Elements[i] = string(GroupSize) $ Elements[i];
+			if(GroupSize > 1)
+			{
+				Elements.Remove(i+1, GroupSize-1);
+				GroupSize = 1;
+			}
+		}
+	}
+
+	JoinArray(Elements, Def, "_");
+	//`cdlog("Squad=" $ Def);
+	return Def;
+}
+
+function GetVanillaCycleDefs(byte GL, byte Dif, byte Wave, out array<string> result)
+{
+	local KFAIWaveInfo WaveInfo;
+
+	WaveInfo = class'KFGameInfo_Survival'.default.SpawnManagerClasses[GL].default.DifficultyWaveSettings[Dif].Waves[Wave-1];
+	result.length = 2;
+	result[0] = GetCycleDef(WaveInfo.Squads);
+	result[1] = GetCycleDef(WaveInfo.SpecialSquads);
+}
+
+function string GetCycleDef(array<KFAISpawnSquad> SpawnSquads)
+{
+	local int i, j;
+	local AISquadElement Elem;
+	local class<KFPawn_Monster> ZedClass;
+	local array<string> Elems, Squads;
+	local string TempString;
+
+	for(i=0; i<SpawnSquads.length; i++)
+	{
+		for(j=0; j<SpawnSquads[i].MonsterList.length; j++)
+		{
+			Elem = SpawnSquads[i].MonsterList[j];
+			ZedClass = Elem.CustomClass == none ? GetAISpawnType(Elem.Type) : Elem.CustomClass;
+			Elems.AddItem(string(Elem.Num) $ "-" $ class'CD_ZedNameUtils'.static.GetCycleNameFromOGClass(ZedClass));
+		}
+		JoinArray(Elems, TempString, "_");
+		Squads.AddItem(TempString);
+	}
+	JoinArray(Squads, TempString, ",");
+	return TempString;
 }
 
 function string SpawnOrderOverview(string CycleName)
@@ -274,19 +526,6 @@ function string SpawnOrderOverview(string CycleName)
 	return Result;
 }
 
-function int GetNumber(string s, out string ZedName)
-{
-	local int i, UnicodePoint;
-
-	for(i=0; i<Len(s); i++)
-	{
-		UnicodePoint = Asc( Mid( s, i, 1 ) );
-		if ( !( 48 <= UnicodePoint && UnicodePoint <= 57 ) ) break;
-	}
-	ZedName = Mid(s,i);
-	return (i == 0) ? 0 : int(Mid(s, 0, i));
-}
-
 function bool HandleZedMod(out string ZedName, string Key)
 {
 	local int KeyLen;
@@ -318,6 +557,28 @@ function int GetWaveSize(int WaveIdx, int PlayerCount)
 	DifficultyMod = DMod[GameDifficulty];
 
 	return Round(BaseZedNum * DifficultyMod * WaveSizeMulti);
+}
+
+function int GetNumber(string s, out string ZedName)
+{
+	local int i, UnicodePoint;
+
+	for(i=0; i<Len(s); i++)
+	{
+		UnicodePoint = Asc( Mid( s, i, 1 ) );
+		if ( !( 48 <= UnicodePoint && UnicodePoint <= 57 ) ) break;
+	}
+	ZedName = Mid(s,i);
+	return (i == 0) ? 0 : int(Mid(s, 0, i));
+}
+
+function SyncResults(CD_PlayerController CDPC)
+{
+	local int i;
+	for(i=0; i<Count.length; i++)
+	{
+		CDPC.SyncAnalysis(i, Count[i]);
+	}
 }
 
 defaultproperties

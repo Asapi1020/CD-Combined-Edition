@@ -16,7 +16,7 @@ protected function string SanitizeIndicator( const string Raw )
 {
 	if ( Locs(Raw) == "max" )
 	{
-		return string( 2147483647 );
+		return string( MaxInt );
 	}
 
 	if ( Locs(Raw) == "unmodded" )
@@ -24,7 +24,7 @@ protected function string SanitizeIndicator( const string Raw )
 		return string( 0 );
 	}
 
-	return string( Clamp( int(Raw), 0, 2147483647 ) );
+	return string( Clamp( int(Raw), 0, MaxInt ) );
 }
 /*
 function bool GetChatWriteCommand( out StructChatCommand scc )

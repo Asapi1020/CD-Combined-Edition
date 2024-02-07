@@ -58,5 +58,35 @@ struct LoadoutInfo
 struct CDInfo
 {
 	var string SC, MM, CS, SP, WSF, SM, THPF, QPHPF, FPHPF, SCHPF;
+	var string ZTSM, ZTSSD, AA, AC, AG, DR, DS, FPRS, SWFA, SWFAR, SWFG, ZTC;
 	var bool CHSPP;
+};
+
+struct MatchInfo
+{
+	var string TimeStamp;
+	var int PlayerNum;
+	var CDInfo CI;
+	var int ResultState;
+	var byte DefeatWave;
+};
+
+struct CDSettingCond
+{
+	var array<int> MinMM;
+	var array<int> MinWSF;
+	var int MinHPFakes;
+	var float MaxSP;
+	var float MaxSM;
+	var int MinCS;
+
+	structdefaultproperties
+	{
+		MinMM=(16,24,32,36,40,44)
+		MinWSF=(2,3,5,6,8,9)
+		MinHPFakes=6
+		MaxSP=1.0
+		MaxSM=0.0
+		MinCS=4
+	}
 };

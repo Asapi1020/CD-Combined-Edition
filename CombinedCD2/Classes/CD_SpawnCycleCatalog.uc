@@ -10,14 +10,16 @@ class CD_SpawnCycleCatalog extends Object;
 
 `include(CD_Log.uci)
 
+struct SpawnCycleOverview
+{
+	var string CycleName, Author, PubDate, FinalLargeRatio, bQP, bAlbino;
+};
+
 var private array< class< KFPawn_Monster > > AIClassList;
-
 var array<CD_SpawnCycle_Preset> SpawnCyclePresetList;
-
+var array<SpawnCycleOverview> CycleOverviews;
 var private CD_ConsolePrinter CDCP;
-
 var private bool EnableLogging;
-
 var bool bNoShooter;
 
 function Initialize( const out array< class< KFPawn_Monster > > NewAIClassList, CD_ConsolePrinter NewCDCP, const bool NewEnableLogging )
@@ -217,7 +219,6 @@ private function InitSpawnCyclePresetList()
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.albino_heavy');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.basic_light');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.basic_moderate');
-
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.basic_heavy');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.dtf_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.nam_poundemonium');
@@ -243,7 +244,7 @@ private function InitSpawnCyclePresetList()
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ts_lk313_stg');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.doom_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.doom_v2');
-		SpawnCyclePresetList.AddItem(new class'SpawnCycle.doom_v2_plus');	
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.doom_v2_plus');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.doom_v2_short');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.grand_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.bl_v1');
@@ -270,16 +271,36 @@ private function InitSpawnCyclePresetList()
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.poopro_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.dtf_pm');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.dtf_pm_plus');
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.dtf_pm_plus_fx');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.who_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.who_v2');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ebr_hh_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.nt_v2');
-
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.jhhc_v1');
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.jhscc_v1');
+/*
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.gso_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.aio_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.aio_v2');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.gg_v1');
+*/
 	}
+}
+
+function ClientSetup(CD_PlayerController CDPC)
+{
+	//local CD_SpawnCycle_Preset SCP;
+	InitSpawnCyclePresetList();
+	/*
+	CycleOverviews.length = 0;
+	foreach SpawnCyclePresetList(SCP)
+	{
+		CycleOverviews.CycleName = SCP.GetName();
+		CycleOverviews.Author = SCP.GetAuthor();
+		CycleOverviews.PubDate = SCP.GetDate();
+		CDPC.AnalyzeSpawnCycle(SCP,4,12,0);
+	}
+	*/
 }
 
 /*

@@ -153,6 +153,7 @@ function DrawTitledInfoBox(string title, string body, float Sc, float XL, float 
 	a = YL/2;
 	h = YL*(LineNum+1);
 	Y = Yb - h;
+
 	Canvas.SetDrawColor(0, 0, 0, 250);
 	GUIStyle.DrawRectBox(X-a, Y-a, XL+YL, h, 8.f, 152);
 	Canvas.SetDrawColor(250, 250, 250, 255);

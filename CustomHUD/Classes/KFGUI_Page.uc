@@ -78,9 +78,12 @@ function DrawCategolyZone(string Title, float XPos, float YPos, float ZoneWidth,
 	Owner.CurrentStyle.DrawRectBox(XPos, YPos+YL+BorderSize, ZoneWidth, ZoneHight+BorderSize, 8.f, 152);
 }
 
-function DrawBoxDescription(string Title, KFGUI_CheckBox C, float RightEnd)
+function DrawBoxDescription(string Title, KFGUI_CheckBox C, float RightEnd, optional bool bDrawCond=true)
 {
 	local float YL, Width, Height, FontScalar, XPos, YPos;
+
+	if(!bDrawCond)
+		return;
 
 	Width = RightEnd*CompPos[2]+CompPos[0]-C.CompPos[0]-C.CompPos[2];
 	Height = C.CompPos[3];
@@ -91,9 +94,12 @@ function DrawBoxDescription(string Title, KFGUI_CheckBox C, float RightEnd)
 	DrawTextShadowHLeftVCenter(Title, XPos+Width*0.1, YPos, FontScalar);
 }
 
-function DrawBoxDescriptionReverse(string Title, KFGUI_CheckBox C, float LeftEnd)
+function DrawBoxDescriptionReverse(string Title, KFGUI_CheckBox C, float LeftEnd, optional bool bDrawCond=true)
 {
 	local float YL, Width, Height, FontScalar, XPos, YPos;
+
+	if(!bDrawCond)
+		return;
 
 	Width = C.CompPos[0]-LeftEnd*CompPos[2]-CompPos[0];
 	Height = C.CompPos[3];

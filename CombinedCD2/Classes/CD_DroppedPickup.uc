@@ -7,11 +7,13 @@ var string AmmoText, WeightText;
 var PlayerReplicationInfo OriginalOwner;
 var string OriginalOwnerPlayerName;
 var CD_DroppedPickupTracker PickupTracker;
+var bool bGlowRef;
+var string IconPath;
 
 replication
 {
 	if (bNetDirty)
-		MagazineAmmo,SpareAmmo,UpgradeLevel,OriginalOwnerPlayerName;
+		MagazineAmmo,SpareAmmo,UpgradeLevel,OriginalOwnerPlayerName,OriginalOwner,IconPath;
 }
 
 /** Overridden to update weapon information */
@@ -27,6 +29,7 @@ simulated function SetPickupMesh(PrimitiveComponent NewPickupMesh)
 		SetTimer(0.2, false, nameof(UpdateInformation));
 		
 		OriginalOwner = PickupTracker.RegisterDroppedPickup(Self, PlayerController(Instigator.Controller));
+		IconPath = class'CD_Object'.static.GetWeapDef(KFWeapon(Inventory)).static.GetImagePath();
 
 		// Not in solo unless debug is enabled
 		if (WorldInfo.NetMode != NM_Standalone || (CD_Survival(PickupTracker.Owner) != None))
@@ -52,11 +55,16 @@ unreliable client simulated function SwitchMaterialGlow(bool bGlow)
             if(bGlow)
             {
 				UpdateColor.G=1;
-	        }
-	        else
-	        {
+			}
+			else
+			{
 				UpdateColor.A=0;
-	        }
+				if(bUpgradedPickup)
+				{
+					MeshMIC.SetScalarParameterValue('Upgrade', 0);
+				}
+			}
+			bGlowRef = bGlow;
 			MeshMIC.SetVectorParameterValue('GlowColor', UpdateColor);
         }
     }
@@ -94,6 +102,7 @@ function UpdateInformation()
 {
 	local KFWeapon KFW;
 
+	AmmoText = "";
 	KFW = KFWeapon(Inventory);
 	if (KFW != None)
 	{

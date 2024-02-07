@@ -1,9 +1,10 @@
 class xUI_AdminMenu extends xUI_MenuBase;
 
-enum ListSwitch
+enum PageState
 {
-	WeapList,
-	UserList
+	RPW,
+	Authority,
+	Record
 };
 
 var KFGUI_Button CommandoB;
@@ -13,10 +14,11 @@ var KFGUI_Button GunslingerB;
 var KFGUI_Button SharpshooterB;
 var KFGUI_Button SwatB;
 var KFGUI_Button OtherB;
-var KFGUI_Button WeaponB;
-var KFGUI_Button PlayerB;
+//var KFGUI_Button WeaponB;
+//var KFGUI_Button PlayerB;
 var KFGUI_Button CloseB;
-var KFGUI_Button ListToggleB;
+var KFGUI_Button RPWB;
+var KFGUI_Button AuthorityB;
 var KFGUI_Button PerkSubB;
 var KFGUI_Button PerkAddB;
 var KFGUI_Button UpgradeSubB;
@@ -41,7 +43,7 @@ var KFGUI_CheckBox SkillRestriction7;
 var KFGUI_CheckBox SkillRestriction8;
 var KFGUI_CheckBox SkillRestriction9;
 
-var ListSwitch ListCategoly;
+var PageState CurState;
 var bool bListUpdate;
 var class<KFWeaponDefinition> SelectedWeap;
 var UserInfo SelectedUser;
@@ -52,11 +54,11 @@ var array<string> ColumnText;
 //var localized string Title;
 var localized string LevelRestrictionToolTip;
 var localized string SkillRestrictionToolTip;
-var localized string ListToggleToolTip;
 var localized string AntiOvercapToolTip;
 var localized string PerkAuthorityString;
 var localized string MaxUpgradeString;
-var localized string ListToggleButtonText;
+var localized string RPWButtonText;
+var localized string AuthorityButtonText;
 var localized string LevelRequirementString;
 var localized string AntiOvercapString;
 var localized string WeaponHeader;
@@ -84,9 +86,10 @@ function DrawMenu()
 
 	Super.DrawMenu();
 
-	WindowTitle = Title @ "v1.1";
+	WindowTitle = Title @ "v2.0";
 	Canvas.Font = Owner.CurrentStyle.PickFont(FontScalar);
 	Canvas.TextSize("ABC", XL, YL, FontScalar, FontScalar);
+	ToggleComponents();
 
 //	Perk Option Button
 
@@ -143,14 +146,14 @@ function DrawMenu()
 	else
 		S = string(GetCDPC().PerkRestrictions[index].RequiredLevel);
 
-	DrawControllerInfo(PerkAuthorityString, S, PerkSubB, PerkAddB, YL, FontScalar, Owner.HUDOwner.ScaledBorderSize, 30);
+	DrawControllerInfo(PerkAuthorityString, S, PerkSubB, PerkAddB, YL, FontScalar, Owner.HUDOwner.ScaledBorderSize, 30,,,CurState==RPW);
 
 	UpgradeSubB = KFGUI_Button(FindComponentID('UpgradeSub'));
 	UpgradeSubB.ButtonText = "-";
 	UpgradeAddB = KFGUI_Button(FindComponentID('UpgradeAdd'));
 	UpgradeAddB.ButtonText = "+";
 	S = string(GetCDGRI().MaxUpgrade);
-	DrawControllerInfo(MaxUpgradeString, S, UpgradeSubB, UpgradeAddB, YL, FontScalar, Owner.HUDOwner.ScaledBorderSize, 30);
+	DrawControllerInfo(MaxUpgradeString, S, UpgradeSubB, UpgradeAddB, YL, FontScalar, Owner.HUDOwner.ScaledBorderSize, 30,,,CurState==RPW);
 
 //	List
 	if(!bListUpdate)
@@ -158,73 +161,107 @@ function DrawMenu()
 		UpdateList();
 	}
 
-	ListToggleB = KFGUI_Button(FindComponentID('ListToggle'));
-	ListToggleB.ButtonText = ListToggleButtonText;
-	ListToggleB.ToolTip=ListToggleToolTip;
+	RPWB = KFGUI_Button(FindComponentID('RPW'));
+	RPWB.ButtonText = RPWButtonText;
+
+	AuthorityB = KFGUI_Button(FindComponentID('Authority'));
+	AuthorityB.ButtonText = AuthorityButtonText;
 
 //	Check Boxes (Level & Skills)
 	LevelRestrictionBox = KFGUI_CheckBox(FindComponentID('LevelRestriction'));
 	LevelRestrictionBox.bChecked = GetCDPC().bRequireLv25;
 	LevelRestrictionBox.ToolTip=LevelRestrictionToolTip;
-	DrawBoxDescription(LevelRequirementString, LevelRestrictionBox, 0.3);
+	DrawBoxDescription(LevelRequirementString, LevelRestrictionBox, 0.3, CurState==RPW);
 
 	AntiOvercapBox = KFGUI_CheckBox(FindComponentID('AntiOvercap'));
 	AntiOvercapBox.bChecked = GetCDPC().bAntiOvercap;
 	AntiOvercapBox.ToolTip=AntiOvercapToolTip;
-	DrawBoxDescription(AntiOvercapString, AntiOvercapBox, 0.3);
+	DrawBoxDescription(AntiOvercapString, AntiOvercapBox, 0.3, CurState==RPW);
 
 	SkillRestriction0 = KFGUI_CheckBox(FindComponentID('SR0'));
 	SkillRestriction0.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 0);
 	SkillRestriction0.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescriptionReverse(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 0), SkillRestriction0, 0.05);
+	DrawBoxDescriptionReverse(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 0), SkillRestriction0, 0.05, CurState==RPW);
 
 	SkillRestriction1 = KFGUI_CheckBox(FindComponentID('SR1'));
 	SkillRestriction1.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 1);
 	SkillRestriction1.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescription(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 1), SkillRestriction1, 0.425);
+	DrawBoxDescription(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 1), SkillRestriction1, 0.425, CurState==RPW);
 
 	SkillRestriction2 = KFGUI_CheckBox(FindComponentID('SR2'));
 	SkillRestriction2.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 2);
 	SkillRestriction2.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescriptionReverse(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 2), SkillRestriction2, 0.05);
+	DrawBoxDescriptionReverse(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 2), SkillRestriction2, 0.05, CurState==RPW);
 
 	SkillRestriction3 = KFGUI_CheckBox(FindComponentID('SR3'));
 	SkillRestriction3.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 3);
 	SkillRestriction3.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescription(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 3), SkillRestriction3, 0.425);
+	DrawBoxDescription(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 3), SkillRestriction3, 0.425, CurState==RPW);
 
 	SkillRestriction4 = KFGUI_CheckBox(FindComponentID('SR4'));
 	SkillRestriction4.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 4);
 	SkillRestriction4.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescriptionReverse(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 4), SkillRestriction4, 0.05);
+	DrawBoxDescriptionReverse(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 4), SkillRestriction4, 0.05, CurState==RPW);
 
 	SkillRestriction5 = KFGUI_CheckBox(FindComponentID('SR5'));
 	SkillRestriction5.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 5);
 	SkillRestriction5.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescription(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 5), SkillRestriction5, 0.425);
+	DrawBoxDescription(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 5), SkillRestriction5, 0.425, CurState==RPW);
 
 	SkillRestriction6 = KFGUI_CheckBox(FindComponentID('SR6'));
 	SkillRestriction6.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 6);
 	SkillRestriction6.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescriptionReverse(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 6), SkillRestriction6, 0.05);
+	DrawBoxDescriptionReverse(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 6), SkillRestriction6, 0.05, CurState==RPW);
 
 	SkillRestriction7 = KFGUI_CheckBox(FindComponentID('SR7'));
 	SkillRestriction7.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 7);
 	SkillRestriction7.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescription(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 7), SkillRestriction7, 0.425);
+	DrawBoxDescription(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 7), SkillRestriction7, 0.425, CurState==RPW);
 
 	SkillRestriction8 = KFGUI_CheckBox(FindComponentID('SR8'));
 	SkillRestriction8.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 8);
 	SkillRestriction8.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescriptionReverse(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 8), SkillRestriction8, 0.05);
+	DrawBoxDescriptionReverse(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 8), SkillRestriction8, 0.05, CurState==RPW);
 
 	SkillRestriction9 = KFGUI_CheckBox(FindComponentID('SR9'));
 	SkillRestriction9.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 9);
 	SkillRestriction9.ToolTip=SkillRestrictionToolTip;
-	DrawBoxDescription(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 9), SkillRestriction9, 0.425);
+	DrawBoxDescription(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 9), SkillRestriction9, 0.425, CurState==RPW);
 
 	CloseB = KFGUI_Button(FindComponentID('Close'));
 	CloseB.ButtonText = CloseButtonText;
+}
+
+final function ToggleComponents()
+{
+	RPWB.bDisabled			= CurState == RPW;
+	AuthorityB.bDisabled	= CurState == Authority;
+
+	CommandoB.bVisible		= CurState == RPW;
+	SupportB.bVisible		= CurState == RPW;
+	FieldMedicB.bVisible	= CurState == RPW;
+	GunslingerB.bVisible	= CurState == RPW;
+	SharpshooterB.bVisible	= CurState == RPW;
+	SwatB.bVisible			= CurState == RPW;
+	OtherB.bVisible			= CurState == RPW;
+	PerkSubB.bVisible		= CurState == RPW;
+	PerkAddB.bVisible		= CurState == RPW;
+	UpgradeSubB.bVisible	= CurState == RPW;
+	UpgradeAddB.bVisible	= CurState == RPW;
+	LevelRestrictionBox.bVisible= CurState == RPW;
+	AntiOvercapBox.bVisible		= CurState == RPW;
+	SkillRestriction0.bVisible	= CurState == RPW;
+	SkillRestriction1.bVisible	= CurState == RPW;
+	SkillRestriction2.bVisible	= CurState == RPW;
+	SkillRestriction3.bVisible	= CurState == RPW;
+	SkillRestriction4.bVisible	= CurState == RPW;
+	SkillRestriction5.bVisible	= CurState == RPW;
+	SkillRestriction6.bVisible	= CurState == RPW;
+	SkillRestriction7.bVisible	= CurState == RPW;
+	SkillRestriction8.bVisible	= CurState == RPW;
+	SkillRestriction9.bVisible	= CurState == RPW;
+
+	AuthList.bVisible = (CurState <= Authority);
 }
 
 function InitMenu()
@@ -269,7 +306,7 @@ final function UpdateList()
 
 	AuthList.EmptyList();
 
-	if(ListCategoly == WeapList)
+	if(CurState == RPW)
 	{
 		TraderItems = KFGameReplicationInfo(GetCDPC().WorldInfo.GRI).TraderItems;
 		CurWeapDef.Remove(0, CurWeapDef.length);
@@ -301,7 +338,7 @@ final function UpdateList()
 			AuthList.AddLine(S);
 		}
 	}
-	else
+	else if(CurState == Authority)
 	{
 		CurUserInfo.Remove(0, CurUserInfo.length);
 		AuthList.Columns[0].Text = NameHeader;
@@ -379,11 +416,12 @@ function ButtonClicked(KFGUI_Button Sender)
 		case 'Close':
 			DoClose();
 			break;
-		case 'ListToggle':
-			if(ListCategoly == WeapList)
-				ListCategoly = UserList;
-			else
-				ListCategoly = WeapList;
+		case 'RPW':
+			CurState = RPW;
+			bListUpdate = false;
+			break;
+		case 'Authority':
+			CurState = Authority;
 			bListUpdate = false;
 			break;
 		case 'PerkSub':
@@ -406,12 +444,12 @@ function SelectedListRow(KFGUI_ListItem Item, int Row, bool bRight, bool bDblCli
 	if(Row < 0)
 		return;
 
-	if(ListCategoly == WeapList)
+	if(CurState == RPW)
 	{
 		SelectedWeap = CurWeapDef[Row];
 		WeapRightClick.OpenMenu(self);
 	}
-	else
+	else if(CurState == Authority)
 	{
 		SelectedUser = CurUserInfo[Row];
 		UserRightClick.OpenMenu(self);
@@ -534,7 +572,7 @@ defaultproperties
 	YPosition=0.05
 	XSize=0.64
 	YSize=0.9
-	ListCategoly=WeapList
+	CurState=RPW
 	ColumnText(0)=WeaponHeader
 	ColumnText(1)=BossOnlyHeader
 	ColumnText(2)=LevelHeader
@@ -542,9 +580,9 @@ defaultproperties
 //	Perk Option
 
 	Begin Object Class=KFGUI_Button Name=Commando
-		XPosition=0.055
+		XPosition=0.0550
 		YPosition=0.05
-		XSize=0.14
+		XSize=0.1185
 		YSize=0.05
 		ID="Commando"
 		OnClickLeft=ButtonClicked
@@ -553,9 +591,9 @@ defaultproperties
 	End Object
 
 	Begin Object Class=KFGUI_Button Name=Support
-		XPosition=0.205
+		XPosition=0.1835 //0.205
 		YPosition=0.05
-		XSize=0.14
+		XSize=0.1185
 		YSize=0.05
 		ID="Support"
 		OnClickLeft=ButtonClicked
@@ -564,9 +602,9 @@ defaultproperties
 	End Object
 
 	Begin Object Class=KFGUI_Button Name=FieldMedic
-		XPosition=0.355
+		XPosition=0.3120 //0.355
 		YPosition=0.05
-		XSize=0.14
+		XSize=0.1185
 		YSize=0.05
 		ID="FieldMedic"
 		OnClickLeft=ButtonClicked
@@ -575,9 +613,9 @@ defaultproperties
 	End Object
 
 	Begin Object Class=KFGUI_Button Name=Gunslinger
-		XPosition=0.505
+		XPosition=0.4405 //0.505
 		YPosition=0.05
-		XSize=0.14
+		XSize=0.1185
 		YSize=0.05
 		ID="Gunslinger"
 		OnClickLeft=ButtonClicked
@@ -586,9 +624,9 @@ defaultproperties
 	End Object
 
 	Begin Object Class=KFGUI_Button Name=Sharpshooter
-		XPosition=0.655
+		XPosition=0.5690 //0.655
 		YPosition=0.05
-		XSize=0.14
+		XSize=0.1185
 		YSize=0.05
 		ID="Sharpshooter"
 		OnClickLeft=ButtonClicked
@@ -597,9 +635,9 @@ defaultproperties
 	End Object
 
 	Begin Object Class=KFGUI_Button Name=Swat
-		XPosition=0.805
+		XPosition=0.6975 //0.805
 		YPosition=0.05
-		XSize=0.14
+		XSize=0.1185
 		YSize=0.05
 		ID="Swat"
 		OnClickLeft=ButtonClicked
@@ -607,8 +645,19 @@ defaultproperties
 		ButtonText=""
 	End Object
 
+	Begin Object Class=KFGUI_Button Name=Other
+		XPosition=0.8260 //0.055
+		YPosition=0.05 //0.125
+		XSize=0.1185 //0.14
+		YSize=0.05
+		ID="Other"
+		OnClickLeft=ButtonClicked
+		TextColor=(R=255, G=255, B=255, A=255)
+		ButtonText=""
+	End Object
+
 	Begin Object Class=KFGUI_Button Name=Close
-		XPosition=0.025
+		XPosition=0.875 //0.025
 		YPosition=0.925
 		XSize=0.10
 		YSize=0.05
@@ -617,20 +666,9 @@ defaultproperties
 		TextColor=(R=255, G=255, B=255, A=255)
 	End Object
 
-	Begin Object Class=KFGUI_Button Name=Other
-		XPosition=0.055
-		YPosition=0.125
-		XSize=0.14
-		YSize=0.05
-		ID="Other"
-		OnClickLeft=ButtonClicked
-		TextColor=(R=255, G=255, B=255, A=255)
-		ButtonText=""
-	End Object
-
 	Begin Object Class=KFGUI_Button Name=PerkSub
 		XPosition=0.055
-		YPosition=0.300
+		YPosition=0.15 //0.300
 		XSize=0.05
 		YSize=0.05
 		ID="PerkSub"
@@ -640,7 +678,7 @@ defaultproperties
 
 	Begin Object Class=KFGUI_Button Name=PerkAdd
 		XPosition=0.250
-		YPosition=0.300
+		YPosition=0.15 //0.300
 		XSize=0.05
 		YSize=0.05
 		ID="PerkAdd"
@@ -662,7 +700,7 @@ defaultproperties
 //	List
 	Begin Object Class=KFGUI_ColumnList Name=AuthList
 		XPosition=0.45
-		YPosition=0.20
+		YPosition=0.125 //0.20
 		XSize=0.52
 		YSize=0.775
 		ID="AuthList"
@@ -670,12 +708,22 @@ defaultproperties
 		bCanSortColumn=false
 	End Object
 
-	Begin Object Class=KFGUI_Button Name=ListToggle
-		XPosition=0.80
-		YPosition=0.13
+	Begin Object Class=KFGUI_Button Name=RPW
+		XPosition=0.025 //-0.16//0.80
+		YPosition=0.925 //0.46//0.13
 		XSize=0.14
 		YSize=0.05
-		ID="ListToggle"
+		ID="RPW"
+		OnClickLeft=ButtonClicked
+		TextColor=(R=255, G=255, B=255, A=255)
+	End Object
+
+	Begin Object Class=KFGUI_Button Name=Authority
+		XPosition=0.19 //-0.16//0.80
+		YPosition=0.925 //0.52 //0.13
+		XSize=0.14
+		YSize=0.05
+		ID="Authority"
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)
 	End Object
@@ -691,91 +739,85 @@ defaultproperties
 	End Object
 
 	Components.Add(AuthList)
-	Components.Add(ListToggle)
+	Components.Add(RPW)
+	Components.Add(Authority)
 	WeapRightClick=WeapRClicker
 	UserRightClick=UserRClicker
 
 //	Check Box
-	Begin Object Class=KFGUI_CheckBox Name=LevelRestriction
-		XPosition=0.055
-		YPosition=0.200
-		ID="LevelRestriction"
-		OnCheckChange=ToggleCheckBox
-	End Object
-
 	Begin Object Class=KFGUI_CheckBox Name=SkillRestriction0
 		XPosition=0.20
-		YPosition=0.40
+		YPosition=0.25 //0.40
 		ID="SR0"
 		OnCheckChange=ToggleCheckBox
 	End Object
 
 	Begin Object Class=KFGUI_CheckBox Name=SkillRestriction1
 		XPosition=0.24
-		YPosition=0.40
+		YPosition=0.25 //0.40
 		ID="SR1"
 		OnCheckChange=ToggleCheckBox
 	End Object
 
 	Begin Object Class=KFGUI_CheckBox Name=SkillRestriction2
 		XPosition=0.20
-		YPosition=0.45
+		YPosition=0.30 //0.45
 		ID="SR2"
 		OnCheckChange=ToggleCheckBox
 	End Object
 
 	Begin Object Class=KFGUI_CheckBox Name=SkillRestriction3
 		XPosition=0.24
-		YPosition=0.45
+		YPosition=0.30 //0.45
 		ID="SR3"
 		OnCheckChange=ToggleCheckBox
 	End Object
 
 	Begin Object Class=KFGUI_CheckBox Name=SkillRestriction4
 		XPosition=0.20
-		YPosition=0.50
+		YPosition=0.35 //0.50
 		ID="SR4"
 		OnCheckChange=ToggleCheckBox
 	End Object
 
 	Begin Object Class=KFGUI_CheckBox Name=SkillRestriction5
 		XPosition=0.24
-		YPosition=0.50
+		YPosition=0.35 //0.50
 		ID="SR5"
 		OnCheckChange=ToggleCheckBox
 	End Object
 
 	Begin Object Class=KFGUI_CheckBox Name=SkillRestriction6
 		XPosition=0.20
-		YPosition=0.55
+		YPosition=0.40 //0.55
 		ID="SR6"
 		OnCheckChange=ToggleCheckBox
 	End Object
 
 	Begin Object Class=KFGUI_CheckBox Name=SkillRestriction7
 		XPosition=0.24
-		YPosition=0.55
+		YPosition=0.40 //0.55
 		ID="SR7"
 		OnCheckChange=ToggleCheckBox
 	End Object
 
 	Begin Object Class=KFGUI_CheckBox Name=SkillRestriction8
 		XPosition=0.20
-		YPosition=0.60
+		YPosition=0.45 //0.60
 		ID="SR8"
 		OnCheckChange=ToggleCheckBox
 	End Object
 
 	Begin Object Class=KFGUI_CheckBox Name=SkillRestriction9
 		XPosition=0.24
-		YPosition=0.60
+		YPosition=0.45 //0.60
 		ID="SR9"
 		OnCheckChange=ToggleCheckBox
 	End Object
 
 	Begin Object Class=KFGUI_Button Name=UpgradeSub
 		XPosition=0.055
-		YPosition=0.700
+		YPosition=0.55 //0.700
 		XSize=0.05
 		YSize=0.05
 		ID="UpgradeSub"
@@ -785,7 +827,7 @@ defaultproperties
 
 	Begin Object Class=KFGUI_Button Name=UpgradeAdd
 		XPosition=0.250
-		YPosition=0.700
+		YPosition=0.55 //0.700
 		XSize=0.05
 		YSize=0.05
 		ID="UpgradeAdd"
@@ -793,9 +835,16 @@ defaultproperties
 		TextColor=(R=255, G=255, B=255, A=255)
 	End Object
 
+	Begin Object Class=KFGUI_CheckBox Name=LevelRestriction
+		XPosition=0.055
+		YPosition=0.65 //0.200
+		ID="LevelRestriction"
+		OnCheckChange=ToggleCheckBox
+	End Object
+
 	Begin Object Class=KFGUI_CheckBox Name=AntiOvercap
 		XPosition=0.055
-		YPosition=0.800
+		YPosition=0.700
 		ID="AntiOvercap"
 		OnCheckChange=ToggleCheckBox
 	End Object
