@@ -366,7 +366,6 @@ function DrawWeaponPickupInfo()
 	local float IconSize, XL, YL, Sc, defaultSc;
 	local array<float> tempXL, tempYL;
 	local float PosX, PosY, Width, Height, OffsetX, OffsetY;
-	local string WeapIconPath;
 	local Texture2D WeapIcon, AmmoIcon, Avatar;
 	local KFInventoryManager KFIM;
 	local Inventory Inv;
@@ -451,8 +450,7 @@ function DrawWeaponPickupInfo()
 				PosX = ScreenPos.X - (tempXL[0] + IconSize*2.5)*0.5;
 				C.DrawColor = WeaponIconColor;
 				C.SetPos(PosX, PosY);
-				WeapIconPath = class'CD_Object'.static.GetWeapDef(KFWeapon(CDDP.Inventory)).static.GetImagePath();
-				WeapIcon = Texture2D(class'CD_Object'.static.SafeLoadObject(WeapIconPath, class'Texture2D'));
+				WeapIcon = Texture2D(class'CD_Object'.static.SafeLoadObject(CDDP.IconPath, class'Texture2D'));
 				C.DrawTile(WeapIcon, IconSize*2, IconSize, 0, 0, 256, 128);
 
 				C.SetDrawColor(250, 250, 250, 255);
