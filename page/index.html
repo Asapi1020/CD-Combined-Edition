@@ -3,101 +3,101 @@
   <head>
     <meta charset='utf-8'>
     <title>Spawn Cycle Analyzer</title>
+    <link href="./style.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-fx038NkLY4U1TCrBDiu5FWPEa9eiZu01EiLryshJbCo=" crossorigin="anonymous">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" integrity="sha256-fx038NkLY4U1TCrBDiu5FWPEa9eiZu01EiLryshJbCo=" crossorigin="anonymous">
-    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" integrity="sha256-fx038NkLY4U1TCrBDiu5FWPEa9eiZu01EiLryshJbCo=" crossorigin="anonymous">  
   </head>
   <body>
     <div id="analysis">
       <table class="table table-bordered">
-        <tr class="tableheader">
+        <tr class="headerRow">
           <th>Name</th><th>count</th><th>%</th><th>Spawn Rage</th>
         </tr>
         <tr id="Total">
           <td>Total</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Trash">
+        <tr id="Trash" class="Trash">
           <td>Trash</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Medium">
+        <tr id="Medium" class="Medium">
           <td>Medium</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Large">
+        <tr id="Large" class="Large">
           <td>Large</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Cyst">
+        <tr id="Cyst" class="Trash">
           <td>Cyst</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Alpha Clot">
+        <tr id="Alpha Clot" class="Trash">
           <td>Alpha Clot</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Slasher">
+        <tr id="Slasher" class="Trash">
           <td>Slasher</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Rioter">
+        <tr id="Rioter" class="Albino">
           <td>Rioter</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Gorefast">
+        <tr id="Gorefast" class="Trash">
           <td>Gorefast</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Gorefiend">
+        <tr id="Gorefiend" class="Albino">
           <td>Gorefiend</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Crawler">
+        <tr id="Crawler" class="Trash">
           <td>Crawler</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Elite Crawler">
+        <tr id="Elite Crawler" class="Albino">
           <td>Elite Crawler</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Stalker">
+        <tr id="Stalker" class="Trash">
           <td>Stalker</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Bloat">
+        <tr id="Bloat" class="Medium">
           <td>Bloat</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Husk">
+        <tr id="Husk" class="Medium">
           <td>Husk</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Siren">
+        <tr id="Siren" class="Medium">
           <td>Siren</td><td></td><td></td><td></td>
         </tr>
-        <tr id="EDAR Trapper">
+        <tr id="EDAR Trapper" class="Robot">
           <td>EDAR Trapper</td><td></td><td></td><td></td>
         </tr>
-        <tr id="EDAR Blaster">
+        <tr id="EDAR Blaster" class="Robot">
           <td>EDAR Blaster</td><td></td><td></td><td></td>
         </tr>
-        <tr id="EDAR Bomber">
+        <tr id="EDAR Bomber" class="Robot">
           <td>EDAR Bomber</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Scrake">
+        <tr id="Scrake" class="Large">
           <td>Scrake</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Quarterpound">
+        <tr id="Quarterpound" class="Large">
           <td>Quarterpound</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Fleshpound">
+        <tr id="Fleshpound" class="Large">
           <td>Fleshpound</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Clots">
+        <tr id="Clots" class="Trash">
           <td>Clots</td><td></td><td></td><td></td>
         </tr>
         <tr id="Gorefasts">
           <td>Gorefasts</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Crawlers/Stalkers">
+        <tr id="Crawlers_Stalkers">
           <td>Crawlers/Stalkers</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Robots">
+        <tr id="Robots" class="Robot">
           <td>Robots</td><td></td><td></td><td></td>
         </tr>
         <tr id="Scrakes">
           <td>Scrakes</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Fleshpounds">
+        <tr id="Fleshpounds" class="Large">
           <td>Fleshpounds</td><td></td><td></td><td></td>
         </tr>
-        <tr id="Albino">
+        <tr id="Albino" class="Albino">
           <td>Albino</td><td></td><td></td><td></td>
         </tr>
         <tr id="Other">
