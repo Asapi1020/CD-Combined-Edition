@@ -1,4 +1,36 @@
-th{
-  color: whitesmoke;
-  background-color: grey;
+th {
+  color: whitesmoke !important;
+  background-color: #666666 !important;
+}
+
+tr#Total > td, tr#Gorefasts > td {
+  background-color: #d0e0e3;
+}
+
+tr.Trash > td {
+  background-color: #d9ead3;
+}
+
+tr.Medium > td, tr#Crawlers_Stalkers > td {
+  background-color: #fff2cc;
+}
+
+tr.Large > td {
+  background-color: #f4cccc;
+}
+
+tr.Albino > td {
+  background-color: #d9d2e9;
+}
+
+tr#Scrakes > td {
+  background-color: #ead1dc;
+}
+
+tr.Robot > td {
+  background-color: #fce5cd;
+}
+
+tr#Other > td {
+  background-color: #cccccc;
 }
