@@ -8,13 +8,49 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" integrity="sha256-fx038NkLY4U1TCrBDiu5FWPEa9eiZu01EiLryshJbCo=" crossorigin="anonymous">  
   </head>
   <body>
+    <div id="config">
+      <div class="row mb-3">
+        <label for="cycle" class="col-auto col-form-label">Spawn Cycle: </label>
+        <div class="col-auto">
+          <select id="spawncycle" name="cycle" class="form-select">
+            <!-- Insert Cycle Option -->
+          </select>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <label for="gameLen" class="col-auto col-form-label">Game Length: </label>
+        <div class="col-auto">
+          <select id="gamelength" name="gameLen" class="form-select">
+            <option value="1">Short</option>
+            <option value="2">Medium</option>
+            <option value="3" selected>Long</option>
+          </select>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <label for="dif" class="col-auto col-form-label">Difficulty: </label>
+        <div class="col-auto">
+          <select id="difficulty" name="dif" class="form-select">
+            <option value="1">Normal</option>
+            <option value="2">Hard</option>
+            <option value="3">Suicidal</option>
+            <option value="4" selected>Hell on Earth</option>
+          </select>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <label for="wsf" class="col-auto col-form-label">Wave Size Fakes: </label>
+        <div class="col-auto">
+          <input id="wavesizefakes" class="form-control" type="number" min="1" max="32">
+        </div>
+      </div>
+      <button class="btn btn-success mb-3">Analyze</button>
+    </div>
     <div id="analysis">
+      <label class="form-label">ZEDs by Category</label>
       <table class="table table-bordered">
         <tr class="headerRow">
           <th>Name</th><th>count</th><th>%</th><th>Spawn Rage</th>
-        </tr>
-        <tr id="Total">
-          <td>Total</td><td></td><td></td><td></td>
         </tr>
         <tr id="Trash" class="Trash">
           <td>Trash</td><td></td><td></td><td></td>
@@ -24,6 +60,16 @@
         </tr>
         <tr id="Large" class="Large">
           <td>Large</td><td></td><td></td><td></td>
+        </tr>
+        <tr id="Total">
+          <td>Total</td><td></td><td></td><td></td>
+        </tr>
+      </table>
+
+      <label class="form-label">ZEDs by Type</label>
+      <table class="table table-bordered">
+        <tr class="headerRow">
+          <th>Name</th><th>count</th><th>%</th><th>Spawn Rage</th>
         </tr>
         <tr id="Cyst" class="Trash">
           <td>Cyst</td><td></td><td></td><td></td>
@@ -78,6 +124,13 @@
         </tr>
         <tr id="Fleshpound" class="Large">
           <td>Fleshpound</td><td></td><td></td><td></td>
+        </tr>
+      </table>
+
+      <label class="form-label">ZEDs by Group</label>
+      <table class="table table-bordered">
+        <tr class="headerRow">
+          <th>Name</th><th>count</th><th>%</th><th>Spawn Rage</th>
         </tr>
         <tr id="Clots" class="Trash">
           <td>Clots</td><td></td><td></td><td></td>
