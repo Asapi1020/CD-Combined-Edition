@@ -1,3 +1,17 @@
+// Init
+setupSpawnCycleSelect();
+
+// fetch cycle list and setup options for select
+function setupSpawnCycleSelect(){
+  const select = document.getElementById('cycle');
+
+}
+
+function initSpawnCycleDefsMap(){
+  const spawnCycleDefsMap = new Map();
+  
+}
+
 // read input config and execute other functions to show analysis
 function analyzeFromConfig(){
   const button = document.getElementById('analyzebutton');
@@ -20,6 +34,7 @@ function analyzeFromConfig(){
   }
 }
 
+// get the value of currently selected option
 function getSelectedInfoById(id){
   const select = document.getElementById(id);
 
@@ -33,7 +48,8 @@ function getSelectedInfoById(id){
     return '';
   }
   
-  const selectedOption = select.options[select.selectedIndex];
+  const selectedIndex = select.selectedIndex;
+  const selectedOption = select.options[selectedIndex];
   const selectedText = selectedOption.textContent;
   return {
     selectedIndex,
@@ -48,7 +64,13 @@ function getSelectedInfoById(id){
  * @param {number} wsf 1~32
  * @return {object[]} [ { zedName: count, ... }, ..., {} ]
  */
-function analyzeCycle(){
+function analyzeCycle(spawnCycle, gameLength, difficulty, wsf){
+  console.log({
+    spawnCycle,
+    gameLength,
+    difficulty,
+    wsf
+  });
   // calculate
 }
 
