@@ -730,12 +730,12 @@ function analyzeFromConfig(){
 
   if(button){
     const spawnCycle = getSelectedInfoById('spawncycle').selectedText;
-    const gameLength = getSelectedInfoById('gamelength').selectedIndex;
-    const difficulty = getSelectedInfoById('difficulty').selectedIndex;
+    const gameLength = parseInt(getSelectedInfoById('gamelength').selectedIndex);
+    const difficulty = parseInt(getSelectedInfoById('difficulty').selectedIndex);
 
     const wsfInput = document.getElementById('wavesizefakes');
     const wsf = (wsfInput)
-      ? wsfInput.value
+      ? parseInt(wsfInput.value)
       : 12;
   
     const analysis = analyzeCycle(spawnCycle, gameLength, difficulty, wsf);
@@ -769,24 +769,6 @@ function getSelectedInfoById(id){
   };  
 }
 
-/**
- * @param {string} spawnCycle
- * @param {number} gameLength 0: Short, ..., 2: Long
- * @param {number} difficulty 0: Normal, ..., 3: HoE
- * @param {number} wsf 1~32
- * @return {object[]} [ { zedName: count, ... }, ..., {} ]
- */
-function analyzeCycle(spawnCycle, gameLength, difficulty, wsf){
-  console.log({
-    spawnCycle,
-    gameLength,
-    difficulty,
-    wsf
-  });
-  // calculate
-}
-
 function updateAnalysis(analysis){
   // update table content
 }
-
