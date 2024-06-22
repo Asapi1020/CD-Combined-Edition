@@ -141,6 +141,7 @@ function calcWaveSize(waveNum, gameLength, difficulty, wsf){
 }
 
 function analyzeWave(waveDef, waveSize){
+  const list = [];
   const squads = waveDef.split(",");
     
   squads.forEach((squad, squadIndex) => {
@@ -149,12 +150,14 @@ function analyzeWave(waveDef, waveSize){
     groups.forEach((group, groupIndex) => {
       // (e.g) 3GF* -> [3, GF, *]
       const groupInfo = group.match(/(^\d+)|([A-Za-z]+)|([*!]$)/g);
-      console.log(groupInfo);
+      list.push(groupInfo);
     })
   });
+  return list;
 }
 
 module.exports  = {
   extractDefsByGameLen,
-  calcWaveSize
+  calcWaveSize,
+  analyzeWave
 };
