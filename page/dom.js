@@ -710,7 +710,7 @@ const spawnCycleDefs = {
   ]
 }
 
-let analysisTable = [];
+let analysis = [];
 
 setupSpawnCycleSelect();
 
@@ -741,10 +741,8 @@ function analyzeFromConfig(){
       ? parseInt(wsfInput.value)
       : 12;
   
-    const analysis = analyzeCycle(spawnCycle, gameLength, difficulty, wsf);
-    console.log(analysis);
-    //analysisTable = makeTableFromAnalysis(analysis);
-    //updateAnalysis(analysisTable);
+    analysis = analyzeCycle(spawnCycle, gameLength, difficulty, wsf);
+    updateAnalysis(analysis);
   }
   else{
     console.error("Not found the button identified as analyzebutton");
@@ -776,5 +774,20 @@ function getSelectedInfoById(id){
 
 function updateAnalysis(analysis){
   // update table content
+  console.log(analysis);
+  const tableNameKeys = Object.keys(analysis[0]);
   
+  for(let tableNameKey of tableNameKeys){
+    const zedNameKeys = Object.keys(analysis[0][tableNameKey]);
+
+    for(let zedNameKey of zedNameKeys){
+      const row = document.getElementById(zedNameKey);
+      const tableData = row.children;
+      const zedInfo = analysis[0][tableNameKey][zedNameKey];
+      
+      tableData[1].textContent = zedInfo.num;
+      tableData[2].textContent = zedInfo.pct;
+      tableData[3].taxtContent = zedInfo.spawnRage;
+    }
+  }
 }

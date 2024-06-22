@@ -149,7 +149,15 @@ function calcWaveSize(waveNum, gameLength, difficulty, wsf){
  * 
  * @param {String} waveDef e.g) 3GF*_1FP!,1CY_10CR
  * @param {Number} waveSize totalAI in a wave
- * @returns {Object} {"Fleshpound": {"num": 12, "spawnRage": 5}}
+ * @returns {Object} {
+ *  'category': {
+ *    "Large": {"num": 12, "spawnRage": 5},
+ *    "Medium": {"num": 12, "spawnRage": 0},
+ *    "Trash": {}
+ *  },
+ *  'type': {same},
+ *  'group': {same}
+ * }
  */
 function analyzeWave(waveDef, waveSize){
   let analysis = {
@@ -332,10 +340,6 @@ function addPctPropertyToAnalysis(analysis, waveSize){
   }
 
   return analysis;
-}
-
-function makeTableFromAnalysis(analysis){
-
 }
 
 module.exports  = {
