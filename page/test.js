@@ -17,7 +17,13 @@ describe("analyzeWave", () => {
   it("should parse correctly", () => {
     const waveDef = '3GF*_2FP!,1CY_10CR';
     const waveSize = 314;
-    expect(utils.analyzeWave(waveDef, waveSize)).toBe(['3', 'GF', '*']);
+    const expectedOutput = {
+      'Gorefiend': 60,
+      'Fleshpound': 40,
+      'Cyst': 20,
+      'Crawler': 194
+    };
+    expect(utils.analyzeWave(waveDef, waveSize)).toEqual(expectedOutput);
   });
 });
 
@@ -40,8 +46,9 @@ function it(description, test){
 }
 
 function expect(expection){
-  const toBe = (destination) => {
-    if(expection === destination){
+  // processes to be executed after judging correctness
+  const processBasedOnResult = (bCorrectlyExpected, destination) => {
+    if(bCorrectlyExpected){
       process.stdout.write('\t\u2714');
       ++passCount;
     }
@@ -53,9 +60,55 @@ function expect(expection){
       console.log(destination);
       process.stdout.write('\t\u2716');
       ++failCount;
-    }    
+    }
+  };
+
+  // complete corresponding
+  const toBe = (destination) => {
+    processBasedOnResult(expection === destination, destination);
+  };
+
+  // for array and object
+  const toEqual = (destination) => {
+    if(Array.isArray(destination)){
+
+    }
+    else if(typeof destination === 'object'){
+      processBasedOnResult(deepEqual(expection, destination), destination);
+    }
+    else{
+      console.error("Unexpected destination");
+    }
+  };
+
+  return {
+    toBe,
+    toEqual
+  };
+}
+
+function deepEqual(obj1, obj2){
+  // complete corresponding
+  if(obj1 === obj2){
+    return true;
   }
-  return {toBe};
+
+  // keys
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  // difference length of keys means unmatch of objects
+  if(keys1.length !== keys2.length || keys1.length === 0){
+    return false;
+  }
+
+  // compare
+  for(let key of keys1){
+    if(!keys2.includes(key) || !deepEqual(obj1[key], obj2[key])){
+      return false;
+    }
+  }
+  return true;
 }
 
 console.log(

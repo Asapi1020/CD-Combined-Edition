@@ -141,19 +141,100 @@ function calcWaveSize(waveNum, gameLength, difficulty, wsf){
 }
 
 function analyzeWave(waveDef, waveSize){
-  const list = [];
-  const squads = waveDef.split(",");
-    
-  squads.forEach((squad, squadIndex) => {
-    const groups = squad.split("_");
+  const analysis = {};
+  let spawnCount = 0;
 
-    groups.forEach((group, groupIndex) => {
-      // (e.g) 3GF* -> [3, GF, *]
-      const groupInfo = group.match(/(^\d+)|([A-Za-z]+)|([*!]$)/g);
-      list.push(groupInfo);
-    })
-  });
-  return list;
+  // (e.g) 
+  const squads = waveDef.split(",");
+  
+  do{
+    for(let squad of squads){
+      const groups = squad.split("_");
+  
+      for(let group of groups){
+        const groupInfo = parseGroupInfo(group);
+  
+        if(spawnCount + groupInfo.groupSize > waveSize){
+          // end of wave
+          groupInfo.groupSize = waveSize - spawnCount;
+        }
+  
+        spawnCount += groupInfo.groupSize;
+        
+        analysis[groupInfo.zedName] = analysis[groupInfo.zedName] || 0;
+        analysis[groupInfo.zedName] += groupInfo.groupSize;
+  
+        if(spawnCount >= waveSize){
+          return analysis;
+        }
+      };
+    };
+  }while(spawnCount < waveSize)
+  
+  console.log('something error');
+  return analysis;
+}
+
+// (e.g) 3GF* -> {groupSize: 3, zedName: Gorefiend, spawnRage: false}
+function parseGroupInfo(group){
+  // (e.g) 3GF* -> [3, GF, *]
+  const parsedGroupDef = group.match(/(^\d+)|([A-Za-z]+)|([*!]$)/g);
+
+  if(parsedGroupDef.length < 2){
+    console.error(`GroupDef is collapsed: ${group}`);
+    return{};
+  }
+
+  const groupSize = parseInt(parsedGroupDef[0]);
+  const zedCode = parsedGroupDef[1].toUpperCase();
+  const codeSuffix = (parsedGroupDef.length === 3) ? parsedGroupDef[2] : '';
+
+  const getZedNameFromCode = (code, suffix) => {
+    switch(code){
+      case 'CY':
+        return 'Cyst';
+      case 'AL':
+        return (suffix === '*') ? 'Rioter' : 'Alpha Clot';
+      case 'SL':
+        return 'Slasher';
+      case 'GF':
+        return (suffix === '*') ? 'Gorefiend' : 'Gorefast';
+      case 'CR':
+        return (suffix === '*') ? 'Elite Crawler' : 'Crawler';
+      case 'ST':
+        return 'Stalker'; // TODO: consider st*
+      case 'BL':
+        return 'Bloat';
+      case 'HU':
+        return 'Husk'; // TODO: consider hu*
+      case 'SI':
+        return 'Siren';
+      case 'DE':
+        return 'EDAR Trapper';
+      case 'DL':
+        return 'EDAR Blaster';
+      case 'DR':
+        return 'EDAR Bomber';
+      case 'SC':
+        return 'Scrake';
+      case 'QP':
+        return 'Quarterpound';
+      case 'FP':
+        return 'Fleshpound';
+      default:
+        console.error(`Failed to identify zed: ${code}`);
+        return 'Unknown';
+    }
+  };
+
+  const zedName = getZedNameFromCode(zedCode, codeSuffix);
+  const spawnRage = codeSuffix === "!";
+
+  return {
+    groupSize,
+    zedName,
+    spawnRage
+  };
 }
 
 module.exports  = {
