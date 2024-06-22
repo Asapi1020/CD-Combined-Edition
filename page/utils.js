@@ -216,16 +216,19 @@ function parseGroupInfo(group){
 
   switch(zedCode){
     case 'CY':
+    case 'CC':
       groupInfo.zedName = 'Cyst';
       groupInfo.categoryName = 'Trash';
       groupInfo.groupName = 'Clots';
       break;
     case 'AL':
+    case 'CA':
       groupInfo.zedName = (codeSuffix === '*') ? 'Rioter' : 'Alpha Clot';
       groupInfo.categoryName = 'Trash';
       groupInfo.groupName = 'Clots';
       break;
     case 'SL':
+    case 'CS':
       groupInfo.zedName = 'Slasher';
       groupInfo.categoryName = 'Trash';
       groupInfo.groupName = 'Clots';
@@ -281,6 +284,7 @@ function parseGroupInfo(group){
       groupInfo.groupName = 'Scrakes';
       break;
     case 'QP':
+    case 'MF':
       groupInfo.zedName = 'Quarterpound';
       groupInfo.categoryName = 'Large';
       groupInfo.groupName = 'Fleshpounds';
@@ -291,7 +295,7 @@ function parseGroupInfo(group){
       groupInfo.groupName = 'Fleshpounds';
       break;
     default:
-      console.error(`Failed to identify zed: ${code}`);
+      console.error(`Failed to identify zed: ${zedCode}`);
       groupInfo.zedName = 'Unknown';
       break;
   }
