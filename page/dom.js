@@ -709,6 +709,9 @@ const spawnCycleDefs = {
     "1GF,1AL*,1CY,1SC,1AL*,1SL,1AL,1GF,1SI,1HU,1BL,1FP,1CY,1CR,1SL,1SC,1FP,1SC,1CR*,1GF*,1FP,1AL*,1SL,1CY,1CR*,1HU,1SC,1SC,1FP,1HU,1SI,1SL,1AL*,1ST,1CY,1SC,1ST,1SC,1CR*,1FP,1BL,1CY,1ST,1SC,1FP,1FP,1SL,1CR*,1GF,1CY,1SC,1FP,1FP,1SL,1AL*,1GF*,1BL,1SI,1HU,1GF,1GF,1CY,1AL,1SL,1AL*,1CR,1CY,1SL,1GF*,1CR*,1ST,1AL,1ST,1CY,1AL*,1CR,1GF,1ST,1SC,1GF,1AL*,1HU,1SI,1SI,1GF*,1SC,1AL,1GF*,1ST,1CR,1SL,1AL*,1GF,1CR,1CR*,1SC,1GF*,1CY,1AL*,1HU,1SI,1BL,1GF*,1SC,1SL,1CY,1ST,1AL*,1FP,1FP,1SI,1SC,1BL,1HU,1SL,1SC,1AL*,1ST,1BL,1SC,1SI,1HU,1GF,1AL*,1CY,1CR*,1AL,1SL,1CR,1GF*,1CR*,1FP,1SC,1SL,1CR,1GF,1AL*,1SC,1GF*,1HU,1BL,1SI,1ST,1CR,1SC,1GF,1GF*,1ST,1SC,1GF,1CR*,1SL,1AL*,1HU,1SI,1AL,1GF,1SL,1HU,1CR*,1ST,1BL,1AL,1FP,1SC,1GF,1ST,1AL*,1SL,1GF*,1CR,1ST,1CR*,1CY,1GF*,1FP,1GF,1SL,1SC,1AL*,1CR*,1FP,1HU,1SI,1ST,1FP,1HU,1BL,1ST,1SC,1SL,1SC,1AL*,1GF*,1SC,1CR*"
   ]
 }
+
+let analysisTable = [];
+
 setupSpawnCycleSelect();
 
 // fetch cycle list and setup options for select
@@ -739,7 +742,9 @@ function analyzeFromConfig(){
       : 12;
   
     const analysis = analyzeCycle(spawnCycle, gameLength, difficulty, wsf);
-    updateAnalysis(analysis);
+    console.log(analysis);
+    //analysisTable = makeTableFromAnalysis(analysis);
+    //updateAnalysis(analysisTable);
   }
   else{
     console.error("Not found the button identified as analyzebutton");
@@ -771,4 +776,5 @@ function getSelectedInfoById(id){
 
 function updateAnalysis(analysis){
   // update table content
+  
 }

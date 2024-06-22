@@ -1,4 +1,3 @@
-const { fail } = require('assert');
 const utils = require('./utils');
 
 // dummy jest XD

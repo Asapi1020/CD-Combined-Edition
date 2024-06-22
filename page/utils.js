@@ -13,6 +13,8 @@ function analyzeCycle(spawnCycle, gameLength, difficulty, wsf){
     wsf
   });
 
+  let cycleAnalysis = [];
+
   // calculate
   const targetSpawnCycleDefs = spawnCycleDefs[spawnCycle];
   const cycleDefsApplyedGameLen = extractDefsByGameLen(targetSpawnCycleDefs, gameLength);
@@ -20,7 +22,10 @@ function analyzeCycle(spawnCycle, gameLength, difficulty, wsf){
   cycleDefsApplyedGameLen.forEach((waveDef, waveNum) => {
     const waveSize = calcWaveSize(waveNum, gameLength, difficulty, wsf);
     const waveAnalysis = analyzeWave(waveDef, waveSize);
+    cycleAnalysis.push(waveAnalysis);
   });
+
+  return cycleAnalysis;
 }
 
 /**
@@ -140,8 +145,18 @@ function calcWaveSize(waveNum, gameLength, difficulty, wsf){
   return Math.round(multiplier * baseNum * difficultyMod);
 }
 
+/**
+ * 
+ * @param {String} waveDef e.g) 3GF*_1FP!,1CY_10CR
+ * @param {Number} waveSize totalAI in a wave
+ * @returns {Object} {"Fleshpound": {"num": 12, "spawnRage": 5}}
+ */
 function analyzeWave(waveDef, waveSize){
-  const analysis = {};
+  let analysis = {
+    'category': {},
+    'type': {},
+    'group': {}
+  };
   let spawnCount = 0;
 
   // (e.g) 
@@ -160,11 +175,10 @@ function analyzeWave(waveDef, waveSize){
         }
   
         spawnCount += groupInfo.groupSize;
-        
-        analysis[groupInfo.zedName] = analysis[groupInfo.zedName] || 0;
-        analysis[groupInfo.zedName] += groupInfo.groupSize;
+        analysis = addCountToAnalysis(analysis, groupInfo);        
   
         if(spawnCount >= waveSize){
+          analysis = addPctPropertyToAnalysis(analysis, waveSize);
           return analysis;
         }
       };
@@ -175,7 +189,7 @@ function analyzeWave(waveDef, waveSize){
   return analysis;
 }
 
-// (e.g) 3GF* -> {groupSize: 3, zedName: Gorefiend, spawnRage: false}
+// (e.g) 3GF* -> {groupSize: 3, zedName: Gorefiend, categoryName: Trash, groupName: Gorefasts spawnRage: false}
 function parseGroupInfo(group){
   // (e.g) 3GF* -> [3, GF, *]
   const parsedGroupDef = group.match(/(^\d+)|([A-Za-z]+)|([*!]$)/g);
@@ -185,56 +199,143 @@ function parseGroupInfo(group){
     return{};
   }
 
-  const groupSize = parseInt(parsedGroupDef[0]);
+  const groupInfo = {};
+  groupInfo.groupSize = parseInt(parsedGroupDef[0]);
+
   const zedCode = parsedGroupDef[1].toUpperCase();
-  const codeSuffix = (parsedGroupDef.length === 3) ? parsedGroupDef[2] : '';
+  const codeSuffix = (parsedGroupDef.length === 3) ? parsedGroupDef[2] : '';  
+  groupInfo.spawnRage = codeSuffix === "!";
 
-  const getZedNameFromCode = (code, suffix) => {
-    switch(code){
-      case 'CY':
-        return 'Cyst';
-      case 'AL':
-        return (suffix === '*') ? 'Rioter' : 'Alpha Clot';
-      case 'SL':
-        return 'Slasher';
-      case 'GF':
-        return (suffix === '*') ? 'Gorefiend' : 'Gorefast';
-      case 'CR':
-        return (suffix === '*') ? 'Elite Crawler' : 'Crawler';
-      case 'ST':
-        return 'Stalker'; // TODO: consider st*
-      case 'BL':
-        return 'Bloat';
-      case 'HU':
-        return 'Husk'; // TODO: consider hu*
-      case 'SI':
-        return 'Siren';
-      case 'DE':
-        return 'EDAR Trapper';
-      case 'DL':
-        return 'EDAR Blaster';
-      case 'DR':
-        return 'EDAR Bomber';
-      case 'SC':
-        return 'Scrake';
-      case 'QP':
-        return 'Quarterpound';
-      case 'FP':
-        return 'Fleshpound';
-      default:
-        console.error(`Failed to identify zed: ${code}`);
-        return 'Unknown';
+  switch(zedCode){
+    case 'CY':
+      groupInfo.zedName = 'Cyst';
+      groupInfo.categoryName = 'Trash';
+      groupInfo.groupName = 'Clots';
+      break;
+    case 'AL':
+      groupInfo.zedName = (codeSuffix === '*') ? 'Rioter' : 'Alpha Clot';
+      groupInfo.categoryName = 'Trash';
+      groupInfo.groupName = 'Clots';
+      break;
+    case 'SL':
+      groupInfo.zedName = 'Slasher';
+      groupInfo.categoryName = 'Trash';
+      groupInfo.groupName = 'Clots';
+      break;
+    case 'GF':
+      groupInfo.zedName = (codeSuffix === '*') ? 'Gorefiend' : 'Gorefast';
+      groupInfo.categoryName = 'Trash';
+      groupInfo.groupName = 'Gorefasts';
+      break;
+    case 'CR':
+      groupInfo.zedName = (codeSuffix === '*') ? 'Elite Crawler' : 'Crawler';
+      groupInfo.categoryName = 'Trash';
+      groupInfo.groupName = 'Crawlers_Stalkers';
+      break;
+    case 'ST':
+      groupInfo.zedName = 'Stalker'; // TODO: consider st*
+      groupInfo.categoryName = 'Trash';
+      groupInfo.groupName = 'Crawlers_Stalkers';
+      break;
+    case 'BL':
+      groupInfo.zedName = 'Bloat';
+      groupInfo.categoryName = 'Medium';
+      groupInfo.groupName = 'Other';
+      break;
+    case 'HU':
+      groupInfo.zedName = 'Husk'; // TODO: consider hu*
+      groupInfo.categoryName = 'Medium';
+      groupInfo.groupName = 'Other';
+      break;
+    case 'SI':
+      groupInfo.zedName = 'Siren';
+      groupInfo.categoryName = 'Medium';
+      groupInfo.groupName = 'Other';
+      break;
+    case 'DE':
+      groupInfo.zedName = 'EDAR Trapper';
+      groupInfo.categoryName = 'Medium';
+      groupInfo.groupName = 'Robot';
+      break;
+    case 'DL':
+      groupInfo.zedName = 'EDAR Blaster';
+      groupInfo.categoryName = 'Medium';
+      groupInfo.groupName = 'Robot';
+      break;
+    case 'DR':
+      groupInfo.zedName = 'EDAR Bomber';
+      groupInfo.categoryName = 'Medium';
+      groupInfo.groupName = 'Robot';
+      break;
+    case 'SC':
+      groupInfo.zedName = 'Scrake';
+      groupInfo.categoryName = 'Large';
+      groupInfo.groupName = 'Scrakes';
+      break;
+    case 'QP':
+      groupInfo.zedName = 'Quarterpound';
+      groupInfo.categoryName = 'Large';
+      groupInfo.groupName = 'Fleshpounds';
+      break;
+    case 'FP':
+      groupInfo.zedName = 'Fleshpound';
+      groupInfo.categoryName = 'Large';
+      groupInfo.groupName = 'Fleshpounds';
+      break;
+    default:
+      console.error(`Failed to identify zed: ${code}`);
+      groupInfo.zedName = 'Unknown';
+      break;
+  }
+
+  return groupInfo;
+}
+
+function addCountToAnalysis(analysis, groupInfo){
+  // type
+  if(!analysis.type[groupInfo.zedName]){
+    analysis.type[groupInfo.zedName] = {};
+  }
+  analysis.type[groupInfo.zedName].num = (analysis.type[groupInfo.zedName].num || 0) + groupInfo.groupSize;
+
+  // category
+  if(!analysis.category[groupInfo.categoryName]){
+    analysis.category[groupInfo.categoryName] = {};
+  }
+  analysis.category[groupInfo.categoryName].num = (analysis.category[groupInfo.categoryName].num || 0) + groupInfo.groupSize;
+
+  // group
+  if(!analysis.group[groupInfo.groupName]){
+    analysis.group[groupInfo.groupName] = {};
+  }
+  analysis.group[groupInfo.groupName].num = (analysis.group[groupInfo.groupName].num || 0) + groupInfo.groupSize;
+
+  // add spawn rage count
+  if(groupInfo.spawnRage){
+    analysis.type[groupInfo.zedName].spawnRage = (analysis.type[groupInfo.zedName].spawnRage || 0) + groupInfo.groupSize;
+    analysis.category[groupInfo.categoryName].spawnRage = (analysis.category[groupInfo.categoryName].spawnRage || 0) + groupInfo.groupSize;
+    analysis.group[groupInfo.groupName].spawnRage = (analysis.group[groupInfo.groupName].spawnRage || 0) + groupInfo.groupSize;
+  }
+
+  return analysis;
+}
+
+function addPctPropertyToAnalysis(analysis, waveSize){
+  const namekeys = Object.keys(analysis);
+
+  for(let nameKey of namekeys){
+    const zedKeys = Object.keys(analysis[nameKey]);
+    
+    for(let zedKey of zedKeys){
+      analysis[nameKey][zedKey].pct = (100 * analysis[nameKey][zedKey].num / waveSize).toFixed(2);
     }
-  };
+  }
 
-  const zedName = getZedNameFromCode(zedCode, codeSuffix);
-  const spawnRage = codeSuffix === "!";
+  return analysis;
+}
 
-  return {
-    groupSize,
-    zedName,
-    spawnRage
-  };
+function makeTableFromAnalysis(analysis){
+
 }
 
 module.exports  = {
