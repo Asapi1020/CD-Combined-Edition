@@ -714,7 +714,6 @@ let analysis = [];
 let currentWave = 9; // Index of course
 
 setupSpawnCycleSelect();
-setSelectedClassForCurrentWave();
 
 // fetch cycle list and setup options for select
 function setupSpawnCycleSelect(){
@@ -744,6 +743,7 @@ function setSelectedClassForCurrentWave(unselected=-1){
 function analyzeAndUpdate(){
   if(analyzeFromConfig()){
     updateAnalysis();
+    setSelectedClassForCurrentWave();
   }
 }
 
@@ -751,6 +751,7 @@ function analyzeFromConfig(){
   const button = document.getElementById('analyzebutton');
 
   if(button){
+    // read config
     const spawnCycle = getSelectedInfoById('spawncycle').selectedText;
     const gameLength = parseInt(getSelectedInfoById('gamelength').selectedIndex);
     const difficulty = parseInt(getSelectedInfoById('difficulty').selectedIndex);
@@ -759,7 +760,15 @@ function analyzeFromConfig(){
     const wsf = (wsfInput)
       ? parseInt(wsfInput.value)
       : 12;
-  
+
+    // wave controller visibilty
+    const totalAnalysisIndex = gameLength*3 + 4;
+    if(currentWave > totalAnalysisIndex){
+      selectWave(totalAnalysisIndex-1);
+    }
+    updateWaveController(gameLength);
+
+    // analysis itself
     analysis = analyzeCycle(spawnCycle, gameLength, difficulty, wsf);
     return true;
   }
@@ -792,10 +801,39 @@ function getSelectedInfoById(id){
   };  
 }
 
+function updateWaveController(gameLength){
+  const waveController = document.getElementById('waveController');
+  let controllerContent = `
+    <li class="page-item"><button class="page-link" onclick="selectWave(0)">1</button></li>
+    <li class="page-item"><button class="page-link" onclick="selectWave(1)">2</button></li>
+    <li class="page-item"><button class="page-link" onclick="selectWave(2)">3</button></li>
+    <li class="page-item"><button class="page-link" onclick="selectWave(3)">4</button></li>`;
+  
+  if(gameLength >= 1){
+    controllerContent += `
+      <li class="page-item"><button class="page-link" onclick="selectWave(4)">5</button></li>
+      <li class="page-item"><button class="page-link" onclick="selectWave(5)">6</button></li>
+      <li class="page-item"><button class="page-link" onclick="selectWave(6)">7</button></li>`;
+  }
+  if(gameLength == 2){
+    controllerContent += `
+      <li class="page-item"><button class="page-link" onclick="selectWave(7)">8</button></li>
+      <li class="page-item"><button class="page-link" onclick="selectWave(8)">9</button></li>
+      <li class="page-item"><button class="page-link" onclick="selectWave(9)">10</button></li>`;
+  }
+
+  controllerContent += `<li class="page-item"><button class="page-link" onclick="selectWave(${gameLength*3 + 4})">ALL</button></li>`
+
+  waveController.innerHTML = controllerContent;
+  if(waveController.classList.contains('invisible')){
+    waveController.classList.remove('invisible');
+  }
+}
+
 function updateAnalysis(){
   if(analysis.length === 0){
-    console.log('Not analyzed yet... automatically analyze for current config');
-    analyzeFromConfig();
+    console.log('Not analyzed yet...');
+    return;
   }
   console.log(analysis);
   // clear table content
@@ -832,6 +870,10 @@ function updateAnalysis(){
 }
 
 function selectWave(waveNum){
+  if(currentWave === waveNum){
+    console.log('Nothing changed');
+    return;
+  }
   const lastWave = currentWave;
   currentWave = waveNum;
   updateAnalysis();

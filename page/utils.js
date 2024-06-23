@@ -61,14 +61,14 @@ function extractDefsByGameLen(targetSpawnCycleDefs, gameLength){
     // short
     case 0:
       if(defLength === 4){
-        return targetSpawnCycleDef;
+        return targetSpawnCycleDefs;
       }
       else if(defLength === 7){
         // [0, 1, 2, 3, 4, 5, 6] -> [0, 2, 4, 6]
         targetSpawnCycleDefs.splice(5,1);
         targetSpawnCycleDefs.splice(3,1);
         targetSpawnCycleDefs.splice(1,1);
-        return targetSpawnCycleDef;
+        return targetSpawnCycleDefs;
       }
       else if(defLength === 10){
         // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] -> [0,  3,  6,  9]
@@ -86,7 +86,7 @@ function extractDefsByGameLen(targetSpawnCycleDefs, gameLength){
     // medium
     case 1:
         if(defLength === 7){
-          return targetSpawnCycleDef;
+          return targetSpawnCycleDefs;
         }
         else if(defLength === 10){
           // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] -> [0, 1, 3, 5, 6, 8, 9]
