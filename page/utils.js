@@ -316,17 +316,17 @@ function parseGroupInfo(group){
     case 'DE':
       groupInfo.zedName = 'EDAR Trapper';
       groupInfo.categoryName = 'Medium';
-      groupInfo.groupName = 'Robot';
+      groupInfo.groupName = 'Robots';
       break;
     case 'DL':
       groupInfo.zedName = 'EDAR Blaster';
       groupInfo.categoryName = 'Medium';
-      groupInfo.groupName = 'Robot';
+      groupInfo.groupName = 'Robots';
       break;
     case 'DR':
       groupInfo.zedName = 'EDAR Bomber';
       groupInfo.categoryName = 'Medium';
-      groupInfo.groupName = 'Robot';
+      groupInfo.groupName = 'Robots';
       break;
     case 'SC':
       groupInfo.zedName = 'Scrake';
