@@ -86,7 +86,7 @@ function extractDefsByGameLen(targetSpawnCycleDefs, gameLength){
     // medium
     case 1:
         if(defLength === 7){
-          return targetSpawnCycleDef;
+          return targetSpawnCycleDefs;
         }
         else if(defLength === 10){
           // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] -> [0, 1, 3, 5, 6, 8, 9]

@@ -44,11 +44,14 @@
           <input id="wavesizefakes" class="form-control" type="number" min="1" max="32" value="12">
         </div>
       </div>
-      <button id="analyzebutton" class="btn btn-success mb-3" onclick="analyzeAndUpdate()">Analyze</button>
+      <button id="analyzebutton" class="btn btn-success mb-3" onclick="analyzeAndUpdate()">
+        Analyze
+        <i class="bi-arrow-clockwise ms-1"></i>
+      </button>
     </div>
 
     <nav aria-label="Wave Controller">
-      <ul class="pagination" id="waveController">
+      <ul class="pagination invisible" id="waveController">
         <li class="page-item"><button class="page-link" onclick="selectWave(0)">1</button></li>
         <li class="page-item"><button class="page-link" onclick="selectWave(1)">2</button></li>
         <li class="page-item"><button class="page-link" onclick="selectWave(2)">3</button></li>
