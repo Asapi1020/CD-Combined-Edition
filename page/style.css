@@ -54,3 +54,8 @@ button.page-link.selected:hover {
   background-color:#cccccc;
   color: white;
 }
+
+div.card.settings {
+  background-color: #666666;
+  color: white
+}

@@ -714,7 +714,6 @@ let analysis = [];
 let currentWave = 9; // Index of course
 
 setupSpawnCycleSelect();
-setSelectedClassForCurrentWave();
 
 // fetch cycle list and setup options for select
 function setupSpawnCycleSelect(){
@@ -744,6 +743,7 @@ function setSelectedClassForCurrentWave(unselected=-1){
 function analyzeAndUpdate(){
   if(analyzeFromConfig()){
     updateAnalysis();
+    setSelectedClassForCurrentWave();
   }
 }
 
@@ -870,6 +870,10 @@ function updateAnalysis(){
 }
 
 function selectWave(waveNum){
+  if(currentWave === waveNum){
+    console.log('Nothing changed');
+    return;
+  }
   const lastWave = currentWave;
   currentWave = waveNum;
   updateAnalysis();
