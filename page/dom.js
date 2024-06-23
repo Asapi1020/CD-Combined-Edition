@@ -714,6 +714,7 @@ let analysis = [];
 let currentWave = 9; // Index of course
 
 setupSpawnCycleSelect();
+setSelectedClassForCurrentWave();
 
 // fetch cycle list and setup options for select
 function setupSpawnCycleSelect(){
@@ -726,6 +727,17 @@ function setupSpawnCycleSelect(){
     cycleOption.value = (index + 1);
     select.appendChild(cycleOption);
   });
+}
+
+// set class'selected' to wave controller button to control their style
+function setSelectedClassForCurrentWave(unselected=-1){
+  const waveController = document.getElementById('waveController');
+  const items = waveController.querySelectorAll('button');
+  items[currentWave].classList.add('selected');
+
+  if(unselected >= 0){
+    items[unselected].classList.remove('selected');
+  }
 }
 
 // read input config and execute other functions to show analysis
@@ -743,7 +755,7 @@ function analyzeFromConfig(){
       : 12;
   
     analysis = analyzeCycle(spawnCycle, gameLength, difficulty, wsf);
-    updateAnalysis(analysis);
+    updateAnalysis();
   }
   else{
     console.error("Not found the button identified as analyzebutton");
@@ -773,7 +785,7 @@ function getSelectedInfoById(id){
   };  
 }
 
-function updateAnalysis(analysis){
+function updateAnalysis(){
   console.log(analysis);
   // clear table content
   const analysisDiv = document.getElementById('analysis');
@@ -806,4 +818,11 @@ function updateAnalysis(analysis){
       tableData[3].textContent = zedInfo.spawnRage;
     }
   }
+}
+
+function selectWave(waveNum){
+  const lastWave = currentWave;
+  currentWave = waveNum;
+  updateAnalysis();
+  setSelectedClassForCurrentWave(lastWave);
 }

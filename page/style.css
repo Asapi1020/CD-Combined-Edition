@@ -39,12 +39,18 @@ td,th{
   width: 25%;
 }
 
-button.page-link {
+button.page-link{
   width: 60px;
+  background-color:white;
+  color: #666666;
+}
+
+button.page-link.selected, button.page-link:hover {
   background-color: #666666;
   color: white;
 }
 
-button.page-link:hover {
-  color: #666666;
+button.page-link.selected:hover {
+  background-color:#cccccc;
+  color: white;
 }
