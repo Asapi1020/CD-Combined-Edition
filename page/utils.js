@@ -20,18 +20,27 @@ function analyzeCycle(spawnCycle, gameLength, difficulty, wsf){
     'group': {}
   };
 
-  // calculate
+  // find target spawn cycle definition and apply game length
   const targetSpawnCycleDefs = spawnCycleDefs[spawnCycle];
   const cycleDefsApplyedGameLen = extractDefsByGameLen(targetSpawnCycleDefs, gameLength);
   
+  // analyze for each wave
   let waveNum = 0;
+  let matchSize = 0;
   for(let waveDef of cycleDefsApplyedGameLen){
+    // calculate wave size and analyze wave with it
     const waveSize = calcWaveSize(waveNum, gameLength, difficulty, wsf);
     const waveAndTotalAnalysis = analyzeWave(waveDef, waveSize, totalAnalysis);
+
+    // register the results
     cycleAnalysis.push(waveAndTotalAnalysis.waveAnalysis);
     totalAnalysis = waveAndTotalAnalysis.totalAnalysis;
     ++waveNum;
+    matchSize += waveSize;
   }
+
+  // register the final output of total count
+  totalAnalysis = addPctPropertyToAnalysis(totalAnalysis, matchSize);
   cycleAnalysis.push(totalAnalysis);
   return cycleAnalysis;
 }
@@ -168,14 +177,13 @@ function calcWaveSize(waveNum, gameLength, difficulty, wsf){
  * }
  */
 function analyzeWave(waveDef, waveSize, totalAnalysis){
-  let analysis = {
+  let waveAnalysis = {
     'category': {},
     'type': {},
     'group': {}
   };
   let spawnCount = 0;
 
-  // (e.g) 
   const squads = waveDef.split(",");
   
   do{
@@ -186,18 +194,19 @@ function analyzeWave(waveDef, waveSize, totalAnalysis){
         const groupInfo = parseGroupInfo(group);
   
         if(spawnCount + groupInfo.groupSize > waveSize){
-          // end of wave
+          // at the end of wave, you should cut the group
           groupInfo.groupSize = waveSize - spawnCount;
         }
   
         spawnCount += groupInfo.groupSize;
-        analysis = addCountToAnalysis(analysis, groupInfo);
-        totalAnalysis = addCountToAnalysis(totalAnalysis, groupInfo) ;
+        waveAnalysis = addCountToAnalysis(waveAnalysis, groupInfo);
+        totalAnalysis = addCountToAnalysis(totalAnalysis, groupInfo); // this is sum of wave 1 to here
   
         if(spawnCount >= waveSize){
-          analysis = addPctPropertyToAnalysis(analysis, waveSize);
+          // done to count up this wave. It's time to calc percentage
+          waveAnalysis = addPctPropertyToAnalysis(waveAnalysis, waveSize);
           return {
-            'waveAnalysis': analysis,
+            waveAnalysis,
             totalAnalysis
           };
         }
@@ -207,7 +216,7 @@ function analyzeWave(waveDef, waveSize, totalAnalysis){
   
   console.log('something error');
   return {
-    'waveAnalysis': analysis,
+    waveAnalysis,
     totalAnalysis
   };
 }
