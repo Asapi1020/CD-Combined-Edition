@@ -773,8 +773,23 @@ function getSelectedInfoById(id){
 }
 
 function updateAnalysis(analysis){
-  // update table content
   console.log(analysis);
+  // clear table content
+  const analysisDiv = document.getElementById('analysis');
+  const rows = analysisDiv.querySelectorAll('tr');
+  rows.forEach(row => {
+    const tableData = row.children;
+    
+    if(tableData[0].nodeName === 'TH'){
+      return;
+    }
+
+    tableData[1].textContent = '';
+    tableData[2].textContent = '';
+    tableData[3].textContent = '';
+  });
+
+  // update table content
   const tableNameKeys = Object.keys(analysis[9]);
   
   for(let tableNameKey of tableNameKeys){
