@@ -790,15 +790,15 @@ function updateAnalysis(analysis){
   });
 
   // update table content
-  const tableNameKeys = Object.keys(analysis[9]);
+  const tableNameKeys = Object.keys(analysis[0]);
   
   for(let tableNameKey of tableNameKeys){
-    const zedNameKeys = Object.keys(analysis[9][tableNameKey]);
+    const zedNameKeys = Object.keys(analysis[0][tableNameKey]);
 
     for(let zedNameKey of zedNameKeys){
       const row = document.getElementById(zedNameKey);
       const tableData = row.children;
-      const zedInfo = analysis[9][tableNameKey][zedNameKey];
+      const zedInfo = analysis[0][tableNameKey][zedNameKey];
       
       tableData[1].textContent = zedInfo.num;
       tableData[2].textContent = zedInfo.pct;

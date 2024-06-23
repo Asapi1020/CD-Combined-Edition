@@ -197,7 +197,7 @@ function analyzeWave(waveDef, waveSize){
   return analysis;
 }
 
-// (e.g) 3GF* -> {groupSize: 3, zedName: Gorefiend, categoryName: Trash, groupName: Gorefasts spawnRage: false}
+// (e.g) 3GF* -> {groupSize: 3, zedName: Gorefiend, categoryName: Trash, groupName: Gorefasts, albino: true, spawnRage: false}
 function parseGroupInfo(group){
   // (e.g) 3GF* -> [3, GF, *]
   const parsedGroupDef = group.match(/(^\d+)|([A-Za-z]+)|([*!]$)/g);
@@ -210,8 +210,30 @@ function parseGroupInfo(group){
   const groupInfo = {};
   groupInfo.groupSize = parseInt(parsedGroupDef[0]);
 
-  const zedCode = parsedGroupDef[1].toUpperCase();
-  const codeSuffix = (parsedGroupDef.length === 3) ? parsedGroupDef[2] : '';  
+  let zedCode = parsedGroupDef[1].toUpperCase();
+  let codeSuffix = (parsedGroupDef.length === 3) ? parsedGroupDef[2] : '';
+
+  // handle ST* and HU*
+  if(codeSuffix === "*" && (zedCode === "ST" || zedCode === "HU")){
+    const rand = Math.floor(Math.random() * 3);
+    switch(rand){
+      case 0:
+        zedCode = 'DE';
+        break;
+      case 1:
+        zedCode = 'DL';
+        break;
+      case 2:
+        zedCode = 'DR';
+        break;
+      default:
+        console.error(`something wrong with random output: ${rand}`);
+        break;
+    }
+    codeSuffix = '';
+  }
+
+  groupInfo.albino = codeSuffix === "*";
   groupInfo.spawnRage = codeSuffix === "!";
 
   switch(zedCode){
@@ -321,6 +343,14 @@ function addCountToAnalysis(analysis, groupInfo){
     analysis.group[groupInfo.groupName] = {};
   }
   analysis.group[groupInfo.groupName].num = (analysis.group[groupInfo.groupName].num || 0) + groupInfo.groupSize;
+
+  // albino
+  if(groupInfo.albino){
+    if(!analysis.group.Albino){
+      analysis.group.Albino = {};
+    }
+    analysis.group.Albino.num = (analysis.group.Albino.num || 0) + groupInfo.groupSize;
+  }
 
   // add spawn rage count
   if(groupInfo.spawnRage){
