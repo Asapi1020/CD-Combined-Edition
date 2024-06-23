@@ -41,6 +41,8 @@ function analyzeCycle(spawnCycle, gameLength, difficulty, wsf){
 
   // register the final output of total count
   totalAnalysis = addPctPropertyToAnalysis(totalAnalysis, matchSize);
+  totalAnalysis.category.Total = {};
+  totalAnalysis.category.Total.num = matchSize;
   cycleAnalysis.push(totalAnalysis);
   return cycleAnalysis;
 }
@@ -205,6 +207,8 @@ function analyzeWave(waveDef, waveSize, totalAnalysis){
         if(spawnCount >= waveSize){
           // done to count up this wave. It's time to calc percentage
           waveAnalysis = addPctPropertyToAnalysis(waveAnalysis, waveSize);
+          waveAnalysis.category.Total = {};
+          waveAnalysis.category.Total.num = waveSize;
           return {
             waveAnalysis,
             totalAnalysis
