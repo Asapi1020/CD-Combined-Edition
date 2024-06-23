@@ -14,17 +14,25 @@ function analyzeCycle(spawnCycle, gameLength, difficulty, wsf){
   });
 
   let cycleAnalysis = [];
+  let totalAnalysis = {
+    'category': {},
+    'type': {},
+    'group': {}
+  };
 
   // calculate
   const targetSpawnCycleDefs = spawnCycleDefs[spawnCycle];
   const cycleDefsApplyedGameLen = extractDefsByGameLen(targetSpawnCycleDefs, gameLength);
   
-  cycleDefsApplyedGameLen.forEach((waveDef, waveNum) => {
+  let waveNum = 0;
+  for(let waveDef of cycleDefsApplyedGameLen){
     const waveSize = calcWaveSize(waveNum, gameLength, difficulty, wsf);
-    const waveAnalysis = analyzeWave(waveDef, waveSize);
-    cycleAnalysis.push(waveAnalysis);
-  });
-
+    const waveAndTotalAnalysis = analyzeWave(waveDef, waveSize, totalAnalysis);
+    cycleAnalysis.push(waveAndTotalAnalysis.waveAnalysis);
+    totalAnalysis = waveAndTotalAnalysis.totalAnalysis;
+    ++waveNum;
+  }
+  cycleAnalysis.push(totalAnalysis);
   return cycleAnalysis;
 }
 
@@ -159,7 +167,7 @@ function calcWaveSize(waveNum, gameLength, difficulty, wsf){
  *  'group': {same}
  * }
  */
-function analyzeWave(waveDef, waveSize){
+function analyzeWave(waveDef, waveSize, totalAnalysis){
   let analysis = {
     'category': {},
     'type': {},
@@ -183,18 +191,25 @@ function analyzeWave(waveDef, waveSize){
         }
   
         spawnCount += groupInfo.groupSize;
-        analysis = addCountToAnalysis(analysis, groupInfo);        
+        analysis = addCountToAnalysis(analysis, groupInfo);
+        totalAnalysis = addCountToAnalysis(totalAnalysis, groupInfo) ;
   
         if(spawnCount >= waveSize){
           analysis = addPctPropertyToAnalysis(analysis, waveSize);
-          return analysis;
+          return {
+            'waveAnalysis': analysis,
+            totalAnalysis
+          };
         }
       };
     };
   }while(spawnCount < waveSize)
   
   console.log('something error');
-  return analysis;
+  return {
+    'waveAnalysis': analysis,
+    totalAnalysis
+  };
 }
 
 // (e.g) 3GF* -> {groupSize: 3, zedName: Gorefiend, categoryName: Trash, groupName: Gorefasts, albino: true, spawnRage: false}

@@ -741,6 +741,12 @@ function setSelectedClassForCurrentWave(unselected=-1){
 }
 
 // read input config and execute other functions to show analysis
+function analyzeAndUpdate(){
+  if(analyzeFromConfig()){
+    updateAnalysis();
+  }
+}
+
 function analyzeFromConfig(){
   const button = document.getElementById('analyzebutton');
 
@@ -755,10 +761,11 @@ function analyzeFromConfig(){
       : 12;
   
     analysis = analyzeCycle(spawnCycle, gameLength, difficulty, wsf);
-    updateAnalysis();
+    return true;
   }
   else{
     console.error("Not found the button identified as analyzebutton");
+    return false;
   }
 }
 
@@ -786,6 +793,10 @@ function getSelectedInfoById(id){
 }
 
 function updateAnalysis(){
+  if(analysis.length === 0){
+    console.log('Not analyzed yet... automatically analyze for current config');
+    analyzeFromConfig();
+  }
   console.log(analysis);
   // clear table content
   const analysisDiv = document.getElementById('analysis');
