@@ -161,7 +161,7 @@ function calcWaveSize(waveNum, gameLength, difficulty, wsf){
   const multiplier = calcMultiplier();
   const baseNum = defaultBaseNum[gameLength][waveNum];
   const difficultyMod = defaultDifficultyMod[difficulty];
-  return Math.round(multiplier * baseNum * difficultyMod);
+  return Math.floor(multiplier * baseNum * difficultyMod);
 }
 
 /**
