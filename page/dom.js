@@ -711,6 +711,7 @@ const spawnCycleDefs = {
 }
 
 let analysis = [];
+let currentWave = 9; // Index of course
 
 setupSpawnCycleSelect();
 
@@ -790,15 +791,15 @@ function updateAnalysis(analysis){
   });
 
   // update table content
-  const tableNameKeys = Object.keys(analysis[0]);
+  const tableNameKeys = Object.keys(analysis[currentWave]);
   
   for(let tableNameKey of tableNameKeys){
-    const zedNameKeys = Object.keys(analysis[0][tableNameKey]);
+    const zedNameKeys = Object.keys(analysis[currentWave][tableNameKey]);
 
     for(let zedNameKey of zedNameKeys){
       const row = document.getElementById(zedNameKey);
       const tableData = row.children;
-      const zedInfo = analysis[0][tableNameKey][zedNameKey];
+      const zedInfo = analysis[currentWave][tableNameKey][zedNameKey];
       
       tableData[1].textContent = zedInfo.num;
       tableData[2].textContent = zedInfo.pct;

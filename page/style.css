@@ -34,3 +34,17 @@ tr.Robot > td {
 tr#Other > td {
   background-color: #cccccc;
 }
+
+td,th{
+  width: 25%;
+}
+
+button.page-link {
+  width: 60px;
+  background-color: #666666;
+  color: white;
+}
+
+button.page-link:hover {
+  color: #666666;
+}
