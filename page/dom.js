@@ -711,8 +711,10 @@ const spawnCycleDefs = {
 }
 
 let analysis = [];
+let currentWave = 9; // Index of course
 
 setupSpawnCycleSelect();
+setSelectedClassForCurrentWave();
 
 // fetch cycle list and setup options for select
 function setupSpawnCycleSelect(){
@@ -727,7 +729,24 @@ function setupSpawnCycleSelect(){
   });
 }
 
+// set class'selected' to wave controller button to control their style
+function setSelectedClassForCurrentWave(unselected=-1){
+  const waveController = document.getElementById('waveController');
+  const items = waveController.querySelectorAll('button');
+  items[currentWave].classList.add('selected');
+
+  if(unselected >= 0){
+    items[unselected].classList.remove('selected');
+  }
+}
+
 // read input config and execute other functions to show analysis
+function analyzeAndUpdate(){
+  if(analyzeFromConfig()){
+    updateAnalysis();
+  }
+}
+
 function analyzeFromConfig(){
   const button = document.getElementById('analyzebutton');
 
@@ -742,10 +761,11 @@ function analyzeFromConfig(){
       : 12;
   
     analysis = analyzeCycle(spawnCycle, gameLength, difficulty, wsf);
-    updateAnalysis(analysis);
+    return true;
   }
   else{
     console.error("Not found the button identified as analyzebutton");
+    return false;
   }
 }
 
@@ -772,22 +792,48 @@ function getSelectedInfoById(id){
   };  
 }
 
-function updateAnalysis(analysis){
-  // update table content
+function updateAnalysis(){
+  if(analysis.length === 0){
+    console.log('Not analyzed yet... automatically analyze for current config');
+    analyzeFromConfig();
+  }
   console.log(analysis);
-  const tableNameKeys = Object.keys(analysis[9]);
+  // clear table content
+  const analysisDiv = document.getElementById('analysis');
+  const rows = analysisDiv.querySelectorAll('tr');
+  rows.forEach(row => {
+    const tableData = row.children;
+    
+    if(tableData[0].nodeName === 'TH'){
+      return;
+    }
+
+    tableData[1].textContent = '';
+    tableData[2].textContent = '';
+    tableData[3].textContent = '';
+  });
+
+  // update table content
+  const tableNameKeys = Object.keys(analysis[currentWave]);
   
   for(let tableNameKey of tableNameKeys){
-    const zedNameKeys = Object.keys(analysis[9][tableNameKey]);
+    const zedNameKeys = Object.keys(analysis[currentWave][tableNameKey]);
 
     for(let zedNameKey of zedNameKeys){
       const row = document.getElementById(zedNameKey);
       const tableData = row.children;
-      const zedInfo = analysis[9][tableNameKey][zedNameKey];
+      const zedInfo = analysis[currentWave][tableNameKey][zedNameKey];
       
       tableData[1].textContent = zedInfo.num;
       tableData[2].textContent = zedInfo.pct;
       tableData[3].textContent = zedInfo.spawnRage;
     }
   }
+}
+
+function selectWave(waveNum){
+  const lastWave = currentWave;
+  currentWave = waveNum;
+  updateAnalysis();
+  setSelectedClassForCurrentWave(lastWave);
 }

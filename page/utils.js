@@ -14,17 +14,36 @@ function analyzeCycle(spawnCycle, gameLength, difficulty, wsf){
   });
 
   let cycleAnalysis = [];
+  let totalAnalysis = {
+    'category': {},
+    'type': {},
+    'group': {}
+  };
 
-  // calculate
+  // find target spawn cycle definition and apply game length
   const targetSpawnCycleDefs = spawnCycleDefs[spawnCycle];
   const cycleDefsApplyedGameLen = extractDefsByGameLen(targetSpawnCycleDefs, gameLength);
   
-  cycleDefsApplyedGameLen.forEach((waveDef, waveNum) => {
+  // analyze for each wave
+  let waveNum = 0;
+  let matchSize = 0;
+  for(let waveDef of cycleDefsApplyedGameLen){
+    // calculate wave size and analyze wave with it
     const waveSize = calcWaveSize(waveNum, gameLength, difficulty, wsf);
-    const waveAnalysis = analyzeWave(waveDef, waveSize);
-    cycleAnalysis.push(waveAnalysis);
-  });
+    const waveAndTotalAnalysis = analyzeWave(waveDef, waveSize, totalAnalysis);
 
+    // register the results
+    cycleAnalysis.push(waveAndTotalAnalysis.waveAnalysis);
+    totalAnalysis = waveAndTotalAnalysis.totalAnalysis;
+    ++waveNum;
+    matchSize += waveSize;
+  }
+
+  // register the final output of total count
+  totalAnalysis = addPctPropertyToAnalysis(totalAnalysis, matchSize);
+  totalAnalysis.category.Total = {};
+  totalAnalysis.category.Total.num = matchSize;
+  cycleAnalysis.push(totalAnalysis);
   return cycleAnalysis;
 }
 
@@ -159,15 +178,14 @@ function calcWaveSize(waveNum, gameLength, difficulty, wsf){
  *  'group': {same}
  * }
  */
-function analyzeWave(waveDef, waveSize){
-  let analysis = {
+function analyzeWave(waveDef, waveSize, totalAnalysis){
+  let waveAnalysis = {
     'category': {},
     'type': {},
     'group': {}
   };
   let spawnCount = 0;
 
-  // (e.g) 
   const squads = waveDef.split(",");
   
   do{
@@ -178,26 +196,36 @@ function analyzeWave(waveDef, waveSize){
         const groupInfo = parseGroupInfo(group);
   
         if(spawnCount + groupInfo.groupSize > waveSize){
-          // end of wave
+          // at the end of wave, you should cut the group
           groupInfo.groupSize = waveSize - spawnCount;
         }
   
         spawnCount += groupInfo.groupSize;
-        analysis = addCountToAnalysis(analysis, groupInfo);        
+        waveAnalysis = addCountToAnalysis(waveAnalysis, groupInfo);
+        totalAnalysis = addCountToAnalysis(totalAnalysis, groupInfo); // this is sum of wave 1 to here
   
         if(spawnCount >= waveSize){
-          analysis = addPctPropertyToAnalysis(analysis, waveSize);
-          return analysis;
+          // done to count up this wave. It's time to calc percentage
+          waveAnalysis = addPctPropertyToAnalysis(waveAnalysis, waveSize);
+          waveAnalysis.category.Total = {};
+          waveAnalysis.category.Total.num = waveSize;
+          return {
+            waveAnalysis,
+            totalAnalysis
+          };
         }
       };
     };
   }while(spawnCount < waveSize)
   
   console.log('something error');
-  return analysis;
+  return {
+    waveAnalysis,
+    totalAnalysis
+  };
 }
 
-// (e.g) 3GF* -> {groupSize: 3, zedName: Gorefiend, categoryName: Trash, groupName: Gorefasts spawnRage: false}
+// (e.g) 3GF* -> {groupSize: 3, zedName: Gorefiend, categoryName: Trash, groupName: Gorefasts, albino: true, spawnRage: false}
 function parseGroupInfo(group){
   // (e.g) 3GF* -> [3, GF, *]
   const parsedGroupDef = group.match(/(^\d+)|([A-Za-z]+)|([*!]$)/g);
@@ -210,8 +238,30 @@ function parseGroupInfo(group){
   const groupInfo = {};
   groupInfo.groupSize = parseInt(parsedGroupDef[0]);
 
-  const zedCode = parsedGroupDef[1].toUpperCase();
-  const codeSuffix = (parsedGroupDef.length === 3) ? parsedGroupDef[2] : '';  
+  let zedCode = parsedGroupDef[1].toUpperCase();
+  let codeSuffix = (parsedGroupDef.length === 3) ? parsedGroupDef[2] : '';
+
+  // handle ST* and HU*
+  if(codeSuffix === "*" && (zedCode === "ST" || zedCode === "HU")){
+    const rand = Math.floor(Math.random() * 3);
+    switch(rand){
+      case 0:
+        zedCode = 'DE';
+        break;
+      case 1:
+        zedCode = 'DL';
+        break;
+      case 2:
+        zedCode = 'DR';
+        break;
+      default:
+        console.error(`something wrong with random output: ${rand}`);
+        break;
+    }
+    codeSuffix = '';
+  }
+
+  groupInfo.albino = codeSuffix === "*";
   groupInfo.spawnRage = codeSuffix === "!";
 
   switch(zedCode){
@@ -266,17 +316,17 @@ function parseGroupInfo(group){
     case 'DE':
       groupInfo.zedName = 'EDAR Trapper';
       groupInfo.categoryName = 'Medium';
-      groupInfo.groupName = 'Robot';
+      groupInfo.groupName = 'Robots';
       break;
     case 'DL':
       groupInfo.zedName = 'EDAR Blaster';
       groupInfo.categoryName = 'Medium';
-      groupInfo.groupName = 'Robot';
+      groupInfo.groupName = 'Robots';
       break;
     case 'DR':
       groupInfo.zedName = 'EDAR Bomber';
       groupInfo.categoryName = 'Medium';
-      groupInfo.groupName = 'Robot';
+      groupInfo.groupName = 'Robots';
       break;
     case 'SC':
       groupInfo.zedName = 'Scrake';
@@ -321,6 +371,14 @@ function addCountToAnalysis(analysis, groupInfo){
     analysis.group[groupInfo.groupName] = {};
   }
   analysis.group[groupInfo.groupName].num = (analysis.group[groupInfo.groupName].num || 0) + groupInfo.groupSize;
+
+  // albino
+  if(groupInfo.albino){
+    if(!analysis.group.Albino){
+      analysis.group.Albino = {};
+    }
+    analysis.group.Albino.num = (analysis.group.Albino.num || 0) + groupInfo.groupSize;
+  }
 
   // add spawn rage count
   if(groupInfo.spawnRage){

@@ -44,12 +44,28 @@
           <input id="wavesizefakes" class="form-control" type="number" min="1" max="32" value="12">
         </div>
       </div>
-      <button id="analyzebutton" class="btn btn-success mb-3" onclick="analyzeFromConfig()">Analyze</button>
+      <button id="analyzebutton" class="btn btn-success mb-3" onclick="analyzeAndUpdate()">Analyze</button>
     </div>
+
+    <nav aria-label="Wave Controller">
+      <ul class="pagination" id="waveController">
+        <li class="page-item"><button class="page-link" onclick="selectWave(0)">1</button></li>
+        <li class="page-item"><button class="page-link" onclick="selectWave(1)">2</button></li>
+        <li class="page-item"><button class="page-link" onclick="selectWave(2)">3</button></li>
+        <li class="page-item"><button class="page-link" onclick="selectWave(3)">4</button></li>
+        <li class="page-item"><button class="page-link" onclick="selectWave(4)">5</button></li>
+        <li class="page-item"><button class="page-link" onclick="selectWave(5)">6</button></li>
+        <li class="page-item"><button class="page-link" onclick="selectWave(6)">7</button></li>
+        <li class="page-item"><button class="page-link" onclick="selectWave(7)">8</button></li>
+        <li class="page-item"><button class="page-link" onclick="selectWave(8)">9</button></li>
+        <li class="page-item"><button class="page-link" onclick="selectWave(9)">10</button></li>
+        <li class="page-item"><button class="page-link" onclick="selectWave(10)">ALL</button></li>
+      </ul>
+    </nav>
 
     <div id="analysis">
       <label class="form-label">ZEDs by Category</label>
-      <table class="table table-bordered">
+      <table id="categoryAnalysis" class="table table-bordered">
         <tr class="headerRow">
           <th>Name</th><th>count</th><th>%</th><th>Spawn Rage</th>
         </tr>
@@ -68,7 +84,7 @@
       </table>
 
       <label class="form-label">ZEDs by Type</label>
-      <table class="table table-bordered">
+      <table id="typeAnalysis" class="table table-bordered">
         <tr class="headerRow">
           <th>Name</th><th>count</th><th>%</th><th>Spawn Rage</th>
         </tr>
@@ -129,7 +145,7 @@
       </table>
 
       <label class="form-label">ZEDs by Group</label>
-      <table class="table table-bordered">
+      <table id="groupAnalysis" class="table table-bordered">
         <tr class="headerRow">
           <th>Name</th><th>count</th><th>%</th><th>Spawn Rage</th>
         </tr>
