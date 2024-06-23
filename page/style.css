@@ -59,3 +59,7 @@ div.card.settings {
   background-color: #666666;
   color: white
 }
+
+div#analysis {
+  width: 660px;
+}
