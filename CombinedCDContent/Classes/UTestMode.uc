@@ -85,7 +85,7 @@ event PostBeginPlay()
     MySTMGRI.bLargeLess = bLargeLess;
     MYSTMGRI.bHSOnly = bHSOnly;
     MySTMGRI.nFakedPlayers = ZedHPFakes;
-    RefleshWebInfo();
+    RefreshWebInfo();
 
     bNVBlockDramatic = bDisableZedTime; // an variable called in DramaEvent()
     SaveConfig();
@@ -428,7 +428,7 @@ function MaintainTrashChallenge()
         MaxMonstersInt += 4;
     
     MaxMonsters = string(MaxMonstersInt);
-    RefleshWebInfo();
+    RefreshWebInfo();
 
     if(MaxMonstersInt < 32)
         SetTimer(30.f, false, 'MaintainTrashChallenge');
@@ -465,7 +465,7 @@ exec function DisableRespawn(bool bDisable)
     bDisableRespawn = bDisable;
 }
 
-function RefleshWebInfo()
+function RefreshWebInfo()
 {
     MySTMGRI.CDInfoParams.SC = SpawnCycle;
     MySTMGRI.CDInfoParams.MM = MaxMonsters;
@@ -483,7 +483,7 @@ function SetParams(CD_PlayerController CDPC, string S)
 {
     ChatCommander.RunCDChatCommandIfAuthorized(CDPC, S);
     SaveConfig();
-    RefleshWebInfo();
+    RefreshWebInfo();
 }
 
 function ModTraderDash(bool bDash){ return; }
