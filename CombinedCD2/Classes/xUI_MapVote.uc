@@ -373,18 +373,7 @@ function DrawMenu()
 			WDL = GetCDPC().MatchStats.WeaponDamageList;
 			for(i=0; i<WDL.length; i++)
 			{
-				if(ClassIsChildOf(WDL[i].WeaponDef, Class'KFGame.KFWeapDef_Knife_Base'))
-				{
-					WeapName = class'KFGame.KFGFxPostGameContainer_PlayerStats'.default.KnifeString;
-				}
-				else if(InStr(PathName(WDL[i].WeaponDef), "KFWeapDef_Grenade_") > 0)
-				{
-					WeapName = ParseLocalizedPropertyPath(WDL[i].WeaponDef.default.WeaponClassPath $ ".ItemName");
-				}
-				else
-				{
-					WeapName = class'CD_Object'.static.GetWeapClass(WDL[i].WeaponDef).default.ItemName;
-				}
+				WeapName = class'CD_Object'.static.GetWeapName(WDL[i].WeaponDef);
 
 				if(WeapName == "")
 				{

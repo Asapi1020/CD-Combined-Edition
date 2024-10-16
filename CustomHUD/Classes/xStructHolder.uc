@@ -65,10 +65,21 @@ struct CDInfo
 struct MatchInfo
 {
 	var string TimeStamp;
-	var int PlayerNum;
+	var string MapName;
 	var CDInfo CI;
-	var int ResultState;
+	var bool bVictory;
 	var byte DefeatWave;
+	var array<string> CheatMessages, Mutators;
+	var bool bSolo;
+};
+
+struct UserStats
+{
+	var string PlayerName, ID, Perk;
+	var float PlayTime;
+	var int DamageDealt, DamageTaken, HealsGiven, HealsReceived, DoshEarned, ShotsFired, ShotsHit, HeadShots, Deaths, Kills, LargeKills;
+	var array<WeaponDamage> WeaponDamageList;
+	var array<ZedKillType> ZedKillsArray;
 };
 
 struct CDSettingCond
