@@ -209,6 +209,8 @@ static function JsonObject GetJsonFromMatchInfo(MatchInfo MI){
 	Json = new class'JsonObject';
 	Json.SetStringValue("timeStamp", MI.TimeStamp);
 	Json.SetStringValue("mapName", MI.MapName);
+	Json.SetStringValue("serverName", MI.ServerName);
+	Json.SetStringValue("serverIP", MI.ServerIP);
 	Json.SetBoolValue("isVictory", MI.bVictory);
 	Json.SetIntValue("defeatWave", MI.DefeatWave);
 	Json.SetStringValue("cheatMessages", ConvertJsonList(MI.CheatMessages));

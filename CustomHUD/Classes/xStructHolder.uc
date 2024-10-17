@@ -66,6 +66,7 @@ struct MatchInfo
 {
 	var string TimeStamp;
 	var string MapName;
+	var string ServerName, ServerIP;
 	var CDInfo CI;
 	var bool bVictory;
 	var byte DefeatWave;
