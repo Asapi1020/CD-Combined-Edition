@@ -57,6 +57,14 @@ struct LoadoutInfo
 
 struct CDInfo
 {
+	var string SC, ZTSM;
+	var int MM, CS, WSF, THPF, QPHPF, FPHPF, SCHPF;
+	var float SP, SM, ZTSSD;
+	var bool AA, AC, AG, DR, DS, FPRS, SWFA, SWFAR, SWFG, ZTC;
+};
+
+struct CDInfoForFrontend
+{
 	var string SC, MM, CS, SP, WSF, SM, THPF, QPHPF, FPHPF, SCHPF;
 	var string ZTSM, ZTSSD, AA, AC, AG, DR, DS, FPRS, SWFA, SWFAR, SWFG, ZTC;
 	var bool CHSPP;

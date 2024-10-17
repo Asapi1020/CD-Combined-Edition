@@ -15,7 +15,8 @@ public function PostRecord(MatchInfo MI, array<UserStats> USArray){
 	local string body;
 
 	Json = class'CD_Object'.static.GetJsonForRecord(MI, USArray);
-	body = class'JsonObject'.static.EncodeJson(Json);
+	body = class'CD_Object'.static.EncodeJsonIncludingList(Json);
+	`cdlog(body);
 	Post("records", body , CommonResponse);
 }
 

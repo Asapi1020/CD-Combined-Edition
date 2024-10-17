@@ -138,7 +138,7 @@ function DrawMenu()
 	local float X, Y, W, H, XL, YL, FontScalar, BorderSize, gap, sc;
 	local string S;
 	local string WeapName;
-	local CDInfo CDI;
+	local CDInfoForFrontend CDI;
 	local array<WeaponDamage> WDL;
 	local array<ZedKillType> ZedKills;
 	local int i, TotalKills, Headshots;

@@ -226,42 +226,43 @@ static function JsonObject GetJsonFromCDInfo(CDInfo CI){
 
 	Json = new class'JsonObject';
 	Json.SetStringValue("spawnCycle", CI.SC);
-	Json.SetStringValue("maxMonsters", CI.MM);
-	Json.SetStringValue("cohortSize", CI.CS);
-	Json.SetStringValue("spawnPoll", CI.SP);
-	Json.SetStringValue("waveSizeFakes", CI.WSF);
-	Json.SetStringValue("spawnMod", CI.SM);
-	Json.SetStringValue("trashHPFakes", CI.THPF);
-	Json.SetStringValue("QPHPFakes", CI.QPHPF);
-	Json.SetStringValue("FPHPFakes", CI.FPHPF);
-	Json.SetStringValue("SCHPFakes", CI.SCHPF);
+	Json.SetIntValue("maxMonsters", CI.MM);
+	Json.SetIntValue("cohortSize", CI.CS);
+	Json.SetFloatValue("spawnPoll", CI.SP);
+	Json.SetFloatValue("waveSizeFakes", CI.WSF);
+	Json.SetFloatValue("spawnMod", CI.SM);
+	Json.SetIntValue("trashHPFakes", CI.THPF);
+	Json.SetIntValue("QPHPFakes", CI.QPHPF);
+	Json.SetIntValue("FPHPFakes", CI.FPHPF);
+	Json.SetIntValue("SCHPFakes", CI.SCHPF);
 	Json.SetStringValue("ZTSpawnMode", CI.ZTSM);
-	Json.SetStringValue("ZTSpawnSlowDown", CI.ZTSSD);
-	Json.SetStringValue("albinoAlphas", CI.AA);
-	Json.SetStringValue("albinoCrawlers", CI.AC);
-	Json.SetStringValue("albinoGorefasts", CI.AG);
-	Json.SetStringValue("disableRobots", CI.DR);
-	Json.SetStringValue("disableSpawners", CI.DS);
-	Json.SetStringValue("fleshpoundRageSpawns", CI.FPRS);
-	Json.SetStringValue("startWithFullAmmo", CI.SWFA);
-	Json.SetStringValue("startWithFullArmor", CI.SWFAR);
-	Json.SetStringValue("startWithFullGrenade", CI.SWFG);
-	Json.SetStringValue("zedsTeleportCloser", CI.ZTC);
+	Json.SetFloatValue("ZTSpawnSlowDown", CI.ZTSSD);
+	Json.SetBoolValue("albinoAlphas", CI.AA);
+	Json.SetBoolValue("albinoCrawlers", CI.AC);
+	Json.SetBoolValue("albinoGorefasts", CI.AG);
+	Json.SetBoolValue("disableRobots", CI.DR);
+	Json.SetBoolValue("disableSpawners", CI.DS);
+	Json.SetBoolValue("fleshpoundRageSpawns", CI.FPRS);
+	Json.SetBoolValue("startWithFullAmmo", CI.SWFA);
+	Json.SetBoolValue("startWithFullArmor", CI.SWFAR);
+	Json.SetBoolValue("startWithFullGrenade", CI.SWFG);
+	Json.SetBoolValue("zedsTeleportCloser", CI.ZTC);
 
 	return Json;
 }
 
 static function JsonObject GetJsonFromUserStats(UserStats US){
-	local JsonObject Json, WeaponDamageJson, ZedKillsArrayJson;
+	local JsonObject Json, WeaponDamageJson, ZedKillJson;
 	local WeaponDamage WD;
-	local string WeaponDamageJsonString;
-	local array<string> WeaponDamageJsonStringArray;
+	local ZedKillType ZKT;
+	local string WeaponDamageJsonString, ZedKillJsonString;
+	local array<string> WeaponDamageJsonStringArray, ZedKillJsonStringArray;
 
 	Json = new class'JsonObject';
 
 	Json.SetStringValue("playerName", US.PlayerName);
-	Json.SetStringValue("id", US.ID);
-	Json.SetStringValue("perk", US.Perk);
+	Json.SetStringValue("steamID", US.ID);
+	Json.SetStringValue("perkClass", US.Perk);
 	Json.SetFloatValue("playTime", US.PlayTime);
 	Json.SetIntValue("damageDealt", US.DamageDealt);
 	Json.SetIntValue("damageTaken", US.DamageTaken);
@@ -275,13 +276,17 @@ static function JsonObject GetJsonFromUserStats(UserStats US){
 
 	foreach US.WeaponDamageList(WD){
 		WeaponDamageJson = GetJsonFromWeaponDamage(WD);
-		WeaponDamageJsonString = class'JsonObject'.static.EncodeJson(WeaponDamageJson);
+		WeaponDamageJsonString = EncodeJsonIncludingList(WeaponDamageJson);
 		WeaponDamageJsonStringArray.AddItem(WeaponDamageJsonString);
 	}
 	Json.SetStringValue("weaponDamages", ConvertJsonList(WeaponDamageJsonStringArray));
 
-	ZedKillsArrayJson = GetJsonFromZedKillsArray(US.ZedKillsArray);
-	Json.SetObject("zedKills", ZedKillsArrayJson);
+	foreach US.ZedKillsArray(ZKT){
+		ZedKillJson = GetJsonFromZedKillType(ZKT);
+		ZedKillJsonString = EncodeJsonIncludingList(ZedKillJson);
+		ZedKillJsonStringArray.AddItem(ZedKillJsonString);
+	}
+	Json.SetStringValue("zedKills", ConvertJsonList(ZedKillJsonStringArray));
 
 	return Json;
 }
@@ -290,7 +295,7 @@ static function JsonObject GetJsonFromWeaponDamage(WeaponDamage WD){
 	local JsonObject Json;
 
 	Json = new class'JsonObject';
-	Json.SetStringValue("weaponName", PathName(WD.WeaponDef));
+	Json.SetStringValue("weaponDefClass", PathName(WD.WeaponDef));
 	Json.SetIntValue("damageAmount", WD.DamageAmount);
 	Json.SetIntValue("headShots", WD.Headshots);
 	Json.SetIntValue("largeZedKills", WD.LargeZedKills);
@@ -298,17 +303,12 @@ static function JsonObject GetJsonFromWeaponDamage(WeaponDamage WD){
 	return Json;
 }
 
-static function JsonObject GetJsonFromZedKillsArray(array<ZedKillType> ZedKillsArray){
+static function JsonObject GetJsonFromZedKillType(ZedKillType ZKT){
 	local JsonObject Json;
-	local ZedKillType ZKT;
-	local string ZedName;
 
 	Json = new class'JsonObject';
-
-	foreach ZedKillsArray(ZKT){
-		ZedName = PathName(ZKT.MonsterClass);
-		Json.SetIntValue(ZedName, ZKT.KillCount);
-	}
+	Json.SetStringValue("zedClass", PathName(ZKT.MonsterClass));
+	Json.SetIntValue("killCount", ZKT.KillCount);
 
 	return Json;
 }
@@ -326,7 +326,7 @@ static function JsonObject GetJsonForRecord(MatchInfo MI, array<UserStats> USArr
 
 	foreach USArray(US){
 		UserStatsJson = GetJsonFromUserStats(US);
-		UserStatsJsonString = class'JsonObject'.static.EncodeJson(UserStatsJson);
+		UserStatsJsonString = EncodeJsonIncludingList(UserStatsJson);
 		UserStatsJsonStringArray.AddItem(UserStatsJsonString);
 	}
 	Json.SetStringValue("userStats", ConvertJsonList(UserStatsJsonStringArray));
@@ -337,11 +337,14 @@ static function JsonObject GetJsonForRecord(MatchInfo MI, array<UserStats> USArr
 static function string ConvertJsonList(array<string> JsonStringArray){
 	local string ListString;
 	JoinArray(JsonStringArray, ListString);
-
-	// revert replacing to avoid excess escape
-	ListString = Repl(ListString, "\\\"", "\"");
-
-	ListString = Repl(ListString, "\"", "\\\"");
-
 	return "[" $ ListString $ "]";
+}
+
+static function string EncodeJsonIncludingList(JsonObject decoded){
+	local string encoded;
+
+	encoded = class'JsonObject'.static.EncodeJson(decoded);
+	encoded = Repl(encoded, "\"[", "[");
+	encoded = Repl(encoded, "]\"", "]");
+	return encoded;
 }
