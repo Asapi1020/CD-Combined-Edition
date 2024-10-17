@@ -4,7 +4,7 @@ class CD_HTTPRequestHandler extends object
 `include(CD_Log.uci)
 
 //var config string token;
-const BASE_PATH = "https://cd-eapi-git-dev-asapi1020s-projects.vercel.app/api/";
+const BASE_PATH = "https://cd-eapi.vercel.app/api/";
 
 public function CheckStatus(){
 	Get("status", CommonResponse);
@@ -16,7 +16,6 @@ public function PostRecord(MatchInfo MI, array<UserStats> USArray){
 
 	Json = class'CD_Object'.static.GetJsonForRecord(MI, USArray);
 	body = class'CD_Object'.static.EncodeJsonIncludingList(Json);
-	`cdlog(body);
 	Post("records", body , CommonResponse);
 }
 
