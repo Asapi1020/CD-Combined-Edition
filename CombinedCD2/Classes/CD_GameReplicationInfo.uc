@@ -10,8 +10,8 @@ var int MaxUpgrade;
 
 var array<string> DebugTexts;
 
-var CDInfo CDInfoParams;
-var CDInfo CDFinalParams;
+var CDInfoForFrontend CDInfoParams;
+var CDInfoForFrontend CDFinalParams;
 
 struct AwardInfo
 {

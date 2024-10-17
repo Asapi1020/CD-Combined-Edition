@@ -11,6 +11,18 @@ static function class<Weapon> GetWeapClass(class<KFWeaponDefinition> Def)
 	return class<Weapon>(DynamicLoadObject(Def.default.WeaponClassPath, class'Class'));
 }
 
+static function string GetWeapName(class<KFWeaponDefinition> Def){
+	if(ClassIsChildOf(Def, Class'KFGame.KFWeapDef_Knife_Base')){
+		return class'KFGame.KFGFxPostGameContainer_PlayerStats'.default.KnifeString;
+	}
+
+	if(InStr(PathName(Def), "KFWeapDef_Grenade_") > 0){
+		return ParseLocalizedPropertyPath(Def.default.WeaponClassPath $ ".ItemName");
+	}
+
+	return class'CD_Object'.static.GetWeapClass(Def).default.ItemName;
+}
+
 static final function Object SafeLoadObject(string S, Class ObjClass)
 {
     local Object O;
@@ -189,4 +201,150 @@ static function int BinaryToInt(string Binary)
 	}
 
 	return r;
+}
+
+static function JsonObject GetJsonFromMatchInfo(MatchInfo MI){
+	local JsonObject Json;
+
+	Json = new class'JsonObject';
+	Json.SetStringValue("timeStamp", MI.TimeStamp);
+	Json.SetStringValue("mapName", MI.MapName);
+	Json.SetStringValue("serverName", MI.ServerName);
+	Json.SetStringValue("serverIP", MI.ServerIP);
+	Json.SetBoolValue("isVictory", MI.bVictory);
+	Json.SetIntValue("defeatWave", MI.DefeatWave);
+	Json.SetStringValue("cheatMessages", ConvertJsonList(MI.CheatMessages));
+	Json.SetStringValue("mutators", ConvertJsonList(MI.Mutators));
+	Json.SetBoolValue("isSolo", MI.bSolo);
+	Json.SetObject("CDInfo", GetJsonFromCDInfo(MI.CI));
+
+	return Json;
+}
+
+static function JsonObject GetJsonFromCDInfo(CDInfo CI){
+	local JsonObject Json;
+
+	Json = new class'JsonObject';
+	Json.SetStringValue("spawnCycle", CI.SC);
+	Json.SetIntValue("maxMonsters", CI.MM);
+	Json.SetIntValue("cohortSize", CI.CS);
+	Json.SetFloatValue("spawnPoll", CI.SP);
+	Json.SetFloatValue("waveSizeFakes", CI.WSF);
+	Json.SetFloatValue("spawnMod", CI.SM);
+	Json.SetIntValue("trashHPFakes", CI.THPF);
+	Json.SetIntValue("QPHPFakes", CI.QPHPF);
+	Json.SetIntValue("FPHPFakes", CI.FPHPF);
+	Json.SetIntValue("SCHPFakes", CI.SCHPF);
+	Json.SetStringValue("ZTSpawnMode", CI.ZTSM);
+	Json.SetFloatValue("ZTSpawnSlowDown", CI.ZTSSD);
+	Json.SetBoolValue("albinoAlphas", CI.AA);
+	Json.SetBoolValue("albinoCrawlers", CI.AC);
+	Json.SetBoolValue("albinoGorefasts", CI.AG);
+	Json.SetBoolValue("disableRobots", CI.DR);
+	Json.SetBoolValue("disableSpawners", CI.DS);
+	Json.SetBoolValue("fleshpoundRageSpawns", CI.FPRS);
+	Json.SetBoolValue("startWithFullAmmo", CI.SWFA);
+	Json.SetBoolValue("startWithFullArmor", CI.SWFAR);
+	Json.SetBoolValue("startWithFullGrenade", CI.SWFG);
+	Json.SetBoolValue("zedsTeleportCloser", CI.ZTC);
+
+	return Json;
+}
+
+static function JsonObject GetJsonFromUserStats(UserStats US){
+	local JsonObject Json, WeaponDamageJson, ZedKillJson;
+	local WeaponDamage WD;
+	local ZedKillType ZKT;
+	local string WeaponDamageJsonString, ZedKillJsonString;
+	local array<string> WeaponDamageJsonStringArray, ZedKillJsonStringArray;
+
+	Json = new class'JsonObject';
+
+	Json.SetStringValue("playerName", US.PlayerName);
+	Json.SetStringValue("steamID", US.ID);
+	Json.SetStringValue("perkClass", US.Perk);
+	Json.SetFloatValue("playTime", US.PlayTime);
+	Json.SetIntValue("damageDealt", US.DamageDealt);
+	Json.SetIntValue("damageTaken", US.DamageTaken);
+	Json.SetIntValue("healsGiven", US.HealsGiven);
+	Json.SetIntValue("healsReceived", US.HealsReceived);
+	Json.SetIntValue("doshEarned", US.DoshEarned);
+	Json.SetIntValue("shotsFired", US.ShotsFired);
+	Json.SetIntValue("shotsHit", US.ShotsHit);
+	Json.SetIntValue("headShots", US.HeadShots);
+	Json.SetIntValue("deaths", US.Deaths);
+
+	foreach US.WeaponDamageList(WD){
+		WeaponDamageJson = GetJsonFromWeaponDamage(WD);
+		WeaponDamageJsonString = EncodeJsonIncludingList(WeaponDamageJson);
+		WeaponDamageJsonStringArray.AddItem(WeaponDamageJsonString);
+	}
+	Json.SetStringValue("weaponDamages", ConvertJsonList(WeaponDamageJsonStringArray));
+
+	foreach US.ZedKillsArray(ZKT){
+		ZedKillJson = GetJsonFromZedKillType(ZKT);
+		ZedKillJsonString = EncodeJsonIncludingList(ZedKillJson);
+		ZedKillJsonStringArray.AddItem(ZedKillJsonString);
+	}
+	Json.SetStringValue("zedKills", ConvertJsonList(ZedKillJsonStringArray));
+
+	return Json;
+}
+
+static function JsonObject GetJsonFromWeaponDamage(WeaponDamage WD){
+	local JsonObject Json;
+
+	Json = new class'JsonObject';
+	Json.SetStringValue("weaponDefClass", PathName(WD.WeaponDef));
+	Json.SetIntValue("damageAmount", WD.DamageAmount);
+	Json.SetIntValue("headShots", WD.Headshots);
+	Json.SetIntValue("largeZedKills", WD.LargeZedKills);
+	// TODO: ignore kills so far because kills is saved only on client side
+	return Json;
+}
+
+static function JsonObject GetJsonFromZedKillType(ZedKillType ZKT){
+	local JsonObject Json;
+
+	Json = new class'JsonObject';
+	Json.SetStringValue("zedClass", PathName(ZKT.MonsterClass));
+	Json.SetIntValue("killCount", ZKT.KillCount);
+
+	return Json;
+}
+
+static function JsonObject GetJsonForRecord(MatchInfo MI, array<UserStats> USArray){
+	local JsonObject Json, MatchInfoJson, UserStatsJson;
+	local UserStats US;
+	local string UserStatsJsonString;
+	local array<string> UserStatsJsonStringArray;
+
+	Json = new class'JsonObject';
+	
+	MatchInfoJson = GetJsonFromMatchInfo(MI);
+	Json.SetObject("matchInfo", MatchInfoJson);
+
+	foreach USArray(US){
+		UserStatsJson = GetJsonFromUserStats(US);
+		UserStatsJsonString = EncodeJsonIncludingList(UserStatsJson);
+		UserStatsJsonStringArray.AddItem(UserStatsJsonString);
+	}
+	Json.SetStringValue("userStats", ConvertJsonList(UserStatsJsonStringArray));
+
+	return Json;
+}
+
+static function string ConvertJsonList(array<string> JsonStringArray){
+	local string ListString;
+	JoinArray(JsonStringArray, ListString);
+	return "[" $ ListString $ "]";
+}
+
+static function string EncodeJsonIncludingList(JsonObject decoded){
+	local string encoded;
+
+	encoded = class'JsonObject'.static.EncodeJson(decoded);
+	encoded = Repl(encoded, "\"[", "[");
+	encoded = Repl(encoded, "]\"", "]");
+	return encoded;
 }
