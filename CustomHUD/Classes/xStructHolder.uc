@@ -57,6 +57,14 @@ struct LoadoutInfo
 
 struct CDInfo
 {
+	var string SC, ZTSM;
+	var int MM, CS, WSF, THPF, QPHPF, FPHPF, SCHPF;
+	var float SP, SM, ZTSSD;
+	var bool AA, AC, AG, DR, DS, FPRS, SWFA, SWFAR, SWFG, ZTC;
+};
+
+struct CDInfoForFrontend
+{
 	var string SC, MM, CS, SP, WSF, SM, THPF, QPHPF, FPHPF, SCHPF;
 	var string ZTSM, ZTSSD, AA, AC, AG, DR, DS, FPRS, SWFA, SWFAR, SWFG, ZTC;
 	var bool CHSPP;
@@ -65,10 +73,22 @@ struct CDInfo
 struct MatchInfo
 {
 	var string TimeStamp;
-	var int PlayerNum;
+	var string MapName;
+	var string ServerName, ServerIP;
 	var CDInfo CI;
-	var int ResultState;
+	var bool bVictory;
 	var byte DefeatWave;
+	var array<string> CheatMessages, Mutators;
+	var bool bSolo;
+};
+
+struct UserStats
+{
+	var string PlayerName, ID, Perk;
+	var float PlayTime;
+	var int DamageDealt, DamageTaken, HealsGiven, HealsReceived, DoshEarned, ShotsFired, ShotsHit, HeadShots, Deaths, Kills, LargeKills;
+	var array<WeaponDamage> WeaponDamageList;
+	var array<ZedKillType> ZedKillsArray;
 };
 
 struct CDSettingCond
