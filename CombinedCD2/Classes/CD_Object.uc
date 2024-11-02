@@ -209,7 +209,7 @@ static function JsonObject GetJsonFromMatchInfo(MatchInfo MI){
 	Json = new class'JsonObject';
 	Json.SetStringValue("timeStamp", MI.TimeStamp);
 	Json.SetStringValue("mapName", MI.MapName);
-	Json.SetStringValue("serverName", MI.ServerName);
+	// Json.SetStringValue("serverName", MI.ServerName);
 	Json.SetStringValue("serverIP", MI.ServerIP);
 	Json.SetBoolValue("isVictory", MI.bVictory);
 	Json.SetIntValue("defeatWave", MI.DefeatWave);
@@ -260,7 +260,6 @@ static function JsonObject GetJsonFromUserStats(UserStats US){
 
 	Json = new class'JsonObject';
 
-	Json.SetStringValue("playerName", US.PlayerName);
 	Json.SetStringValue("steamID", US.ID);
 	Json.SetStringValue("perkClass", US.Perk);
 	Json.SetFloatValue("playTime", US.PlayTime);
