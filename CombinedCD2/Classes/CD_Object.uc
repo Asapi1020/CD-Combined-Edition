@@ -31,18 +31,28 @@ static final function Object SafeLoadObject(string S, Class ObjClass)
     return ((O != none) ? O : DynamicLoadObject(S, ObjClass));
 }
 
+/*
+ * @return Steam2 ID
+ */
 static function string GetSteamID(UniqueNetId ID)
 {
-	local string SteamIdHexString;
 	local int SteamIdAccountNumber;
 
-	SteamIdHexString = class'OnlineSubsystem'.static.UniqueNetIdToString(ID);
-	class'CD_StringUtils'.static.HexStringToInt( Right( SteamIdHexString, 8 ), SteamIdAccountNumber );
+	SteamIdAccountNumber = GetSteam64ID(ID);
 
 	if ( -1 == SteamIdAccountNumber )
 		return "Unrecognized";
 
 	return "STEAM_0:" $ string(SteamIdAccountNumber % 2) $ ":" $ string(SteamIdAccountNumber / 2);
+}
+
+static function int GetSteam64ID(UniqueNetId ID){
+	local string SteamIdHexString;
+	local int SteamIdAccountNumber;
+
+	SteamIdHexString = class'OnlineSubsystem'.static.UniqueNetIdToString(ID);
+	class'CD_StringUtils'.static.HexStringToInt( Right( SteamIdHexString, 8 ), SteamIdAccountNumber );
+	return SteamIdAccountNumber;
 }
 
 static function string GetCustomMapName(string MapName)

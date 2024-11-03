@@ -7,8 +7,7 @@ class CD_HTTPRequestHandler extends object
 const BASE_PATH = "https://cd-eapi.vercel.app/api/";
 
 public function CheckStatus(){
-	//Get("status", CommonResponse);
-	TestConnection("status", CommonResponse);
+	Get("status", CommonResponse);
 }
 
 public function PostRecord(MatchInfo MI, array<UserStats> USArray){
@@ -18,27 +17,6 @@ public function PostRecord(MatchInfo MI, array<UserStats> USArray){
 	Json = class'CD_Object'.static.GetJsonForRecord(MI, USArray);
 	body = class'CD_Object'.static.EncodeJsonIncludingList(Json);
 	Post("records", body , CommonResponse);
-}
-
-private function TestConnection(string uri, delegate<HttpRequestInterface.OnProcessRequestComplete> response){
-	local HttpRequestInterface R;
-	local bool bSuccessful;
-
-	`cdlog("Create Request");
-	R = class'HttpFactory'.static.CreateRequest();
-	
-	`cdlog("Set URL");
-	R = R.SetURL(BASE_PATH $ uri);
-	
-	`cdlog("Set Verb");
-	R = R.SetVerb("GET");
-
-	`cdlog("Set Process Request Complete");
-	R = R.SetProcessRequestCompleteDelegate(response);
-
-	`cdlog("Process Request");
-	bSuccessful = R.ProcessRequest();
-	`cdlog(string(bSuccessful));
 }
 
 private function Get(string uri, delegate<HttpRequestInterface.OnProcessRequestComplete> response){
