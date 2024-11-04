@@ -256,18 +256,18 @@ function string GetIndividualPlayerStats(KFPlayerController KFPC)
 		PersonalStats = KFPC.MatchStats.ZedKillsArray;
 		foreach PersonalStats(Status)
 		{
-			switch(Status.MonsterClass)
+			switch(class'CD_ZedNameUtils'.static.GetZedPathCore(Status.MonsterClass))
 			{
-				case class'KFGameContent.KFPawn_ZedScrake':
+				case "ZedScrake":
 					SCKills = Status.KillCount;
 					break;
-				case class'KFGameContent.KFPawn_ZedFleshpound':
+				case "ZedFleshpound":
 					FPKills = Status.KillCount;
 					break;
-				case class'KFGameContent.KFPawn_ZedFleshpoundMini':
+				case "ZedFleshpoundMini":
 					QPKills = Status.KillCount;
 					break;
-				case class'KFGameContent.KFPawn_ZedHusk':
+				case "ZedHusk":
 					HUKills = Status.KillCount;
 					break;
 			}
@@ -579,18 +579,18 @@ function GetCDPlayerStats()
 
 			foreach PersonalStats(Status)
 			{
-				switch(Status.MonsterClass)
+				switch(class'CD_ZedNameUtils'.static.GetZedPathCore(Status.MonsterClass))
 				{
-					case class'KFGameContent.KFPawn_ZedScrake':
+					case "ZedScrake":
 						srs.SCKills = Status.KillCount;
 						break;
-					case class'KFGameContent.KFPawn_ZedFleshpound':
+					case "ZedFleshpound":
 						srs.FPKills = Status.KillCount;
 						break;
-					case class'KFGameContent.KFPawn_ZedFleshpoundMini':
+					case "ZedFleshpoundMini":
 						srs.QPKills = Status.KillCount;
 						break;
-					case class'KFGameContent.KFPawn_ZedHusk':
+					case "ZedHusk":
 						srs.HUKills = Status.KillCount;
 						break;
 				}
