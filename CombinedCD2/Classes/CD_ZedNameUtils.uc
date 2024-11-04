@@ -371,6 +371,23 @@ static function class<KFPawn_Monster> CheckMonsterClassRemap( const class<KFPawn
 	return NewClass;
 }
 
+/*
+ * @return e.g) ZedHusk, ZedScrake
+ */
+static function string GetZedPathCore(class ZedClass){
+	local string ZedFullPath;
+	local array<string> SplitZedPath, SplitClassPath;
+
+	ZedFullPath = PathName(ZedClass);
+	SplitZedPath = SplitString(ZedFullPath, ".");
+	if(SplitZedPath.length < 2){
+		return "";
+	}
+
+	SplitClassPath = SplitString(SplitZedPath[1], "_");
+	return (SplitClassPath.length < 2) ? "" : SplitClassPath[1];
+}
+
 defaultproperties
 {
 	ZedInfoArray.Add((OG_ZedClasses=(class'KFPawn_ZedClot_Cyst'), ZedType=AT_Clot, ZedName_Cycle=(Names=("CLOTC", "CC"), RangeName=(min=2, val="CYST")),	ZedName_Wave=("Cyst", "CY")))

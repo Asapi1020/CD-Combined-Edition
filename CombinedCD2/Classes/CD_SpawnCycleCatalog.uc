@@ -278,12 +278,10 @@ private function InitSpawnCyclePresetList()
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.nt_v2');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.jhhc_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.jhscc_v1');
-/*
-		SpawnCyclePresetList.AddItem(new class'SpawnCycle.gso_v1');
-		SpawnCyclePresetList.AddItem(new class'SpawnCycle.aio_v1');
-		SpawnCyclePresetList.AddItem(new class'SpawnCycle.aio_v2');
-		SpawnCyclePresetList.AddItem(new class'SpawnCycle.gg_v1');
-*/
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.jhscc_v2');
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.baf_v1');
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.nbd_v1');
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.albino_mig');
 	}
 }
 
