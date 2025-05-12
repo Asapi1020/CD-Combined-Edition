@@ -279,9 +279,11 @@ private function InitSpawnCyclePresetList()
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.jhhc_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.jhscc_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.jhscc_v2');
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.jhscc_v3');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.baf_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.nbd_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.albino_mig');
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ge_hot_pot');
 	}
 }
 
