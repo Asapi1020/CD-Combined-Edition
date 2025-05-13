@@ -240,6 +240,7 @@ private function InitSpawnCyclePresetList()
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ts_mig_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ts_mig_v2');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ts_mig_v3');
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ts_mig_v4');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ts_mig_v1_p');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ts_lk313_stg');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.doom_v1');
@@ -279,9 +280,11 @@ private function InitSpawnCyclePresetList()
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.jhhc_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.jhscc_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.jhscc_v2');
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.jhscc_v3');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.baf_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.nbd_v1');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.albino_mig');
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ge_hot_pot');
 	}
 }
 
