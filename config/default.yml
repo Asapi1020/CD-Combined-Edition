@@ -1,0 +1,28 @@
+kfEditor:
+  configPath: "C:/Users/maima/Documents/My Games/KillingFloor2/KFGame/Config/KFEditor.ini"
+  binPath: "F:/SteamLibrary/steamapps/common/killingfloor2/Binaries/Win64/KFEditor.exe"
+  logPath: "C:/Users/maima/Documents/My Games/KillingFloor2/KFGame/Logs/Launch.log"
+modPackages:
+  path: "D:\\workspace\\CD-Combined-Edition"
+  output: "C:\\Users\\maima\\Documents\\My Games\\KillingFloor2\\KFGame\\Unpublished\\BrewedPC\\Script"
+  packages:
+    - "CustomHUD"
+    - "SpawnCycle"
+    - "CombinedCD2"
+    - "CombinedCDContent"
+launchOptions:
+  gamePath: "F:/SteamLibrary/steamapps/common/killingfloor2/Binaries/Win64/KFGame.exe"
+  languageForCooking: "asp"
+  mapName: "KF-SubSynth"
+  gameMode: "CombinedCD2.CD_Survival"
+  mutators:
+    - "FriendlyHUD.FriendlyHUDMutator"
+  difficulty: 3
+  gameLength: 2
+  otherOptions:
+workshop:
+  userToolPath: "F:/SteamLibrary/steamapps/common/killingfloor2/Binaries/WorkshopUserTool.exe"
+  descriptionPath: "description.txt"
+  title: "Controlled Difficulty - Combined Edition"
+  tags: "GameModes"
+  packageDirectory: "dist"
