@@ -1,0 +1,122 @@
+[h1]Intro[/h1]
+This is based on the [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2050370803]Blackout Edition[/url] and made for mainly [u][b]Japanese[/b][/u] players.
+There are some features seen in the other great mods but customized as we, the Japanese, prefer. So, I do not consider using this version with other mutators together except the [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1819268190]Friendly HUD Mutator[/url]. Some mods must conflict with this.
+[list]
+[*] Launch CD
+[code]Game=CombinedCD2.CD_Survival[/code]
+[*] Launch UTM for CD
+[code]Game=CombinedCDContent.UTestMode[/code]
+[*] Related Files
+[code]
+CombinedSound.upk
+KFCombinedCD.ini
+KFCombinedCD_LocalData.ini
+CombinedCD2.int
+[/code]
+[/list]
+
+[i]Dear mates who joined the Beta:
+Old files possibly cause a bug. Delete the Cache folder "2559459262". Thanks.[/i]
+
+[h1]2024 February Update[/h1]
+[url=https://silly-maple-a31.notion.site/Combined-CD-2024-Feb-Update-b376c58d83af4ece9a6d8a9ba2248c10][img]https://i.imgur.com/oczmH7o.png[/img][/url]
+
+[h1]Detail Guide[/h1]
+[url=https://steamcommunity.com/sharedfiles/filedetails/?id=2859078261][img]https://i.imgur.com/m8LYrGU.png[/img][/url]
+
+[hr][/hr]
+
+[h1]Popular Chat Commands[/h1]
+Very popular and useful commands are installed in this edition.
+[list]
+[*] [b]!ot[/b] : Open Trader
+You can open the trader wherever you are.
+[*] [b]!cdfs[/b] : Fill Spares' Ammo
+You can buy ammo for all spare weapons at one time.
+[*] [b]!mv[/b] : Map Vote
+You can vote to change maps whenever you want.
+[/list]
+
+[h1]Popular Game Settings[/h1]
+[list]
+[*] [b]DisableBoss[/b] : You can skip the boss wave.
+[*] [b]StartingwithFullAmmo[/b] / [b]StartingwithFullGrenade[/b]
+[*] [b]DisableSpawners[/b] : No vents spawn zeds.
+[/list]
+
+[h1]RPW Settings[/h1]
+Ideas are from the great [url=https://steamcommunity.com/sharedfiles/filedetails/?id=909271656]RPW Mod[/url].
+You can restrict Perks, Levels, Skills, and Weapons.
+(Always precision perks only)
+Unlike the original RPW Mod, you do not die or lose weapons because of restrictions. You cannot choose banned perks or skills and banned weapons and upgrading are not shown on the trader menu.
+
+[h1]Additional Menus[/h1]
+[list]
+[*] [b]Admin Menu[/b]
+It allows you to control restrictions visually easier.
+[*] [b]Map Vote Menu[/b]
+Based on the one in the [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2085786712]Server Extension Mutator.[/url]
+You can vote to change maps whenever you want.
+[*] [b]Client Option Menu[/b]
+You can set your pickup, sound, and display options.
+[*] [b]Scoreboard[/b]
+Based on the [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2521826524]Yet Another Scoreboard[/url].
+You can see the CD info and a spectators list.
+[*] [b]Match Result Menu[/b]
+[*] [b]Console Menu[/b]
+[*] [b]Spawn Cycle Preset Menu[/b]
+[/list]
+
+[h1]Additional Spawn Cycle[/h1]
+[list]
+[*] doom_v2_plus_rmk
+[*] osffi_v1_ms
+[*] mko_v1
+[*] machine_solo
+[*] gg_v1
+[*] bl_light
+[*] su_v1
+[*] asp_v1 / asp_v2 / asp_v3
+[*] asp_fp_v1 / asp_fp_v2
+[*] poopro_v1
+[*] dtf_pm / dtf_pm_plus / dtf_pm_plus_fx
+[*] who_v1 / who_v2
+[*] ebr_hh_v1
+[*] nt_v2
+[*] jhhc_v1, jhscc_v1
+[/list]
+
+[h1]Others[/h1]
+[list]
+[*] Spawn Cycle Analyzer
+[*] Custom Player Start
+[*] Unlimited Perk Switch
+[*] Infinite Flashlight
+[*] Drop All Weapons
+[*] TraderDash
+[*] Pickup Info
+[*] Custom Auto Trader
+[*] UTM for CD
+etc...
+[/list]
+
+[hr][/hr]
+
+[h1]Source Codes[/h1]
+[url=https://github.com/Asapi1020/CD-Combined-Edition][img]https://i.imgur.com/PXKFFyJ.png[/img][/url]
+
+[h1]Thanks[/h1]
+I am so grateful for all the previous developments.
+[list]
+[*] Blackout, Tiger, DarkDarkington, Akathiiro313, and HUNTER (CD)
+[*] GM, Iramok, and ganndarusonn (RPW)
+[*] Marco, ForrestMarkX, GenZmeY (HUD)
+[*] [Insert Name Here] (UM)
+[/list]
+The following mates helped me with Localization. Thanks.
+[list]
+[*] S|Kaio (Portuguese)
+[*] milk tea / N̶9 (Thai)
+[*] 小曦曦 (Chinese)
+[/list]
+I'm also thankful for all my Japanese and Korean friends who supported my development.

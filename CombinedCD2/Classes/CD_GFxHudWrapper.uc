@@ -174,8 +174,9 @@ final function CreateAndSetConsoleReplacment()
 
 exec function SetShowScores(bool bNewValue)
 {
-	if (Scoreboard != None)
+	if (Scoreboard != None && !CDPC.UseVanillaScoreboard){
 		Scoreboard.SetVisibility(bNewValue);
+	}
 	else Super.SetShowScores(bNewValue);
 }
 
