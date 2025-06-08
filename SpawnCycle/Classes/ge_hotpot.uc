@@ -1,7 +1,8 @@
-class ge_hot_pot extends CD_SpawnCycle_PresetBase
+class ge_hotpot extends CD_SpawnCycle_PresetBase
 	implements (CD_SpawnCycle_Preset);
 
 `include(CycleMeta.uci)
+
 function GetLongSpawnCycleDefs( out array<string> sink )
 {
 	local int i;
