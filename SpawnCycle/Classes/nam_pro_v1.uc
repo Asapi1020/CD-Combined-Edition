@@ -44,7 +44,7 @@ function GetLongSpawnCycleDefs( out array<string> sink )
 
 function string GetDate()
 {
-	return "2016-12-03";
+	return "2015-12-03";
 }
 
 function string GetAuthor()
