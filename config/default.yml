@@ -26,3 +26,5 @@ workshop:
   title: "Controlled Difficulty - Combined Edition"
   tags: "GameModes"
   packageDirectory: "dist"
+  uploadDirectories:
+    - "./Localization"
