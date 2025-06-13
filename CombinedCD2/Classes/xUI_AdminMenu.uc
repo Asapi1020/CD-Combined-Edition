@@ -1,9 +1,12 @@
 class xUI_AdminMenu extends xUI_MenuBase;
 
+`include(CD_Log.uci)
+
 enum PageState
 {
 	RPW,
 	Authority,
+	CustomPlayerStart,
 	Record
 };
 
@@ -14,11 +17,10 @@ var KFGUI_Button GunslingerB;
 var KFGUI_Button SharpshooterB;
 var KFGUI_Button SwatB;
 var KFGUI_Button OtherB;
-//var KFGUI_Button WeaponB;
-//var KFGUI_Button PlayerB;
 var KFGUI_Button CloseB;
 var KFGUI_Button RPWB;
 var KFGUI_Button AuthorityB;
+var KFGUI_Button PlayerStartButton;
 var KFGUI_Button PerkSubB;
 var KFGUI_Button PerkAddB;
 var KFGUI_Button UpgradeSubB;
@@ -43,6 +45,8 @@ var KFGUI_CheckBox SkillRestriction7;
 var KFGUI_CheckBox SkillRestriction8;
 var KFGUI_CheckBox SkillRestriction9;
 
+var private xUI_AdminMenu_PlayerStart PlayerStartComponents;
+
 var PageState CurState;
 var bool bListUpdate;
 var class<KFWeaponDefinition> SelectedWeap;
@@ -51,7 +55,6 @@ var array< class<KFWeaponDefinition> > CurWeapDef;
 var array<UserInfo> CurUserInfo;
 var array<string> ColumnText;
 
-//var localized string Title;
 var localized string LevelRestrictionToolTip;
 var localized string SkillRestrictionToolTip;
 var localized string AntiOvercapToolTip;
@@ -59,6 +62,7 @@ var localized string PerkAuthorityString;
 var localized string MaxUpgradeString;
 var localized string RPWButtonText;
 var localized string AuthorityButtonText;
+var localized string PlayerStartButtonText;
 var localized string LevelRequirementString;
 var localized string AntiOvercapString;
 var localized string WeaponHeader;
@@ -77,21 +81,67 @@ function SetWindowDrag(bool bDrag)
 	bDragWindow = false;
 }
 
+function InitMenu()
+{
+	super.InitMenu();
+
+	PlayerStartComponents = new(self) class'xUI_AdminMenu_PlayerStart';
+	AddComponent(PlayerStartComponents);
+	PlayerStartComponents.InitComponents();
+
+	InitAuthList();
+}
+
 function DrawMenu()
 {
 //	Setup
 	local float XL, YL, FontScalar;
-	local int index;
-	local string S;
 
 	Super.DrawMenu();
 
-	WindowTitle = Title @ "v2.0";
 	Canvas.Font = Owner.CurrentStyle.PickFont(FontScalar);
 	Canvas.TextSize("ABC", XL, YL, FontScalar, FontScalar);
 	ToggleComponents();
 
-//	Perk Option Button
+	switch(CurState)
+	{
+		case RPW:
+			DrawRPWMenu(XL, YL, FontScalar);
+			break;
+		case Authority:
+			DrawRPWMenu(XL, YL, FontScalar);
+			break;
+		case CustomPlayerStart:
+			PlayerStartComponents.DrawComponents();
+			break;
+		default:
+			`cdlog("invalid cur state");
+			CurState = RPW;
+			break;
+	}
+
+	if(!bListUpdate)
+	{
+		UpdateList();
+	}
+
+	RPWB = KFGUI_Button(FindComponentID('RPW'));
+	RPWB.ButtonText = RPWButtonText;
+
+	AuthorityB = KFGUI_Button(FindComponentID('Authority'));
+	AuthorityB.ButtonText = AuthorityButtonText;
+
+	PlayerStartButton = KFGUI_Button(FindComponentID('CustomPlayerStart'));
+	PlayerStartButton.ButtonText = PlayerStartButtonText;
+
+	CloseB = KFGUI_Button(FindComponentID('Close'));
+	CloseB.ButtonText = CloseButtonText;
+}
+
+private function DrawRPWMenu(float XL, float YL, float FontScalar)
+{
+	local int index;
+	local string S;
 
 	CommandoB = KFGUI_Button(FindComponentID('Commando'));
 	CommandoB.bDisabled = (GetCDPC().WeapUIInfo.Perk == class'KFPerk_Commando') ? true : false;
@@ -155,19 +205,6 @@ function DrawMenu()
 	S = string(GetCDGRI().MaxUpgrade);
 	DrawControllerInfo(MaxUpgradeString, S, UpgradeSubB, UpgradeAddB, YL, FontScalar, Owner.HUDOwner.ScaledBorderSize, 30,,,CurState==RPW);
 
-//	List
-	if(!bListUpdate)
-	{
-		UpdateList();
-	}
-
-	RPWB = KFGUI_Button(FindComponentID('RPW'));
-	RPWB.ButtonText = RPWButtonText;
-
-	AuthorityB = KFGUI_Button(FindComponentID('Authority'));
-	AuthorityB.ButtonText = AuthorityButtonText;
-
-//	Check Boxes (Level & Skills)
 	LevelRestrictionBox = KFGUI_CheckBox(FindComponentID('LevelRestriction'));
 	LevelRestrictionBox.bChecked = GetCDPC().bRequireLv25;
 	LevelRestrictionBox.ToolTip=LevelRestrictionToolTip;
@@ -227,49 +264,50 @@ function DrawMenu()
 	SkillRestriction9.bChecked = GetCDPC().IsRestrictedSkill(GetCDPC().WeapUIInfo.Perk, 9);
 	SkillRestriction9.ToolTip=SkillRestrictionToolTip;
 	DrawBoxDescription(GetCDPC().GetLocalizedSkillName(GetCDPC().WeapUIInfo.Perk, 9), SkillRestriction9, 0.425, CurState==RPW);
-
-	CloseB = KFGUI_Button(FindComponentID('Close'));
-	CloseB.ButtonText = CloseButtonText;
 }
 
 final function ToggleComponents()
 {
+	local array<KFGUI_Base> RPWComponents;
+
 	RPWB.bDisabled			= CurState == RPW;
 	AuthorityB.bDisabled	= CurState == Authority;
+	PlayerStartButton.bDisabled = CurState == CustomPlayerStart;
 
-	CommandoB.bVisible		= CurState == RPW;
-	SupportB.bVisible		= CurState == RPW;
-	FieldMedicB.bVisible	= CurState == RPW;
-	GunslingerB.bVisible	= CurState == RPW;
-	SharpshooterB.bVisible	= CurState == RPW;
-	SwatB.bVisible			= CurState == RPW;
-	OtherB.bVisible			= CurState == RPW;
-	PerkSubB.bVisible		= CurState == RPW;
-	PerkAddB.bVisible		= CurState == RPW;
-	UpgradeSubB.bVisible	= CurState == RPW;
-	UpgradeAddB.bVisible	= CurState == RPW;
-	LevelRestrictionBox.bVisible= CurState == RPW;
-	AntiOvercapBox.bVisible		= CurState == RPW;
-	SkillRestriction0.bVisible	= CurState == RPW;
-	SkillRestriction1.bVisible	= CurState == RPW;
-	SkillRestriction2.bVisible	= CurState == RPW;
-	SkillRestriction3.bVisible	= CurState == RPW;
-	SkillRestriction4.bVisible	= CurState == RPW;
-	SkillRestriction5.bVisible	= CurState == RPW;
-	SkillRestriction6.bVisible	= CurState == RPW;
-	SkillRestriction7.bVisible	= CurState == RPW;
-	SkillRestriction8.bVisible	= CurState == RPW;
-	SkillRestriction9.bVisible	= CurState == RPW;
+	RPWComponents.AddItem(CommandoB);
+	RPWComponents.AddItem(SupportB);
+	RPWComponents.AddItem(FieldMedicB);
+	RPWComponents.AddItem(GunslingerB);
+	RPWComponents.AddItem(SharpshooterB);
+	RPWComponents.AddItem(SwatB);
+	RPWComponents.AddItem(OtherB);
+	RPWComponents.AddItem(PerkSubB);
+	RPWComponents.AddItem(PerkAddB);
+	RPWComponents.AddItem(UpgradeSubB);
+	RPWComponents.AddItem(UpgradeAddB);
+	RPWComponents.AddItem(AntiOverCapBox);
+	RPWComponents.AddItem(LevelRestrictionBox);
+	RPWComponents.AddItem(SkillRestriction0);
+	RPWComponents.AddItem(SkillRestriction1);
+	RPWComponents.AddItem(SkillRestriction2);
+	RPWComponents.AddItem(SkillRestriction3);
+	RPWComponents.AddItem(SkillRestriction4);
+	RPWComponents.AddItem(SkillRestriction5);
+	RPWComponents.AddItem(SkillRestriction6);
+	RPWComponents.AddItem(SkillRestriction7);
+	RPWComponents.AddItem(SkillRestriction8);
+	RPWComponents.AddItem(SkillRestriction9);
+	
+	ToggleComponentsVisibility(RPWComponents, CurState == RPW);
 
-	AuthList.bVisible = (CurState <= Authority);
+	AuthList.bVisible = CurState == RPW || CurState == Authority;
+	PlayerStartComponents.bVisible = CurState == CustomPlayerStart;
 }
 
-function InitMenu()
+private function InitAuthList()
 {
 	local int i;
 	local string s;
-
-	super.InitMenu();
 
 	AuthList = KFGUI_ColumnList(FindComponentID('AuthList'));
 	AuthList.Columns.AddItem(newFColumnItem(ColumnText[0], 0.5f));
@@ -298,81 +336,109 @@ function InitMenu()
 
 final function UpdateList()
 {
-	local KFGFxObject_TraderItems TraderItems;
-	local KFPlayerReplicationinfo KFPRI;
-	local UserInfo NewUser;
-	local int i, j, index;
-	local string S, SteamID;
-
-	AuthList.EmptyList();
-
-	if(CurState == RPW)
+	switch(CurState)
 	{
-		TraderItems = KFGameReplicationInfo(GetCDPC().WorldInfo.GRI).TraderItems;
-		CurWeapDef.Remove(0, CurWeapDef.length);
-		AuthList.Columns[0].Text = WeaponHeader;
-		AuthList.Columns[1].Text = BossOnlyHeader;
-		AuthList.Columns[2].Text = LevelHeader;
-
-		for(i=0; i<TraderItems.SaleItems.length; i++)
-		{
-			if (TraderItems.SaleItems[i].AssociatedPerkClasses.Find(GetCDPC().WeapUIInfo.Perk) == INDEX_NONE)
-				continue;
-
-			S = class'CD_Object'.static.GetWeapClass(TraderItems.SaleItems[i].WeaponDef).default.ItemName;
-			CurWeapDef.AddItem(TraderItems.SaleItems[i].WeaponDef);
-			index = GetCDPC().WeaponRestrictions.Find('WeapDef', TraderItems.SaleItems[i].WeaponDef);
-
-			if(index != INDEX_NONE)
-			{
-				S $= "\n";
-
-				if(GetCDPC().WeaponRestrictions[index].bOnlyForBoss)
-					S $= Caps(string(true));
-
-				j = GetCDPC().WeaponRestrictions[index].RequiredLevel;
-				if(j > 0)
-					S $= "\n" $ string(j);
-			}
-
-			AuthList.AddLine(S);
-		}
-	}
-	else if(CurState == Authority)
-	{
-		CurUserInfo.Remove(0, CurUserInfo.length);
-		AuthList.Columns[0].Text = NameHeader;
-		AuthList.Columns[1].Text = IDHeader;
-		AuthList.Columns[2].Text = LevelHeader;
-
-		for(i=0; i<GetCDGRI().PRIArray.length; i++)
-		{
-			KFPRI = KFPlayerReplicationInfo(GetCDGRI().PRIArray[i]);
-			SteamID = class'CD_Object'.static.GetSteamID(KFPRI.UniqueId);
-
-			if(GetCDPC().AuthorityList.Find('SteamID', SteamID) == INDEX_NONE)
-			{
-				NewUser.UserName = KFPRI.PlayerName;
-				NewUser.SteamID = SteamID;
-				NewUser.AuthorityLevel = 0;
-				AddLineOperation(NewUser);
-			}
-		}
-
-		for(i=0; i<GetCDPC().AuthorityList.length; i++)
-		{
-			AddLineOperation(GetCDPC().AuthorityList[i]);
-		}
-
-		if(!GetCDPC().bAuthReceived)
-		{
-			SetTimer(1.f, false, 'DelayedUpdateList');
-			AuthList.AddLine(LoadingMsg);
+		case(RPW):
+			UpdateRPWList();
+			break;
+		case(Authority):
+			UpdateAuthorityList();
+			break;
+		case(CustomPlayerStart):
+			PlayerStartComponents.OnUpdatePlayerStartList();
+			break;
+		default:
+			`cdlog("invalid cur state");
+			CurState = RPW;
 			return;
-		}	
 	}
 
 	bListUpdate = true;
+}
+
+private function UpdateRPWList()
+{
+	local KFGFxObject_TraderItems TraderItems;
+	local int i, j, index;
+	local string S;
+
+	AuthList.EmptyList();
+
+	TraderItems = KFGameReplicationInfo(GetCDPC().WorldInfo.GRI).TraderItems;
+	CurWeapDef.Remove(0, CurWeapDef.length);
+	AuthList.Columns[0].Text = WeaponHeader;
+	AuthList.Columns[1].Text = BossOnlyHeader;
+	AuthList.Columns[2].Text = LevelHeader;
+
+	for(i=0; i<TraderItems.SaleItems.length; i++)
+	{
+		if (TraderItems.SaleItems[i].AssociatedPerkClasses.Find(GetCDPC().WeapUIInfo.Perk) == INDEX_NONE)
+			continue;
+
+		S = class'CD_Object'.static.GetWeapClass(TraderItems.SaleItems[i].WeaponDef).default.ItemName;
+		CurWeapDef.AddItem(TraderItems.SaleItems[i].WeaponDef);
+		index = GetCDPC().WeaponRestrictions.Find('WeapDef', TraderItems.SaleItems[i].WeaponDef);
+
+		if(index != INDEX_NONE)
+		{
+			S $= "\n";
+
+			if(GetCDPC().WeaponRestrictions[index].bOnlyForBoss)
+				S $= Caps(string(true));
+
+			j = GetCDPC().WeaponRestrictions[index].RequiredLevel;
+			if(j > 0)
+				S $= "\n" $ string(j);
+		}
+
+		AuthList.AddLine(S);
+	}
+}
+
+private function UpdateAuthorityList()
+{
+	local KFPlayerReplicationinfo KFPRI;
+	local UserInfo NewUser;
+	local int i;
+	local string SteamID;
+
+	AuthList.EmptyList();
+
+	CurUserInfo.Remove(0, CurUserInfo.length);
+	AuthList.Columns[0].Text = NameHeader;
+	AuthList.Columns[1].Text = IDHeader;
+	AuthList.Columns[2].Text = LevelHeader;
+
+	for(i=0; i<GetCDGRI().PRIArray.length; i++)
+	{
+		KFPRI = KFPlayerReplicationInfo(GetCDGRI().PRIArray[i]);
+		SteamID = class'CD_Object'.static.GetSteamID(KFPRI.UniqueId);
+
+		if(GetCDPC().AuthorityList.Find('SteamID', SteamID) == INDEX_NONE)
+		{
+			NewUser.UserName = KFPRI.PlayerName;
+			NewUser.SteamID = SteamID;
+			NewUser.AuthorityLevel = 0;
+			AddLineOperation(NewUser);
+		}
+	}
+
+	for(i=0; i<GetCDPC().AuthorityList.length; i++)
+	{
+		AddLineOperation(GetCDPC().AuthorityList[i]);
+	}
+
+	if(!GetCDPC().bAuthReceived)
+	{
+		SetTimer(1.f, false, 'DelayedUpdateList');
+		AuthList.AddLine(LoadingMsg);
+		return;
+	}
+}
+
+public final function UpdatePlayerStartList(array<string> PathNodesIndexString)
+{
+	PlayerStartComponents.UpdatePlayerStartList(PathNodesIndexString);
 }
 
 function AddLineOperation(UserInfo NewUser)
@@ -424,6 +490,10 @@ function ButtonClicked(KFGUI_Button Sender)
 			CurState = Authority;
 			bListUpdate = false;
 			break;
+		case 'CustomPlayerStart':
+			CurState = CustomPlayerStart;
+			bListUpdate = false;
+			break;
 		case 'PerkSub':
 			GetCDPC().ChangePerkRestriction(GetCDPC().WeapUIInfo.Perk, -1);
 			break;
@@ -444,15 +514,22 @@ function SelectedListRow(KFGUI_ListItem Item, int Row, bool bRight, bool bDblCli
 	if(Row < 0)
 		return;
 
-	if(CurState == RPW)
+	switch(CurState)
 	{
-		SelectedWeap = CurWeapDef[Row];
-		WeapRightClick.OpenMenu(self);
-	}
-	else if(CurState == Authority)
-	{
-		SelectedUser = CurUserInfo[Row];
-		UserRightClick.OpenMenu(self);
+		case(RPW):
+			SelectedWeap = CurWeapDef[Row];
+			WeapRightClick.OpenMenu(self);
+			break;
+		case(Authority):
+			SelectedUser = CurUserInfo[Row];
+			UserRightClick.OpenMenu(self);
+			break;
+		case(CustomPlayerStart):
+			break;
+		default:
+			`cdlog("invalid cur state");
+			CurState = RPW;
+			return;
 	}
 }
 
@@ -568,6 +645,8 @@ function ToggleCheckBox(KFGUI_CheckBox Sender)
 defaultproperties
 {
 //	General
+	ID="AdminMenu"
+	Version="2.1.0"
 	XPosition=0.18
 	YPosition=0.05
 	XSize=0.64
@@ -707,6 +786,7 @@ defaultproperties
 		OnSelectedRow=SelectedListRow
 		bCanSortColumn=false
 	End Object
+	Components.Add(AuthList)
 
 	Begin Object Class=KFGUI_Button Name=RPW
 		XPosition=0.025 //-0.16//0.80
@@ -717,6 +797,7 @@ defaultproperties
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)
 	End Object
+	Components.Add(RPW)
 
 	Begin Object Class=KFGUI_Button Name=Authority
 		XPosition=0.19 //-0.16//0.80
@@ -727,21 +808,29 @@ defaultproperties
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)
 	End Object
+	Components.Add(Authority)
+
+	Begin Object Class=KFGUI_Button Name=CustomPlayerStart
+		XPosition=0.355
+		YPosition=0.925
+		XSize=0.14
+		YSize=0.05
+		ID="CustomPlayerStart"
+		OnClickLeft=ButtonClicked
+		TextColor=(R=255, G=255, B=255, A=255)
+	End Object
+	Components.Add(CustomPlayerStart)
 
 	Begin Object Class=KFGUI_RightClickMenu Name=WeapRClicker
 		ID="WeapRClick"
 		OnSelectedItem=WeapClickedRow
 	End Object
+	WeapRightClick=WeapRClicker
 	
 	Begin Object Class=KFGUI_RightClickMenu Name=UserRClicker
 		ID="UserRClick"
 		OnSelectedItem=UserClickedRow
 	End Object
-
-	Components.Add(AuthList)
-	Components.Add(RPW)
-	Components.Add(Authority)
-	WeapRightClick=WeapRClicker
 	UserRightClick=UserRClicker
 
 //	Check Box

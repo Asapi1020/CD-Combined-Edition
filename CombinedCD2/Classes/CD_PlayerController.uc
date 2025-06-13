@@ -59,6 +59,8 @@ var string MapVoteMessageColor;
 var CD_ConsolePrinter Client_CDCP;
 var CD_WeaponSkinList Client_CDWSL;
 var CD_SpawnCycleCatalog SpawnCycleCatalog;
+var private CD_RPCHandler RPCHandler;
+
 var WeaponUIState WeapUIInfo;
 var bool AlphaGlitterBool;
 var bool bDisableDual;
@@ -104,6 +106,12 @@ var localized string BePlayerString;
 var localized string AdminMenuAccessErrorString;
 var localized string SwitchSkillString;
 
+replication
+{
+    if ( bNetOwner && Role == ROLE_Authority )
+        RPCHandler;
+}
+
 /* ==============================================================================================================================
  *	Main functions
  * ============================================================================================================================== */
@@ -116,6 +124,28 @@ function CD_PlayerReplicationInfo GetCDPRI()
 function CD_GameReplicationInfo GetCDGRI()
 {
 	return CD_GameReplicationInfo(WorldInfo.GRI);
+}
+
+public function CD_RPCHandler GetRPCHandler()
+{
+	if (RPCHandler == None && Role < ROLE_Authority)
+    {
+        foreach DynamicActors(class'CD_RPCHandler', RPCHandler)
+        {
+            if (RPCHandler.Owner == self)
+			{
+				`cdlog("CD_RPCHandler.GetRPCHandler: Found existing RPCHandler for " $ self.name);
+                break;
+			}
+        }
+    }
+
+	return RPCHandler;
+}
+
+public function KF2GUIController GetGUIController()
+{
+	return class'KF2GUIController'.static.GetGUIController(self);
 }
 
 simulated event PostBeginPlay()
@@ -155,6 +185,11 @@ simulated event PostBeginPlay()
 	{
 		SetTimer(0.5f, false, 'SetupConfig');
 		SetTimer(1.0f, false, 'SendPickupInfo');
+	}
+
+	if (ROLE == ROLE_AUTHORITY)
+	{
+		RPCHandler = Spawn(class'CD_RPCHandler', self);
 	}
 }
 
@@ -972,6 +1007,21 @@ function AddHeadHit( int AddedHits )
  *	Server functions
  * ============================================================================================================================== */
 
+reliable server simulated function CheckPlayerStartForCurMap()
+{
+	GetRPCHandler().CheckPlayerStartForCurMap();
+}
+
+reliable server simulated function GotoPathNode(int NodeIndex)
+{
+	GetRPCHandler().GotoPathNode(NodeIndex);
+}
+
+reliable server simulated function RequestEveryoneGotoPathNode(int NodeIndex)
+{
+	GetRPCHandler().RequestEveryoneGotoPathNode(NodeIndex);
+}
+
 reliable server function OpenMapVote()
 {
 	CD_Survival(WorldInfo.Game).xMut.ShowMapVote('MapVote', Self);
@@ -1628,6 +1678,38 @@ exec function testNotify()
 
 exec function TestID(){
 	PrintConsole(class'OnlineSubsystem'.static.UniqueNetIdToString(PlayerReplicationinfo.UniqueId));
+}
+
+exec function DebugGUI(
+	name MenuID,
+	name ComponentID,
+	float XPos=INDEX_NONE,
+	float YPos=INDEX_NONE,
+	float Width=INDEX_NONE,
+	float Height=INDEX_NONE
+){
+	local KF2GUIController GUIController;
+	local KFGUI_Page Page;
+	local KFGUI_Base PageComponent;
+
+	GUIController = class'KF2GUIController'.static.GetGUIController(self);
+	Page = GUIController.FindActiveMenu(MenuID);
+
+	if (Page == none)
+	{
+		`cdlog("DebugGUI: Page not found: " $ string(MenuID));
+		return;
+	}
+
+	PageComponent = Page.FindComponentID(ComponentID);
+
+	if (PageComponent != None)
+	{
+		PageComponent.SetPosition(XPos, YPos, Width, Height);
+		return;
+	}
+
+	`cdlog("DebugGUI: Component not found: " $ string(ComponentID) $ " in " $ string(MenuID));
 }
 
 defaultproperties

@@ -238,6 +238,7 @@ PerkAuthorityString="Perk Authority Level"
 MaxUpgradeString="Max Upgrade Count"
 RPWButtonText="RPW"
 AuthorityButtonText="Authority"
+PlayerStartButtonText="Player Start"
 LevelRequirementString="Require Lv25"
 AntiOvercapString="Anti Overcap"
 WeaponHeader="Weapon"
@@ -250,6 +251,15 @@ LevelSetString="Set "
 BanString="(Ban)"
 ToggleBossOnlyString="Toggle Boss Only"
 RemoveString="Remove"
+
+[xUI_AdminMenu_PlayerStart]
+TogglePathNodesIndexButtonText="Switch Pathnode"
+ClearCustomPlayerStartsButtonText="Delete Entirely"
+RemovePlayerStartString="Delete"
+GoToPlayerStartString="Teleport to this"
+EveryoneGoToPlayerStartString="Let everyone teleport to this"
+AddCustomStartString="Add custom player start:
+PlayerStartListTitle="Custom Player Start"
 
 [xUI_AutoTrader]
 Title="Auto Trader Setting"

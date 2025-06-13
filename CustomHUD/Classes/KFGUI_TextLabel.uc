@@ -1,4 +1,4 @@
-Class KFGUI_TextLable extends KFGUI_Base;
+Class KFGUI_TextLabel extends KFGUI_Base;
 
 `include(Build.uci)
 `include(Logger.uci)
