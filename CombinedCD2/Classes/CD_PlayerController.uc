@@ -61,6 +61,8 @@ var CD_WeaponSkinList Client_CDWSL;
 var CD_SpawnCycleCatalog SpawnCycleCatalog;
 var private CD_RPCHandler RPCHandler;
 
+var protected class<KFGUI_Page> CycleMenuClass, AdminMenuClass, ClientMenuClass, PlayersMenuClass;
+
 var WeaponUIState WeapUIInfo;
 var bool AlphaGlitterBool;
 var bool bDisableDual;
@@ -1047,11 +1049,6 @@ reliable server simulated function ServerSendPickupInfo(bool bDisableOthers, boo
 	CD_Survival(WorldInfo.Game).ReceivePickupInfo(self, bDisableOthers, bDropLocked, bDisableLow, bAOC);
 }
 
-reliable server simulated function PrepareOpenMenu()
-{
-	CD_Survival(WorldInfo.Game).ServerPrepareOpenMenu(self);
-}
-
 reliable server function SetSpawnCycle(string Cycle)
 {
     local CD_Survival CD;
@@ -1183,34 +1180,9 @@ reliable server function CheckPlayerStart()
 
 unreliable client final simulated function ClientOpenURL(string URL){ OnlineSub.OpenURL(URL); }
 
-reliable client simulated function OpenClientMenu()
+reliable client simulated function OpenCustomMenu(class<KFGUI_Page> MenuClass)
 {
-	PrepareOpenMenu();
-//	CancelEating();
-	SetTimer(0.25f, false, 'DelayedOpenClientMenu');
-}
-
-function CancelEating()
-{
-	KFGFxHudWrapper(myHUD).HudMovie.EatMyInput(false);
-}
-
-reliable client simulated function OpenCycleMenu()
-{
-	PrepareOpenMenu();
-	SetTimer(0.25f, false, 'DelayedOpenCycleMenu');
-}
-
-reliable client simulated function OpenAdminMenu()
-{
-	PrepareOpenMenu();
-	SetTimer(0.25f, false, 'DelayedOpenAdminMenu');
-}
-
-reliable client simulated function OpenPlayersMenu()
-{
-	PrepareOpenMenu();
-	SetTimer(0.25f, false, 'DelayedOpenPlayersMenu');
+	GetGUIController().OpenMenu(MenuClass);
 }
 
 reliable client simulated function ShowReadyButton()
@@ -1502,26 +1474,6 @@ reliable client function ShowLocalizedPopup(string title, string Msg, optional E
 	ShowConnectionProgressPopup(ProgressType, LocalizeSentence(title), LocalizeSentence(Msg));
 }
 
-simulated function DelayedOpenClientMenu()
-{
-	Class'KF2GUIController'.Static.GetGUIController(self).OpenMenu(class'xUI_ClientMenu');
-}
-
-simulated function DelayedOpenCycleMenu()
-{
-	Class'KF2GUIController'.Static.GetGUIController(self).OpenMenu(class'xUI_CycleMenu');
-}
-
-simulated function DelayedOpenAdminMenu()
-{
-	Class'KF2GUIController'.Static.GetGUIController(self).OpenMenu(class'xUI_AdminMenu');
-}
-
-simulated function DelayedOpenPlayersMenu()
-{
-	Class'KF2GUIController'.Static.GetGUIController(self).OpenMenu(class'xUI_PlayersMenu');
-}
-
 function SendPickupInfo()
 {
 	ServerSendPickupInfo(DisablePickUpOthers, DropLocked, DisablePickUpLowAmmo, ClientAntiOvercap);
@@ -1560,20 +1512,51 @@ reliable server private function RecordEnableCheats(){
 	CD_Survival(WorldInfo.Game).RecordEnableCheats();
 }
 
-exec function ClientOption(){ OpenClientMenu(); }
+exec function ClientOption()
+{
+	SetTimer(0.25f, false, 'DelayedOpenClientMenu');
+}
 
-exec function CycleOption(){ OpenCycleMenu(); }
+private function DelayedOpenClientMenu()
+{
+	OpenCustomMenu(ClientMenuClass);
+}
+
+exec function CycleOption()
+{
+	SetTimer(0.25f, false, 'DelayedOpenCycleMenu');
+}
+
+private function DelayedOpenCycleMenu()
+{
+	OpenCustomMenu(CycleMenuClass);
+}
+
+exec function OpenPlayersMenu()
+{
+	SetTimer(0.25f, false, 'DelayedOpenPlayersMenu');
+}
+
+private function DelayedOpenPlayersMenu()
+{
+	OpenCustomMenu(PlayersMenuClass);
+}
 
 exec function AdminMenu()
 { 
 	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
 	{
-		OpenAdminMenu();
+		SetTimer(0.25f, false, 'DelayedOpenAdminMenu');
 	}
 	else
 	{
 		ClientMessage(AdminMenuAccessErrorString, 'UMEcho');
 	}
+}
+
+private function DelayedOpenAdminMenu()
+{
+	OpenCustomMenu(AdminMenuClass);
 }
 
 exec function ImAdmin(){ AssignAdmin(); }
@@ -1726,6 +1709,11 @@ defaultproperties
 {
 	MatchStatsClass=class'CombinedCD2.CD_EphemeralMatchStats'
 	PurchaseHelperClass=class'CD_AutoPurchaseHelper'
+
+	CycleMenuClass=class'xUI_CycleMenu'
+	AdminMenuClass=class'xUI_AdminMenu'
+	ClientMenuClass=class'xUI_ClientMenu'
+	PlayersMenuClass=class'xUI_PlayersMenu'
 
 	CDEchoMessageColor="00FF0A"
 	RPWEchoMessageColor="FF20B7"
