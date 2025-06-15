@@ -155,6 +155,7 @@ private reliable client simulated function ReceiveDisableCustomStarts(bool bDisa
 public reliable server simulated function SetDisableCustomStarts(bool bDisable)
 {
 	GetCD().xMut.DisableCustomStarts = bDisable;
+	GetCD().xMut.SaveConfig();
 }
 
 defaultproperties
