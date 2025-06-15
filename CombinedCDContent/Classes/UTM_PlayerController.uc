@@ -520,7 +520,6 @@ simulated function DelayedOpenWeapSkinMenu()
 
 reliable client simulated function OpenWeapSkinMenu()
 {
-    PrepareOpenMenu();
     SetTimer(0.25f, false, 'DelayedOpenWeapSkinMenu');
 }
 

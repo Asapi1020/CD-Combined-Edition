@@ -638,6 +638,21 @@ simulated final function bool MenuIsOpen(optional class<KFGUI_Page> MenuClass)
 			return true;
 	return false;
 }
+
+simulated final function KFGUI_Page FindActiveMenu(name MenuID)
+{
+	local int i;
+
+	for (i=0; i < ActiveMenus.length; i++)
+	{
+		if ( ActiveMenus[i].ID == MenuID )
+		{
+			return ActiveMenus[i];
+		}
+	}
+	return None;
+}
+
 simulated final function GrabInputFocus(KFGUI_Base Comp, optional bool bForce)
 {
 	if (Comp == KeyboardFocus && !bForce)

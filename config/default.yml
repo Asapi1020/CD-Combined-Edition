@@ -20,6 +20,7 @@ launchOptions:
   difficulty: 3
   gameLength: 2
   otherOptions:
+    - "EnableLog=1"
 workshop:
   userToolPath: "F:/SteamLibrary/steamapps/common/killingfloor2/Binaries/WorkshopUserTool.exe"
   descriptionPath: "description.txt"

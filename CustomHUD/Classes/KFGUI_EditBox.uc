@@ -10,7 +10,7 @@ var enum eTextCase
 	TXTC_Lower,
 } TextCase;
 
-var Color FontColor, BackgroundColor, CursorColor;
+var Color FontColor, BackgroundColor, CursorColor, SelectedColor;
 
 var string TextStr, AllowedCharSet;
 var bool bDrawBackground, bNoClearOnEnter, bMaskText, bIntOnly, bFloatOnly, bIncludeSign, bConvertSpaces, bCtrl, bAllSelected, bForceShowCaret;
@@ -408,7 +408,7 @@ function DrawMenu()
 
 		if (bAllSelected)
 		{
-			Canvas.SetDrawColor(255, 87, 51, 255);
+			Canvas.SetDrawColor(SelectedColor.R, SelectedColor.G, SelectedColor.B, SelectedColor.A);
 			Owner.CurrentStyle.DrawRectBox(BorderSize, CursorY, XL, YL-Owner.HUDOwner.ScaledBorderSize, 3.f, 0);
 		}
 		else
@@ -448,6 +448,7 @@ defaultproperties
 	FontColor=(R=255, G=255, B=255, A=255)
 	BackgroundColor=(R=30, G=30, B=30, A=200)
 	CursorColor=(R=255, G=255, B=255)
+	SelectedColor=(R=0, G=120, B=215, A=255)
 	MaxWidth=768
 	TextScale=1
 	TextCase=TXTC_None
