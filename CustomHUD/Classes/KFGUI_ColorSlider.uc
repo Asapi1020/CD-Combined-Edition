@@ -4,7 +4,7 @@ class KFGUI_ColorSlider extends KFGUI_MultiComponent;
 `include(Logger.uci)
 
 var KFGUI_Slider RSlider, GSlider, BSlider, ASlider;
-var KFGUI_TextLable TextLable, RedLabel, GreenLabel, BlueLabel, AlphaLabel, RedValue, GreenValue, BlueValue, AlphaValue;
+var KFGUI_TextLabel TextLable, RedLabel, GreenLabel, BlueLabel, AlphaLabel, RedValue, GreenValue, BlueValue, AlphaValue;
 var KFGUI_ComponentList SettingsBox;
 
 var Color DefaultColor;
@@ -16,7 +16,7 @@ function InitMenu()
 
 	SettingsBox = KFGUI_ComponentList(FindComponentID('SettingsBox'));
 
-	TextLable = KFGUI_TextLable(FindComponentID('CaptionText'));
+	TextLable = KFGUI_TextLabel(FindComponentID('CaptionText'));
 	TextLable.SetText(CaptionText);
 
 	RSlider = AddSlider("Red:", 'ColorSliderR', 0,255, RedLabel, RedValue);
@@ -42,19 +42,19 @@ function SetDefaultColor(Color Def)
 	ASlider.UpdateListVis();
 }
 
-final function KFGUI_Slider AddSlider(string Cap, name IDN, int MinValue, int MaxValue, out KFGUI_TextLable Label, out KFGUI_TextLable ColorValueLabel)
+final function KFGUI_Slider AddSlider(string Cap, name IDN, int MinValue, int MaxValue, out KFGUI_TextLabel Label, out KFGUI_TextLabel ColorValueLabel)
 {
 	local KFGUI_Slider SL;
 	local KFGUI_MultiComponent MC;
 
 	MC = KFGUI_MultiComponent(SettingsBox.AddListComponent(class'KFGUI_MultiComponent'));
 	MC.InitMenu();
-	Label = new(MC) class'KFGUI_TextLable';
+	Label = new(MC) class'KFGUI_TextLabel';
 	Label.SetText(Cap);
 	Label.XSize = 0.45;
 	Label.FontScale = 1;
 	MC.AddComponent(Label);	
-	ColorValueLabel = new(MC) class'KFGUI_TextLable';
+	ColorValueLabel = new(MC) class'KFGUI_TextLabel';
 	ColorValueLabel.XPosition = 0.95;
 	ColorValueLabel.XSize = 0.1;
 	ColorValueLabel.FontScale = 1;
@@ -114,7 +114,7 @@ defaultproperties
 	End Object
 	Components.Add(ClientSettingsBox)
 
-	Begin Object Class=KFGUI_TextLable Name=CaptionLabel
+	Begin Object Class=KFGUI_TextLabel Name=CaptionLabel
 		XSize=1
 		YSize=0.125
 		AlignX=1
