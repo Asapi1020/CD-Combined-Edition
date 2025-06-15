@@ -203,6 +203,7 @@ private function bool MatchChatCommand( const string CmdName, out StructChatComm
 function string GetExtraCommand(string Key, out name EchoType)
 {
 	local int i, j, index;
+	local float Chance;
 
 	//	Preset
 	for(i=0; i<PresetCommands.length; i++)
@@ -210,12 +211,18 @@ function string GetExtraCommand(string Key, out name EchoType)
 		if(PresetCommands[i].Key.Find(Key) == INDEX_NONE)
 			continue;
 
+		Chance = FRand();
+		
 		for(j=0; j<PresetCommands[i].ResList.length; j++)
 		{
-			if(FRand() < PresetCommands[i].ResList[j].Chance)
+			if(Chance < PresetCommands[i].ResList[j].Chance)
 			{
 				EchoType = PresetCommands[i].ResList[j].Type;
 				return PresetCommands[i].ResList[j].Res;
+			}
+			else
+			{
+				Chance -= PresetCommands[i].ResList[j].Chance;
 			}
 		}
 	}
