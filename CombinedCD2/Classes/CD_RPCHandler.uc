@@ -126,6 +126,37 @@ private reliable server simulated function KFPathnode FindPathNodeByIndex(int No
 	return None;
 }
 
+public reliable server simulated function GetDisableCustomStarts()
+{
+	local bool bDisableCustomStarts;
+
+	bDisableCustomStarts = GetCD().xMut.DisableCustomStarts;
+
+	ReceiveDisableCustomStarts(bDisableCustomStarts);
+}
+
+private reliable client simulated function ReceiveDisableCustomStarts(bool bDisable)
+{
+	local KFGUI_Page FoundMenu;
+	local xUI_AdminMenu AdminMenu;
+
+	FoundMenu = GetCDPC().GetGUIController().FindActiveMenu('AdminMenu');
+	AdminMenu = xUI_AdminMenu(FoundMenu);
+
+	if ( AdminMenu != None )
+	{
+		AdminMenu.ReceiveDisableCustomStarts(bDisable);
+		return;
+	}
+
+	`cdlog("Admin Menu is not active");
+}
+
+public reliable server simulated function SetDisableCustomStarts(bool bDisable)
+{
+	GetCD().xMut.DisableCustomStarts = bDisable;
+}
+
 defaultproperties
 {
 	bAlwaysRelevant=false

@@ -13,15 +13,21 @@ var editinline export KFGUI_RightClickMenu PlayerStartRightClick;
 var KFGUI_EditBox AddCustomStartEditBox;
 var editinline export KFGUI_TextLabel AddCustomStartTextLabel;
 
+var KFGUI_CheckBox DisableCustomStartsCheckBox;
+
 var private int SelectedPathNodeIndex;
+
+var public bool bServerDisableCustomStarts;
 
 var localized string TogglePathNodesIndexButtonText;
 var localized string ClearCustomPlayerStartsButtonText;
+var localized string ClearCustomPlayerStartsToolTip;
 var localized string PlayerStartListTitle;
 var localized string RemovePlayerStartString;
 var localized string GoToPlayerStartString;
 var localized string EveryoneGoToPlayerStartString;
 var localized string AddCustomStartString;
+var localized string DisableCustomStartsString;
 
 public function InitComponents()
 {
@@ -30,15 +36,26 @@ public function InitComponents()
 	AddCustomStartEditBox = KFGUI_EditBox(FindComponentID('AddCustomStartEditBox'));
 	AddCustomStartTextLabel.SetText(AddCustomStartString);
 	AddComponent(AddCustomStartTextLabel);
+
+	GetCDPC().GetDisableCustomStarts();
 }
 
 public function DrawComponents()
 {
+	local float RightEnd;
+
 	TogglePathNodesIndexButton = KFGUI_Button(FindComponentID('TogglePathNodesIndex'));
 	TogglePathNodesIndexButton.ButtonText = TogglePathNodesIndexButtonText;
 
 	ClearCustomPlayerStartsButton = KFGUI_Button(FindComponentID('ClearCustomPlayerStarts'));
 	ClearCustomPlayerStartsButton.ButtonText = ClearCustomPlayerStartsButtonText;
+	ClearCustomPlayerStartsButton.ToolTip = ClearCustomPlayerStartsToolTip;
+
+	DisableCustomStartsCheckBox = KFGUI_CheckBox(FindComponentID('DisableCustomStarts'));
+	DisableCustomStartsCheckBox.bChecked = bServerDisableCustomStarts;
+
+	RightEnd = PlayerStartList.XPosition + PlayerStartList.XSize - ClearCustomPlayerStartsButton.XPosition;
+	DrawBoxDescription(DisableCustomStartsString, DisableCustomStartsCheckBox, RightEnd, bVisible);
 }
 
 public simulated function OnUpdatePlayerStartList()
@@ -164,6 +181,20 @@ private function AddCustomStart(string indexString)
 	GetCDPC().AddCustomStart(index);
 }
 
+function ToggleCheckBox(KFGUI_CheckBox Sender)
+{
+	switch(Sender.ID)
+	{
+		case 'DisableCustomStarts':
+			GetCDPC().SetDisableCustomStarts(Sender.bChecked);
+			bServerDisableCustomStarts = Sender.bChecked;
+			break;
+		default:
+			`cdlog("xUI_AdminMenu_PlayerStart: ToggleCheckBox: Unknown checkbox clicked: " $ Sender.ID);
+			return;
+	}
+}
+
 private function DelayedReload()
 {
 	SetTimer(0.5, false, 'OnUpdatePlayerStartList');
@@ -239,4 +270,12 @@ defaultproperties
 		TextColor=(R=255, G=255, B=255, A=255)
 	End Object
 	Components.Add(ClearCustomPlayerStartsButton)
+
+	Begin Object Class=KFGUI_CheckBox Name=DisableCustomStartsCheckBox
+		XPosition=0.20
+		YPosition=0.86
+		ID="DisableCustomStarts"
+		OnCheckChange=ToggleCheckBox
+	End Object
+	Components.Add(DisableCustomStartsCheckBox)
 }
