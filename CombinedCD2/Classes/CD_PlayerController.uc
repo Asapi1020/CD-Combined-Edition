@@ -1022,6 +1022,16 @@ reliable server simulated function RequestEveryoneGotoPathNode(int NodeIndex)
 	GetRPCHandler().RequestEveryoneGotoPathNode(NodeIndex);
 }
 
+reliable server simulated function GetDisableCustomStarts()
+{
+	GetRPCHandler().GetDisableCustomStarts();
+}
+
+reliable server simulated function SetDisableCustomStarts(bool bDisable)
+{
+	GetRPCHandler().SetDisableCustomStarts(bDisable);
+}
+
 reliable server function OpenMapVote()
 {
 	CD_Survival(WorldInfo.Game).xMut.ShowMapVote('MapVote', Self);

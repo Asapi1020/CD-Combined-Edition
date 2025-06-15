@@ -642,6 +642,11 @@ function ToggleCheckBox(KFGUI_CheckBox Sender)
 	}
 }
 
+public function ReceiveDisableCustomStarts( bool bDisable )
+{
+	PlayerStartComponents.bServerDisableCustomStarts = bDisable;
+}
+
 defaultproperties
 {
 //	General
