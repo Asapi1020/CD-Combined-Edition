@@ -126,6 +126,16 @@ final function ComputeCoords()
 
 function bool CaptureMouse()
 {
+	/* NOTE:
+	 * Invisible KFGUI_MultiComponents do not render their components even if their bVisible is true.
+	 * Prevent mouse capture if the parent component is not visible
+	 * but this does not recursively check all parent components for safety.
+	 */
+	if(ParentComponent != None && !ParentComponent.bVisible)
+	{
+		return false;
+	}
+
 	return bVisible && ( Owner.MousePosition.X >= CompPos[0] && Owner.MousePosition.Y >= CompPos[1] && Owner.MousePosition.X <= (CompPos[0]+CompPos[2]) && Owner.MousePosition.Y <= (CompPos[1]+CompPos[3]));
 }
 

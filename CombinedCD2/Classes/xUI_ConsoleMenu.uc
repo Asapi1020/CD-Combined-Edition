@@ -19,13 +19,6 @@ function InitMenu()
 	CurrentEntryIndex = -1;
 }
 
-function DrawMenu()
-{
-	Super.DrawMenu();
-	WindowTitle = Title @ "v1.0";
-
-}
-
 function ShowMenu()
 {
 	Super.ShowMenu();
@@ -232,6 +225,8 @@ function Transit()
 defaultproperties
 {
 	// General
+    ID="ConsoleMenu"
+    Version="1.0.1"
 	XPosition=0.05
 	YPosition=0.05
 	XSize=0.90
@@ -243,6 +238,7 @@ defaultproperties
     bForceInput=true
     FrameOpacity=250
     FrameColor=(R=0, G=0, B=0, A=220)
+    bHideNavigation=true
 
 	// Components
 	Begin Object Class=KFGUI_TextField Name=ChatBoxTextBox

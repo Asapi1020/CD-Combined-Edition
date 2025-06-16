@@ -36,7 +36,6 @@ function DrawMenu()
 
 	Super.DrawMenu();
 
-	WindowTitle=Title @ "v1.0";
 	Canvas.Font = Owner.CurrentStyle.PickFont(FontScalar);
 	Canvas.TextSize("ABC", XL, YL, FontScalar, FontScalar);
 
@@ -195,18 +194,15 @@ function AutoBuyClickedRow(int RowNum)
 
 defaultproperties
 {
-//	General
-	XPosition=0.18
-	YPosition=0.1
-	XSize=0.64
-	YSize=0.8
+	ID="AutoTraderMenu"
+	Version="1.0.1"
 
 //	Perk
 	Begin Object Class=KFGUI_Button Name=Commando
 		XPosition=0.055
 		YPosition=0.055
 		XSize=0.14
-		YSize=0.07
+		YSize=0.05
 		ID="Commando"
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)
@@ -217,7 +213,7 @@ defaultproperties
 		XPosition=0.205
 		YPosition=0.055
 		XSize=0.14
-		YSize=0.07
+		YSize=0.05
 		ID="Support"
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)
@@ -228,7 +224,7 @@ defaultproperties
 		XPosition=0.355
 		YPosition=0.055
 		XSize=0.14
-		YSize=0.07
+		YSize=0.05
 		ID="FieldMedic"
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)
@@ -239,7 +235,7 @@ defaultproperties
 		XPosition=0.505
 		YPosition=0.055
 		XSize=0.14
-		YSize=0.07
+		YSize=0.05
 		ID="Gunslinger"
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)
@@ -250,7 +246,7 @@ defaultproperties
 		XPosition=0.655
 		YPosition=0.055
 		XSize=0.14
-		YSize=0.07
+		YSize=0.05
 		ID="Sharpshooter"
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)
@@ -261,7 +257,7 @@ defaultproperties
 		XPosition=0.805
 		YPosition=0.055
 		XSize=0.14
-		YSize=0.07
+		YSize=0.05
 		ID="Swat"
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)

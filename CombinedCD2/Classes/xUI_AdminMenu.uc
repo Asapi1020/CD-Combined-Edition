@@ -175,10 +175,6 @@ defaultproperties
 //	General
 	ID="AdminMenu"
 	Version="2.1.0"
-	XPosition=0.18
-	YPosition=0.05
-	XSize=0.64
-	YSize=0.9
 	CurState=RPW
 
 	Begin Object Class=KFGUI_Button Name=Close

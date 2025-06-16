@@ -152,11 +152,11 @@ function InitializeHUD()
     
     if(ClientViewport != none)
     {
-    	CreateAndSetConsoleReplacment();
+    	CreateAndSetConsoleReplacement();
     }
 }
 
-final function CreateAndSetConsoleReplacment()
+final protected function CreateAndSetConsoleReplacement()
 {
     if(ConsoleClass == none)
    		return;
