@@ -2942,18 +2942,6 @@ exec function ShowCycleOrder(string CycleName)
 	GameInfo_CDCP.Print( SpawnCycleAnalyzer.SpawnOrderOverview(CycleName) );
 }
 
-exec function SetupAspServer(bool Auth, bool Start, bool RPW)
-{
-	if(Auth)
-		AuthorityHandler.SetupAspAuthList();
-
-	if(Start)
-		xMut.SetupAspCustomStart();
-
-	if(RPW)
-		AuthorityHandler.SetupAspRPW();
-}
-
 exec function TestConnection(){
 	local CD_HTTPRequestHandler RequestHandler;
 

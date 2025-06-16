@@ -5,7 +5,7 @@
 // chat strings and dispatches to the appropriate function.
 //=============================================================================
 
-class CD_ChatCommander extends CD_ChatCommandPresets
+class CD_ChatCommander extends Object
 	within CD_Survival
 	DependsOn(CD_Survival)
 	config( CombinedCD );
@@ -35,6 +35,7 @@ struct ExCmdCombo
 
 var array<StructChatCommand> ChatCommands;
 var config array<ExCmdCombo> ExtraCommands;
+var class<CD_ChatCommandPresets> PresetClass;
 
 const AdminLevel = 4;
 const OngshimiVideoChance = 0.05f;
@@ -206,23 +207,23 @@ function string GetExtraCommand(string Key, out name EchoType)
 	local float Chance;
 
 	//	Preset
-	for(i=0; i<PresetCommands.length; i++)
+	for(i=0; i<PresetClass.default.Commands.length; i++)
 	{
-		if(PresetCommands[i].Key.Find(Key) == INDEX_NONE)
+		if(PresetClass.default.Commands[i].Key.Find(Key) == INDEX_NONE)
 			continue;
 
 		Chance = FRand();
 		
-		for(j=0; j<PresetCommands[i].ResList.length; j++)
+		for(j=0; j<PresetClass.default.Commands[i].ResList.length; j++)
 		{
-			if(Chance < PresetCommands[i].ResList[j].Chance)
+			if(Chance < PresetClass.default.Commands[i].ResList[j].Chance)
 			{
-				EchoType = PresetCommands[i].ResList[j].Type;
-				return PresetCommands[i].ResList[j].Res;
+				EchoType = PresetClass.default.Commands[i].ResList[j].Type;
+				return PresetClass.default.Commands[i].ResList[j].Res;
 			}
 			else
 			{
-				Chance -= PresetCommands[i].ResList[j].Chance;
+				Chance -= PresetClass.default.Commands[i].ResList[j].Chance;
 			}
 		}
 	}
@@ -1204,7 +1205,7 @@ private function SetupSenderCommand( const string CmdName, const string SecondNa
 		foreach WorldInfo.AllControllers(class'CD_PlayerController', CDPC)
 			CDPC.PlayMeowSound();
 
-		if(Rand(100) == 0) return JAPANESE_MEOW;
+		if(Rand(100) == 0) return PresetClass.const.JAPANESE_MEOW;
 		return "";
 	}
 
@@ -1214,7 +1215,7 @@ private function SetupSenderCommand( const string CmdName, const string SecondNa
 		{
 			CDPC.ClientOpenURL("https://youtu.be/Rlb_gYjSASY");
 		}
-		return ONGSHIMI_LYRIC;
+		return PresetClass.const.ONGSHIMI_LYRIC;
 	}
 
 	private function string SpawnZedCommand(const array<string> Params, CD_PlayerController CDPC)
@@ -1280,3 +1281,8 @@ private function SetupSenderCommand( const string CmdName, const string SecondNa
 		}
 		return "";
 	}
+
+defaultproperties
+{
+	PresetClass=class'CD_ChatCommandPresets'
+}
