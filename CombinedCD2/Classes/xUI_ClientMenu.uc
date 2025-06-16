@@ -20,8 +20,6 @@ var KFGUI_CheckBox DisplayCDTipsBox;
 var KFGUI_CheckBox ShowPickupInfoBox;
 var KFGUI_CheckBox UseVanillaScoreboardBox;
 
-var KFGUI_Button AutoTraderB;
-
 //var localized string Title;
 var localized string PickupOthersString;
 var localized string DropLockedString;
@@ -39,7 +37,6 @@ var localized string AlertUnusualSettingsString;
 var localized string DisplayCDTipsString;
 var localized string ShowPickupInfoString;
 var localized string UseVanillaScoreboardString;
-var localized string AutoTraderString;
 
 var localized string DisablePickupOthersToolTip;
 var localized string DropLockedToolTip;
@@ -68,7 +65,6 @@ function DrawMenu()
 
 	super.DrawMenu();
 
-	WindowTitle=Title @ "v1.9";
 	Canvas.Font = Owner.CurrentStyle.PickFont(FontScalar);
 	Canvas.TextSize("ABC", XL, YL, FontScalar, FontScalar);
 
@@ -154,20 +150,6 @@ function DrawMenu()
 	UseVanillaScoreboardBox.bChecked = CDPC.UseVanillaScoreboard;
 	UseVanillaScoreboardBox.ToolTip=UseVanillaScoreboardToolTip;
 	DrawBoxDescription(UseVanillaScoreboardString, UseVanillaScoreboardBox, 0.9);
-	
-	AutoTraderB = KFGUI_Button(FindComponentID('AutoTrader'));
-	AutoTraderB.ButtonText = AutoTraderString;
-}
-
-function ButtonClicked(KFGUI_Button Sender)
-{
-	switch(Sender.ID)
-	{
-		case 'AutoTrader':
-			Class'KF2GUIController'.Static.GetGUIController(GetCDPC()).OpenMenu(class'xUI_AutoTrader');
-			DoClose();
-			break;
-	}
 }
 
 function ToggleCheckBox(KFGUI_CheckBox Sender)
@@ -236,10 +218,8 @@ function ToggleCheckBox(KFGUI_CheckBox Sender)
 
 defaultproperties
 {
-	XPosition=0.30
-	YPosition=0.25
-	XSize=0.4
-	YSize=0.5
+	ID="ClientMenu"
+	Version="1.9.1"
 
 //	Pickup settings
 	Begin Object Class=KFGUI_CheckBox Name=DisablePickUpOthers
@@ -358,17 +338,6 @@ defaultproperties
 		OnCheckChange=ToggleCheckBox
 	End Object
 
-//	Button
-	Begin Object Class=KFGUI_Button Name=AutoTrader
-		XPosition=0.05
-		YPosition=0.70
-		XSize=0.35
-		YSize=0.08
-		ID="AutoTrader"
-		OnClickLeft=ButtonClicked
-		TextColor=(R=255, G=255, B=255, A=255)
-	End Object
-
 //	Components
 	Components.Add(DisablePickUpOthers)
 	Components.Add(DropLocked)
@@ -386,5 +355,4 @@ defaultproperties
 	Components.Add(DisplayCDTips)
 	Components.Add(ShowPickupInfo)
 	Components.Add(UseVanillaScoreboard)
-	Components.Add(AutoTrader)
 }

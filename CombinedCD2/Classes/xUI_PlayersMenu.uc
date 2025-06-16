@@ -28,8 +28,6 @@ function DrawMenu()
 {
 	super.DrawMenu();
 
-	WindowTitle = Title @ "v1.0";
-
 	if(!bListUpdate)
 	{
 		UpdateList();
@@ -145,16 +143,14 @@ function UserClickedRow(int i)
 
 defaultproperties
 {
-	XPosition=0.30
-	YPosition=0.30
-	XSize=0.4
-	YSize=0.4
+	ID="PlayersMenu"
+	Version="1.0.1"
 
 	Begin Object Class=KFGUI_Button Name=Refresh
 		XPosition=0.05
 		YPosition=0.875
 		XSize=0.10
-		YSize=0.1
+		YSize=0.05
 		ID="Refresh"
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)
@@ -164,7 +160,7 @@ defaultproperties
 		XPosition=0.85
 		YPosition=0.875
 		XSize=0.10
-		YSize=0.1
+		YSize=0.05
 		ID="Close"
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)

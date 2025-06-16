@@ -1,6 +1,8 @@
 class xUI_CycleMenu extends xUI_MenuBase
 	config(CombinedCD_LocalData);
 
+`include(CD_UTF16LE.uci)
+
 var KFGUI_CheckBox FavoriteFilter;
 var KFGUI_ColumnList CycleList;
 var KFGUI_RightClickMenu CycleRClicker;
@@ -53,8 +55,6 @@ function DrawMenu()
 
 	super.DrawMenu();
 
-	WindowTitle = Title @ "v2.0";
-
 	FavoriteFilter = KFGUI_CheckBox(FindComponentID('FavoriteFilter'));
 	FavoriteFilter.ToolTip=FavoriteFilterToolTip;
 	FavoriteFilter.bChecked = bFiltered;
@@ -73,7 +73,7 @@ function DrawMenu()
 				++skipped;
 				continue;
 			}
-			S = (bFavorite ? "♡" : "") $ "\n" $ S;
+			S = (bFavorite ? `HEART_EMOJI : "") $ "\n" $ S;
 			S $= "\n" $ SpawnCyclePreset.GetAuthor();
 			S $= "\n" $ SpawnCyclePreset.GetDate();
 			CycleList.AddLine(S);
@@ -149,11 +149,8 @@ function ToggleCheckBox(KFGUI_CheckBox Sender)
 
 defaultproperties
 {
-	XPosition=0.18 //0.70
-	YPosition=0.05 //0.50
-	XSize=0.64 //0.15
-	YSize=0.90 //0.4
-	//bHide=true
+	ID="CycleMenu"
+	Version="2.0.1"
 
 	Begin Object Class=KFGUI_CheckBox Name=FavoriteFilter
 		XPosition=0.05
@@ -164,9 +161,9 @@ defaultproperties
 
 	Begin Object Class=KFGUI_ColumnList Name=Cycle
 		XPosition=0.05
-		YPosition=0.20
+		YPosition=0.15
 		XSize=0.90
-		YSize=0.75
+		YSize=0.80
 		ID="Cycle"
 		OnSelectedRow=SelectedCycleRow
 		bCanSortColumn=true
