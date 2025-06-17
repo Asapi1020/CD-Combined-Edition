@@ -61,7 +61,14 @@ var CD_WeaponSkinList Client_CDWSL;
 var CD_SpawnCycleCatalog SpawnCycleCatalog;
 var private CD_RPCHandler RPCHandler;
 
-var protected class<KFGUI_Page> CycleMenuClass, AdminMenuClass, ClientMenuClass, PlayersMenuClass;
+var class<xUI_MenuBase>
+	CycleMenuClass,
+	AdminMenuClass,
+	ClientMenuClass,
+	PlayersMenuClass,
+	AutoTraderMenuClass,
+	MapVoteMenuClass,
+	ConsoleMenuClass;
 
 var WeaponUIState WeapUIInfo;
 var bool AlphaGlitterBool;
@@ -148,6 +155,11 @@ public function CD_RPCHandler GetRPCHandler()
 public function KF2GUIController GetGUIController()
 {
 	return class'KF2GUIController'.static.GetGUIController(self);
+}
+
+public function bool hasAdminLevel()
+{
+	return WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel >= class'CD_AuthorityHandler'.const.ADMIN_LEVEL;
 }
 
 simulated event PostBeginPlay()
@@ -1182,7 +1194,15 @@ unreliable client final simulated function ClientOpenURL(string URL){ OnlineSub.
 
 reliable client simulated function OpenCustomMenu(class<KFGUI_Page> MenuClass)
 {
-	GetGUIController().OpenMenu(MenuClass);
+	local KF2GUIController GUIController;
+
+	GUIController = GetGUIController();
+	GUIController.OpenMenu(MenuClass);
+
+	if ( MenuClass == ConsoleMenuClass &&  GUIController.FindActiveMenu(ConsoleMenuClass.default.ID) != none)
+	{
+		GUIController.CloseMenu(ConsoleMenuClass);
+	}
 }
 
 reliable client simulated function ShowReadyButton()
@@ -1544,7 +1564,7 @@ private function DelayedOpenPlayersMenu()
 
 exec function AdminMenu()
 { 
-	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
+	if(hasAdminLevel())
 	{
 		SetTimer(0.25f, false, 'DelayedOpenAdminMenu');
 	}
@@ -1563,13 +1583,13 @@ exec function ImAdmin(){ AssignAdmin(); }
 
 exec function ForceSpawnAI(string ZedName)
 {
-	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
+	if(hasAdminLevel())
 		CD_Survival(WorldInfo.Game).CD_SpawnZed(ZedName, self);
 }
 
 exec function AddAuthorityInfo(string SteamID, int AuthorityLevel, optional string UserName)
 {
-	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
+	if(hasAdminLevel())
 	{
 		ServerAddAuthorityInfo(SteamID, AuthorityLevel, UserName);
 	}
@@ -1577,19 +1597,19 @@ exec function AddAuthorityInfo(string SteamID, int AuthorityLevel, optional stri
 
 exec function AddCustomStart(int index)
 {
-	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
+	if(hasAdminLevel())
 		AddPlayerStart(index);
 }
 
 exec function RemoveCustomStart(int index)
 {
-	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
+	if(hasAdminLevel())
 		RemovePlayerStart(index);
 }
 
 exec function ClearCustomStart()
 {
-	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
+	if(hasAdminLevel())
 		ClearPlayerStart();
 }
 
@@ -1603,7 +1623,7 @@ exec function CheckAuthList()
 	local string s;
 	local int i;
 
-	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
+	if(hasAdminLevel())
 	{
 		s = "\n";
 
@@ -1616,7 +1636,7 @@ exec function CheckAuthList()
 
 exec function ShowPathNodesNum()
 {
-	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
+	if(hasAdminLevel())
 		bShowPathNodes = !bShowPathNodes;
 }
 
@@ -1669,17 +1689,20 @@ exec function testNotify()
 	ShowLevelUpNotify("Title", "Main", "Secondary", "ImagePath", true, 10);
 }
 
-exec function TestID(){
-	PrintConsole(class'OnlineSubsystem'.static.UniqueNetIdToString(PlayerReplicationinfo.UniqueId));
-}
-
+/**
+ * Debug GUI function to set position and size of a GUI component.
+ * This function is intended for debugging purposes and allows you to modify the position and size of a GUI component
+ * The change does not persist and is only applied during the current session.
+ * @param MenuID The ID of the menu containing the component.
+ * @param ComponentID The ID of the component to modify.
+ */
 exec function DebugGUI(
 	name MenuID,
 	name ComponentID,
-	float XPos=INDEX_NONE,
-	float YPos=INDEX_NONE,
-	float Width=INDEX_NONE,
-	float Height=INDEX_NONE
+	float XPos,
+	float YPos,
+	float Width,
+	float Height
 ){
 	local KF2GUIController GUIController;
 	local KFGUI_Page Page;
@@ -1710,10 +1733,13 @@ defaultproperties
 	MatchStatsClass=class'CombinedCD2.CD_EphemeralMatchStats'
 	PurchaseHelperClass=class'CD_AutoPurchaseHelper'
 
+	ConsoleMenuClass=class'xUI_ConsoleMenu'
 	CycleMenuClass=class'xUI_CycleMenu'
 	AdminMenuClass=class'xUI_AdminMenu'
 	ClientMenuClass=class'xUI_ClientMenu'
 	PlayersMenuClass=class'xUI_PlayersMenu'
+	AutoTraderMenuClass=class'xUI_AutoTrader'
+	MapVoteMenuClass=class'xUI_MapVote'
 
 	CDEchoMessageColor="00FF0A"
 	RPWEchoMessageColor="FF20B7"

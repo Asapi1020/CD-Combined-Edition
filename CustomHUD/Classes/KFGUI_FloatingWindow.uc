@@ -9,7 +9,7 @@ var() bool bHide;
 
 var float DragOffset[2], OpenAnimSpeed;
 var KFGUI_FloatingWindowHeader HeaderComp;
-var bool bDragWindow, bUseAnimation;
+var bool bDragWindow, bUseAnimation, bTemporarySuppressAnimation;
 
 var float WindowFadeInTime;
 var transient float OpenStartTime, OpenEndTime;
@@ -25,7 +25,9 @@ function ShowMenu()
 	Super.ShowMenu();
 
 	OpenStartTime = GetPlayer().WorldInfo.RealTimeSeconds;
-	OpenEndTime = GetPlayer().WorldInfo.RealTimeSeconds + OpenAnimSpeed;
+	OpenEndTime = bTemporarySuppressAnimation ? OpenStartTime : GetPlayer().WorldInfo.RealTimeSeconds + OpenAnimSpeed;
+	
+	bTemporarySuppressAnimation = false;
 }
 function DrawMenu()
 {
@@ -82,7 +84,7 @@ function PreDraw()
 {
 	local float Frac, CenterX, CenterY;
 
-	if (bUseAnimation)
+	if (bUseAnimation && OpenStartTime != OpenEndTime)
 	{
 		Frac = Owner.CurrentStyle.TimeFraction(OpenStartTime, OpenEndTime, GetPlayer().WorldInfo.RealTimeSeconds);
 		XSize = Lerp(default.XSize*0.75, default.XSize, Frac);
