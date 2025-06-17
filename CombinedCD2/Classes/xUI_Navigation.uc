@@ -7,7 +7,9 @@ var KFGUI_Button ClientMenuButton;
 var KFGUI_Button AutoTraderMenuButton;
 var KFGUI_Button CycleMenuButton;
 var KFGUI_Button PlayersMenuButton;
+var KFGUI_Button MapVoteMenuButton;
 var KFGUI_Button AdminMenuButton;
+var KFGUI_Button CloseButton;
 
 public function InitComponents()
 {
@@ -41,10 +43,17 @@ public function DrawComponents()
 	PlayersMenuButton.ButtonText = CDPC.default.PlayersMenuClass.default.Title;
 	PlayersMenuButton.bDisabled = isThisMenu(CDPC.default.PlayersMenuClass);
 
+	MapVoteMenuButton = KFGUI_Button(FindComponentID('MapVoteMenuButton'));
+	MapVoteMenuButton.ButtonText = CDPC.default.MapVoteMenuClass.default.Title;
+	MapVoteMenuButton.bDisabled = isThisMenu(CDPC.default.MapVoteMenuClass);
+
 	AdminMenuButton = KFGUI_Button(FindComponentID('AdminMenuButton'));
 	AdminMenuButton.ButtonText = CDPC.default.AdminMenuClass.default.Title;
 	AdminMenuButton.bVisible = CDPC.hasAdminLevel();
 	AdminMenuButton.bDisabled = isThisMenu(CDPC.default.AdminMenuClass);
+
+	CloseButton = KFGUI_Button(FindComponentID('CloseButton'));
+	CloseButton.ButtonText = Outer.default.CloseButtonText;
 }
 
 private function ButtonClicked(KFGUI_Button Sender)
@@ -90,6 +99,16 @@ private function ButtonClicked(KFGUI_Button Sender)
 				DoClose();
 			}
 			break;
+		case('MapVoteMenuButton'):
+			if(!isThisMenu(CDPC.default.MapVoteMenuClass))
+			{
+				CDPC.OpenMapVote();
+				DoClose();
+			}
+			break;
+		case('CloseButton'):
+			DoClose();
+			break;
 		default:
 			`cdlog("invalid button clicked: " $ Sender.ID);
 			break;
@@ -109,7 +128,7 @@ defaultproperties
 		XPosition=0.10
 		YPosition=0.05
 		XSize=0.800
-		YSize=0.075
+		YSize=0.06
 		ID="ClientMenuButton"
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)
@@ -118,9 +137,9 @@ defaultproperties
 
 	Begin Object Class=KFGUI_Button Name=AutoTraderMenu
 		XPosition=0.10
-		YPosition=0.135
+		YPosition=0.12
 		XSize=0.800
-		YSize=0.075
+		YSize=0.06
 		ID="AutoTraderMenuButton"
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)
@@ -129,9 +148,9 @@ defaultproperties
 
 	Begin Object Class=KFGUI_Button Name=CycleMenu
 		XPosition=0.10
-		YPosition=0.220
+		YPosition=0.19
 		XSize=0.800
-		YSize=0.075
+		YSize=0.06
 		ID="CycleMenuButton"
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)
@@ -140,23 +159,45 @@ defaultproperties
 
 	Begin Object Class=KFGUI_Button Name=PlayersMenu
 		XPosition=0.10
-		YPosition=0.305
+		YPosition=0.26
 		XSize=0.800
-		YSize=0.075
+		YSize=0.06
 		ID="PlayersMenuButton"
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)
 	End Object
 	Components.Add(PlayersMenu)
 
+	Begin Object Class=KFGUI_Button Name=MapVoteMenu
+		XPosition=0.10
+		YPosition=0.33
+		XSize=0.800
+		YSize=0.06
+		ID="MapVoteMenuButton"
+		OnClickLeft=ButtonClicked
+		TextColor=(R=255, G=255, B=255, A=255)
+	End Object
+	Components.Add(MapVoteMenu)
+
 	Begin Object Class=KFGUI_Button Name=AdminMenu
 		XPosition=0.10
-		YPosition=0.390
+		YPosition=0.40
 		XSize=0.800
-		YSize=0.075
+		YSize=0.06
 		ID="AdminMenuButton"
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)
 	End Object
 	Components.Add(AdminMenu)
+
+	Begin Object Class=KFGUI_Button Name=CloseButton
+		XPosition=0.10
+		YPosition=0.94
+		XSize=0.800
+		YSize=0.06
+		ID="CloseButton"
+		OnClickLeft=ButtonClicked
+		TextColor=(R=255, G=255, B=255, A=255)
+	End Object
+	Components.Add(CloseButton)
 }

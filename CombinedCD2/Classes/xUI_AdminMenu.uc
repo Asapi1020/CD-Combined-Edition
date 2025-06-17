@@ -9,7 +9,6 @@ enum PageState
 	CustomPlayerStart
 };
 
-var KFGUI_Button CloseB;
 var KFGUI_Button RPWB;
 var KFGUI_Button AuthorityB;
 var KFGUI_Button PlayerStartButton;
@@ -111,9 +110,6 @@ function DrawMenu()
 	PlayerStartButton = KFGUI_Button(FindComponentID('CustomPlayerStart'));
 	PlayerStartButton.ButtonText = PlayerStartButtonText;
 	PlayerStartButton.bDisabled = CurState == CustomPlayerStart;
-
-	CloseB = KFGUI_Button(FindComponentID('Close'));
-	CloseB.ButtonText = CloseButtonText;
 }
 
 private final function UpdateList()
@@ -147,9 +143,6 @@ private function ButtonClicked(KFGUI_Button Sender)
 {
 	switch(Sender.ID)
 	{
-		case 'Close':
-			DoClose();
-			break;
 		case 'RPW':
 			CurState = RPW;
 			bListUpdate = false;
@@ -176,17 +169,6 @@ defaultproperties
 	ID="AdminMenu"
 	Version="2.1.0"
 	CurState=RPW
-
-	Begin Object Class=KFGUI_Button Name=Close
-		XPosition=0.875 //0.025
-		YPosition=0.925
-		XSize=0.10
-		YSize=0.05
-		ID="Close"
-		OnClickLeft=ButtonClicked
-		TextColor=(R=255, G=255, B=255, A=255)
-	End Object
-	Components.Add(Close)
 
 	Begin Object Class=KFGUI_Button Name=RPW
 		XPosition=0.025
