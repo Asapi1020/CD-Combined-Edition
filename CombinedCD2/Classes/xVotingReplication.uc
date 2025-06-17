@@ -231,9 +231,16 @@ simulated function DelayedOpenTeamAward()
 
 simulated function OpenPostGameMenu(name OpenState)
 {
+	local CD_PlayerController CDPC;
+	local KF2GUIController GUIController;
+	local KFGUI_Page Page;
 	local xUI_MapVote U;
 
-	U = xUI_MapVote(Class'KF2GUIController'.Static.GetGUIController(GetPlayer()).OpenMenu(class'xUI_MapVote'));
+	CDPC = CD_PlayerController(GetPlayer());
+	GUIController = CDPC.GetGUIController();
+	Page = GUIController.OpenMenu(CDPC.default.MapVoteMenuClass);
+
+	U = xUI_MapVote(Page);
 	U.InitMapvote(Self);
 	U.CurState = OpenState;
 }

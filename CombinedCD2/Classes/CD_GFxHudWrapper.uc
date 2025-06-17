@@ -85,6 +85,8 @@ function bool MainMenuIsOpen()
 
 function PostRender()
 {
+	Super.PostRender();
+
 	if(CDPC != none && CDGRI != none)
 	{
 		if(CDPC.myHUD.bShowHUD)
@@ -92,12 +94,12 @@ function PostRender()
 			if(CDPC.bShowVolumes)
 				DrawVolumesNumber();
 
-			if(CDPC.bShowPathNodes)
-				DrawPathsNumber();
-
 			if( !CDPC.bCinematicMode && CDGRI.bTraderIsOpen && CDPC.ShowPickupInfo )
 				DrawWeaponPickupInfo();
 		}
+
+		if(CDPC.bShowPathNodes)
+			DrawPathsNumber();
 
 		if(Scoreboard.bVisible || MainMenuIsOpen())
 			DrawTips();
@@ -124,8 +126,6 @@ function PostRender()
 			DrawVoteLeftTime();
 		}
 	}
-
-	Super.PostRender();
 }
 
 function LaunchHUDMenus()
