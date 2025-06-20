@@ -681,6 +681,7 @@ defaultproperties
 	XSize=1
 	YSize=1
 	bHide=true
+	bHideNavigation=true
 	
 //	Player Stats
 	Begin Object Class=KFGUI_ColumnList Name=StatsList

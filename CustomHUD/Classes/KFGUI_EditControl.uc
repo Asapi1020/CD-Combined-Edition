@@ -3,7 +3,7 @@ Class KFGUI_EditControl extends KFGUI_Clickable;
 `include(Build.uci)
 `include(Logger.uci)
 
-var export editinline KFGUI_TextLable TextLable;
+var export editinline KFGUI_TextLabel TextLable;
 var transient float TextHeight, TextScale;
 var transient Font TextFont;
 var Canvas.FontRenderInfo TextFontInfo;
@@ -96,7 +96,7 @@ defaultproperties
 	bScaleByFontSize=true
 	TextFontInfo=(bClipText=true, bEnableShadow=true)
 
-	Begin Object Class=KFGUI_TextLable Name=MyBoxLableText
+	Begin Object Class=KFGUI_TextLabel Name=MyBoxLableText
 		AlignX=0
 		AlignY=1
 		TextFontInfo=(bClipText=true, bEnableShadow=true)

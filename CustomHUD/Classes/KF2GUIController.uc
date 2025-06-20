@@ -256,6 +256,11 @@ simulated final function SetMenuState(bool bActive)
 	bIsInMenuState = bActive;
 	bHideCursor = !bActive;
 
+	if (!KFPlayerController(PlayerOwner).MyGFxManager.bMenusActive)
+	{
+		PlayerOwner.myHUD.bShowHUD = !bActive;
+	}
+
 	if (bActive)
 	{
 		if (CustomInput == None)
@@ -467,7 +472,7 @@ simulated function KFGUI_Base InitializeHUDWidget(class<KFGUI_Base> GUIClass)
 
 	return Widget;
 }
-simulated function KFGUI_Page OpenMenu(class<KFGUI_Page> MenuClass)
+simulated function KFGUI_Page OpenMenu(class<KFGUI_Page> MenuClass, optional bool bNoAnimation)
 {
 	local int i;
 	local KFGUI_Page M;
@@ -513,6 +518,10 @@ simulated function KFGUI_Page OpenMenu(class<KFGUI_Page> MenuClass)
 				if (PersistentMenus[i].Class == MenuClass)
 				{
 					M = PersistentMenus[i];
+					if( bNoAnimation )
+					{
+						SetWindowAnimationOff(M);
+					}
 					PersistentMenus.Remove(i, 1);
 					i = GetFreeIndex(M.bAlwaysTop);
 					ActiveMenus[i] = M;
@@ -527,12 +536,31 @@ simulated function KFGUI_Page OpenMenu(class<KFGUI_Page> MenuClass)
 		return None;
 
 	i = GetFreeIndex(M.bAlwaysTop);
+
+	if( bNoAnimation )
+	{
+		SetWindowAnimationOff(M);
+	}
+
 	ActiveMenus[i] = M;
 	M.Owner = Self;
 	M.InitMenu();
 	M.ShowMenu();
 	return M;
 }
+
+private function SetWindowAnimationOff(KFGUI_Page Page)
+{
+	local KFGUI_FloatingWindow Window;
+
+	Window = KFGUI_FloatingWindow(Page);
+
+	if (Window != None)
+	{
+		Window.bTemporarySuppressAnimation = true;
+	}
+}
+
 simulated function CloseMenu(class<KFGUI_Page> MenuClass, optional bool bCloseAll)
 {
 	local int i, j;
@@ -638,6 +666,21 @@ simulated final function bool MenuIsOpen(optional class<KFGUI_Page> MenuClass)
 			return true;
 	return false;
 }
+
+simulated final function KFGUI_Page FindActiveMenu(name MenuID)
+{
+	local int i;
+
+	for (i=0; i < ActiveMenus.length; i++)
+	{
+		if ( ActiveMenus[i].ID == MenuID )
+		{
+			return ActiveMenus[i];
+		}
+	}
+	return None;
+}
+
 simulated final function GrabInputFocus(KFGUI_Base Comp, optional bool bForce)
 {
 	if (Comp == KeyboardFocus && !bForce)

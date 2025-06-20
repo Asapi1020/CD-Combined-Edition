@@ -9,7 +9,7 @@ var() bool bHide;
 
 var float DragOffset[2], OpenAnimSpeed;
 var KFGUI_FloatingWindowHeader HeaderComp;
-var bool bDragWindow, bUseAnimation;
+var bool bDragWindow, bUseAnimation, bTemporarySuppressAnimation;
 
 var float WindowFadeInTime;
 var transient float OpenStartTime, OpenEndTime;
@@ -25,7 +25,9 @@ function ShowMenu()
 	Super.ShowMenu();
 
 	OpenStartTime = GetPlayer().WorldInfo.RealTimeSeconds;
-	OpenEndTime = GetPlayer().WorldInfo.RealTimeSeconds + OpenAnimSpeed;
+	OpenEndTime = bTemporarySuppressAnimation ? OpenStartTime : GetPlayer().WorldInfo.RealTimeSeconds + OpenAnimSpeed;
+	
+	bTemporarySuppressAnimation = false;
 }
 function DrawMenu()
 {
@@ -82,7 +84,7 @@ function PreDraw()
 {
 	local float Frac, CenterX, CenterY;
 
-	if (bUseAnimation)
+	if (bUseAnimation && OpenStartTime != OpenEndTime)
 	{
 		Frac = Owner.CurrentStyle.TimeFraction(OpenStartTime, OpenEndTime, GetPlayer().WorldInfo.RealTimeSeconds);
 		XSize = Lerp(default.XSize*0.75, default.XSize, Frac);
@@ -102,6 +104,54 @@ function PreDraw()
 	}
 
 	Super.PreDraw();
+}
+
+function DrawControllerInfo(
+	string InfoTitle,
+	string Value,
+	KFGUI_Button LB,
+	KFGUI_Button RB,
+	float YL,
+	float FontScalar,
+	float BorderSize,
+	int ValueDarkness,
+	optional float SizeRate=1.f,
+	optional bool bHeaderLess=false,
+	optional bool bDrawCond=true
+){
+	local float XPos, YPos, BoxW, sc;
+
+	if(!bDrawCond)
+	{
+		return;
+	}
+
+	//	Header
+	if(!bHeaderLess)
+	{
+		sc = FontScalar;
+		XPos = LB.CompPos[0] - CompPos[0];
+		YPos = LB.CompPos[1] - CompPos[1] - YL - BorderSize;
+		BoxW = RB.CompPos[0] - LB.CompPos[0] + RB.CompPos[2];
+
+		Canvas.SetDrawColor(0, 0, 0, 200);
+		Owner.CurrentStyle.DrawRectBox(XPos, YPos, BoxW, YL + BorderSize, 8.f, 150);
+		Canvas.SetDrawColor(250, 250, 250, 255);
+		FitScale(InfoTitle, BoxW*0.9, sc);
+		DrawTextShadowHVCenter(InfoTitle, XPos, YPos, BoxW, sc);
+	}
+
+	//	Value
+	sc = FontScalar*SizeRate;
+	XPos += LB.CompPos[2];
+	YPos += YL + BorderSize;
+	BoxW = RB.CompPos[0] - LB.CompPos[0] - LB.CompPos[2] + BorderSize;
+
+	Canvas.SetDrawColor(ValueDarkness, ValueDarkness, ValueDarkness, 200);
+	Owner.CurrentStyle.DrawRectBox(XPos, YPos, BoxW, RB.CompPos[3], 8.f, 121);
+	Canvas.SetDrawColor(250, 250, 250, 255);
+	FitScale(Value, BoxW*0.9, sc);
+	DrawTextShadowHVCenter(Value, XPos, YPos + (RB.CompPos[3]/8), BoxW, sc);
 }
 
 defaultproperties

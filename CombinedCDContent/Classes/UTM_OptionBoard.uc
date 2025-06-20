@@ -569,7 +569,7 @@ function ButtonClicked(KFGUI_Button Sender)
 			GetSTMPC().SetMM(int(GetSTMGRI().CDInfoParams.MM)+2);
 			break;
 		case 'Cycle':
-			GetSTMPC().OpenCycleMenu();
+			GetSTMPC().CycleOption();
 			break;
 		case 'WSFSub':
 			GetSTMPC().SetWSF(int(GetSTMGRI().CDInfoParams.WSF)-1);
