@@ -383,6 +383,11 @@ private function ToggleCheckBox(KFGUI_CheckBox Sender)
 	}
 }
 
+private function DelayedUpdateList()
+{
+	Outer.bListUpdate = false;
+}
+
 defaultproperties
 {
 	ID="AdminMenu_RPW"

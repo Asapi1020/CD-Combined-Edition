@@ -2,11 +2,15 @@
  * @file CD_RPCHandler.uc
  * @brief Handles remote procedure call functionality for CD_PlayerController.
  */
-class CD_RPCHandler extends ReplicationInfo;
+class CD_RPCHandler extends ReplicationInfo
+	DependsOn(CD_Domain);
 
 `include(CD_Log.uci)
 
 var private CD_PlayerController CDPC;
+
+var transient array<CDPickupInfo> SparePickups;
+var transient DownloadStage SpareWeaponsDownloadStage;
 
 public function PostBeginPlay()
 {
@@ -156,6 +160,186 @@ public reliable server simulated function SetDisableCustomStarts(bool bDisable)
 {
 	GetCD().xMut.DisableCustomStarts = bDisable;
 	GetCD().xMut.SaveConfig();
+}
+
+public reliable server simulated function RequestPickupInfo()
+{
+	local WeaponPickupRegistryInfo Registry;
+
+	ClearSpareWeapons();
+
+	foreach GetCD().PickupTracker.WeaponPickupRegistry(Registry)
+	{
+		if (Registry.OrigOwnerPRI != GetCDPC().PlayerReplicationInfo)
+		{
+			continue;
+		}
+
+		ReceiveInfoFromPickup(Registry.KFDP);
+	}
+
+	FlagAllPickupsReceived();
+}
+
+public reliable server simulated function ReceiveInfoFromPickup(CD_DroppedPickup Pickup, optional bool bFinishDownload = false)
+{
+	local CDPickupInfo Info;
+	
+	Info.ID = class'CD_ClassNameUtils'.static.ExtractIndexFromInstance(Pickup, "CD_DroppedPickup");
+	Info.IconPath = Pickup.IconPath;
+	Info.KFWClass = class<KFWeapon>(Pickup.InventoryClass);
+	Info.MagazineAmmoText = Pickup.GetMagazineAmmoText();
+	Info.SpareAmmoText = Pickup.GetSpareAmmoText();
+	ReceivePickupInfo(Info);
+
+	if (bFinishDownload)
+	{
+		FlagAllPickupsReceived();
+	}
+}
+
+private reliable client simulated function ClearSpareWeapons()
+{
+	SparePickups.Length = 0;
+	SpareWeaponsDownloadStage = DS_Starting;
+}
+
+private reliable client simulated function ReceivePickupInfo(CDPickupInfo Info)
+{
+	SpareWeaponsDownloadStage = DS_Downloading;
+	SparePickups.AddItem(Info);
+}
+
+private reliable client simulated function FlagAllPickupsReceived()
+{
+	SpareWeaponsDownloadStage = DS_Downloaded;
+}
+
+public reliable client simulated function RemoveSparePickup(int PickupIndex)
+{
+	local int ArrayIndex;
+
+	ArrayIndex = SparePickups.Find('ID', PickupIndex);
+	
+	if (ArrayIndex != INDEX_NONE)
+	{
+		SparePickups.Remove(ArrayIndex, 1);
+	}
+
+	FlagAllPickupsReceived();
+}
+
+public reliable server simulated function RequestSellSpareWeapon(int PickupIndex)
+{
+	local WeaponPickupRegistryInfo Registry;
+	local CD_DroppedPickup Pickup;
+
+	foreach GetCD().PickupTracker.WeaponPickupRegistry(Registry)
+	{
+		if (class'CD_ClassNameUtils'.static.ExtractIndexFromInstance(Registry.KFDP, "CD_DroppedPickup") == PickupIndex)
+		{
+			Pickup = Registry.KFDP;
+			break;
+		}
+
+		Pickup = None;
+	}
+
+	if (Pickup == None)
+	{
+		`cdlog("CD_RPCHandler.RequestSellSpareWeapon: Pickup not found for index " $ PickupIndex);
+		return;
+	}
+
+	SellSpareWeapon(Pickup);
+}
+
+public reliable server simulated function RequestSellAllSpareWeapons(string WeaponName)
+{
+	local array<WeaponPickupRegistryInfo> Registries;
+	local int i;
+
+	Registries = GetCD().PickupTracker.WeaponPickupRegistry;
+
+	for(i = Registries.length - 1; i >= 0; i--)
+	{
+		if( Registries[i].OrigOwnerPRI == GetCDPC().PlayerReplicationInfo &&
+			Registries[i].KFWClass.default.ItemName == WeaponName)
+		{
+			SellSpareWeapon(Registries[i].KFDP);
+		}
+	}
+}
+
+protected reliable server simulated function SellSpareWeapon(CD_DroppedPickup Pickup)
+{
+	local STraderItem SaleItem;
+
+	foreach GetCDPC().GetCDGRI().TraderItems.SaleItems(SaleItem)
+	{
+		if (SaleItem.ClassName == Pickup.InventoryClass.name)
+		{
+			GetCDPC().ForceToSellWeap(SaleItem, Weapon(Pickup.Inventory));
+			Pickup.Destroy();
+			return;
+		}
+	}
+
+	`cdlog("CD_RPCHandler.SellSpareWeapon: Item not found in owned items list for " $ Pickup.InventoryClass.name);
+}
+
+public reliable server simulated function RequestTeleportSpareWeapon(int PickupIndex)
+{
+	local WeaponPickupRegistryInfo Registry;
+	local CD_DroppedPickup Pickup;
+	local Pawn P;
+	local vector Destination;
+
+	foreach GetCD().PickupTracker.WeaponPickupRegistry(Registry)
+	{
+		if (class'CD_ClassNameUtils'.static.ExtractIndexFromInstance(Registry.KFDP, "CD_DroppedPickup") == PickupIndex)
+		{
+			Pickup = Registry.KFDP;
+			break;
+		}
+
+		Pickup = None;
+	}
+
+	if (Pickup == None)
+	{
+		`cdlog("CD_RPCHandler.RequestSellSpareWeapon: Pickup not found for index " $ PickupIndex);
+		return;
+	}
+
+	P = GetCDPC().Pawn;
+
+	Destination = P.Location - P.GetCollisionHeight() * vect(0,0,1);
+	Pickup.SetLocation(Destination);
+
+	if (Pickup.Location != Destination)
+	{
+		Pickup.SetLocation(Destination); // Retry once.
+	}
+}
+
+public reliable server simulated function RequestTeleportAllSpareWeapons(string WeaponName)
+{
+	local array<WeaponPickupRegistryInfo> Registries;
+	local int i;
+	local Pawn P;
+
+	Registries = GetCD().PickupTracker.WeaponPickupRegistry;
+	P = GetCDPC().Pawn;
+
+	for(i = Registries.length - 1; i >= 0; i--)
+	{
+		if( Registries[i].OrigOwnerPRI == GetCDPC().PlayerReplicationInfo &&
+			Registries[i].KFWClass.default.ItemName == WeaponName)
+		{
+			Registries[i].KFDP.SetLocation(P.Location - P.GetCollisionHeight() * vect(0,0,1));
+		}
+	}
 }
 
 defaultproperties

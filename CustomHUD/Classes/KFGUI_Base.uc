@@ -284,7 +284,7 @@ final function GetActualPos(out float X, out float Y)
 	X = ((XPosition+X)*InputPos[2]) + InputPos[0];
 	Y = ((YPosition+Y)*InputPos[3]) + InputPos[1];
 }
-final function GetRealtivePos(out float X, out float Y)
+final function GetRelativePos(out float X, out float Y)
 {
 	X = X / CompPos[2];
 	Y = Y / CompPos[2];
@@ -347,6 +347,21 @@ static final function string MakeSortStr(int Value)
 	if (i < 10)
 		return Mid("0000000000", i)$S;
 	return S;
+}
+
+final protected function DrawTexture(Texture2D Tex, float X, float Y, float IconWidth)
+{
+	local float XPos, YPos, ScaledIconWidth, W, H;
+
+	XPos = X * CompPos[2];
+	YPos = Y * CompPos[3];
+	ScaledIconWidth = IconWidth * CompPos[2];
+
+	W = Tex.GetSurfaceWidth();
+	H = Tex.GetSurfaceHeight();
+
+	Canvas.SetPos(XPos, YPos);
+	Canvas.DrawTile(Tex, ScaledIconWidth, ScaledIconWidth * H / W, 0, 0, W, H);
 }
 
 defaultproperties
