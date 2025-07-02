@@ -3,7 +3,6 @@ class CD_DroppedPickup extends KFDroppedPickup;
 var int MagazineAmmo[2];
 var int SpareAmmo[2];
 var byte UpgradeLevel;
-var string AmmoText, WeightText;
 var PlayerReplicationInfo OriginalOwner;
 var string OriginalOwnerPlayerName;
 var CD_DroppedPickupTracker PickupTracker;
@@ -28,8 +27,8 @@ simulated function SetPickupMesh(PrimitiveComponent NewPickupMesh)
 		// ammo counts for the dropped single
 		SetTimer(0.2, false, nameof(UpdateInformation));
 		
-		OriginalOwner = PickupTracker.RegisterDroppedPickup(Self, PlayerController(Instigator.Controller));
 		IconPath = class'CD_Object'.static.GetWeapDef(KFWeapon(Inventory)).static.GetImagePath();
+		OriginalOwner = PickupTracker.RegisterDroppedPickup(Self, PlayerController(Instigator.Controller));
 
 		// Not in solo unless debug is enabled
 		if (WorldInfo.NetMode != NM_Standalone || (CD_Survival(PickupTracker.Owner) != None))
@@ -102,7 +101,6 @@ function UpdateInformation()
 {
 	local KFWeapon KFW;
 
-	AmmoText = "";
 	KFW = KFWeapon(Inventory);
 	if (KFW != None)
 	{
@@ -126,78 +124,134 @@ function UpdateInformation()
 				SpareAmmo[1] = KFW.SpareAmmoCount[1];
 		}
 
-		CustomUpdateInfo(KFW);
+		bNetDirty = true;
+
+		if (Role == ROLE_Authority && PickupTracker != None)
+		{
+			PickupTracker.OnUpdatePickup(Self);
+		}
 	}
 }
-
-/** Custom information for weapons that need it */
-function CustomUpdateInfo(KFWeapon KFW);
 
 /** Get ammo text for this weapon */
 simulated function string GetAmmoText()
 {
-	if (AmmoText == "")
+	local string AmmoText;
+
+	if (MagazineAmmo[0] < 0)
 	{
-		if (MagazineAmmo[0] >= 0)
-		{
-			AmmoText = MagazineAmmo[0] $ "/" $ SpareAmmo[0];
-			// We check all of these separately because
-			// different weapons do this differently
-			if (MagazineAmmo[1] >= 0 && SpareAmmo[1] >= 0)
-				AmmoText @= "(" $ MagazineAmmo[1] $ "/" $ SpareAmmo[1] $ ")";
-			else if (MagazineAmmo[1] >= 0)
-				AmmoText @= "(" $ MagazineAmmo[1] $ ")";
-			else if (SpareAmmo[1] >= 0)
-				AmmoText @= "(" $ SpareAmmo[1] $ ")";
-		}
-		else
-			AmmoText = "---"; // Same as the Flash HUD for weapons without ammo
+		return "---";
+	}
+
+	AmmoText = MagazineAmmo[0] $ "/" $ SpareAmmo[0];
+
+	if (MagazineAmmo[1] >= 0 && SpareAmmo[1] >= 0)
+	{
+		return AmmoText @= "(" $ MagazineAmmo[1] $ "/" $ SpareAmmo[1] $ ")";
 	}
 	
+	if (MagazineAmmo[1] >= 0)
+	{
+		return AmmoText @= "(" $ MagazineAmmo[1] $ ")";
+	}
+	
+	if (SpareAmmo[1] >= 0)
+	{
+		return AmmoText @= "(" $ SpareAmmo[1] $ ")";
+	}
+
 	return AmmoText;
+}
+
+simulated function string GetMagazineAmmoText()
+{
+	local KFWeapon KFW;
+	local string PrimaryAmmoText;
+
+	KFW = KFWeapon(Inventory);
+
+	if (KFW == None)
+	{
+		return "---";
+	}
+
+	if (KFW.UsesAmmo())
+	{
+		PrimaryAmmoText = string(KFW.AmmoCount[0]) @ "/" @ string(KFW.MagazineCapacity[0]);
+	}
+
+	if (KFW.UsesSecondaryAmmo() && KFW.bCanRefillSecondaryAmmo && KFW.MagazineCapacity[1] > 0)
+	{
+		return PrimaryAmmoText @ " (" $ string(KFW.AmmoCount[1]) @ "/" @ string(KFW.MagazineCapacity[1]) $ ")";
+	}
+
+	return PrimaryAmmoText;
+}
+
+simulated function string GetSpareAmmoText()
+{
+	local KFWeapon KFW;
+	local string PrimaryAmmoText;
+
+	KFW = KFWeapon(Inventory);
+
+	if (KFW == None)
+	{
+		return "---";
+	}
+
+	if (KFW.UsesAmmo())
+	{
+		PrimaryAmmoText = string(KFW.SpareAmmoCount[0]) @ "/" @ string(KFW.SpareAmmoCapacity[0]);
+	}
+
+	if (KFW.UsesSecondaryAmmo() && KFW.bCanRefillSecondaryAmmo && KFW.SpareAmmoCapacity[1] > 0)
+	{
+		return PrimaryAmmoText @ " (" $ string(KFW.SpareAmmoCount[1]) @ "/" @ string(KFW.SpareAmmoCapacity[1]) $ ")";
+	}
+
+	return PrimaryAmmoText;
 }
 
 /** Get weight text for this weapon */
 simulated function string GetWeightText(Pawn P)
 {
+	local string WeightText;
 	local class<KFWeapon> KFWC;
 	local Inventory Inv;
 	local bool bHasSingleForDual;
 	local int Weight;
 	local string TempText;
 	
-	if (WeightText == "")
+	KFWC = class<KFWeapon>(InventoryClass);
+	
+	if (KFWC.default.DualClass != None && P != None && P.InvManager != None)
 	{
-		KFWC = class<KFWeapon>(InventoryClass);
-		
-		if (KFWC.default.DualClass != None && P != None && P.InvManager != None)
-		{
-			Inv = P.InvManager.FindInventoryType(KFWC);
-			if (KFWeapon(Inv) != None)
-				bHasSingleForDual = true;
-		}
-	
-		if (bHasSingleForDual)
-		{
-			Weight = KFWC.default.DualClass.default.InventorySize +
-				KFWC.default.DualClass.static.GetUpgradeWeight(Max(UpgradeLevel, KFWeapon(Inv).CurrentWeaponUpgradeIndex)) -
-				KFWeapon(Inv).GetModifiedWeightValue();
-		}
-		else
-			Weight = KFWC.default.InventorySize + KFWC.static.GetUpgradeWeight(UpgradeLevel);
-	
-		TempText = string(Weight);
-		if (UpgradeLevel > 0)
-			TempText @= "(+" $ UpgradeLevel $ ")";
-		
-		// We don't cache this if it has a dual class,
-		// As the text will depend on what the player's
-		// inventory is when looking at the weapon
-		if (KFWC.default.DualClass != None)
-			return TempText;
-		else
-			WeightText = TempText;
+		Inv = P.InvManager.FindInventoryType(KFWC);
+		if (KFWeapon(Inv) != None)
+			bHasSingleForDual = true;
 	}
+
+	if (bHasSingleForDual)
+	{
+		Weight = KFWC.default.DualClass.default.InventorySize +
+			KFWC.default.DualClass.static.GetUpgradeWeight(Max(UpgradeLevel, KFWeapon(Inv).CurrentWeaponUpgradeIndex)) -
+			KFWeapon(Inv).GetModifiedWeightValue();
+	}
+	else
+		Weight = KFWC.default.InventorySize + KFWC.static.GetUpgradeWeight(UpgradeLevel);
+
+	TempText = string(Weight);
+	if (UpgradeLevel > 0)
+		TempText @= "(+" $ UpgradeLevel $ ")";
+	
+	// We don't cache this if it has a dual class,
+	// As the text will depend on what the player's
+	// inventory is when looking at the weapon
+	if (KFWC.default.DualClass != None)
+		return TempText;
+	else
+		WeightText = TempText;
 
 	return WeightText;
 }
@@ -222,6 +276,16 @@ function bool IsLowAmmo()
 			return true;
 	}
 	return false;
+}
+
+event Destroyed()
+{
+	Super.Destroyed();
+
+	if (Role == ROLE_Authority && PickupTracker != None)
+	{
+		PickupTracker.OnDroppedPickupDestroyed(Self);
+	}
 }
 
 defaultproperties

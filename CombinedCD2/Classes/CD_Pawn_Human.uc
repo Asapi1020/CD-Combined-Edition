@@ -87,6 +87,11 @@ unreliable client simulated function SwitchMaterialGlow(bool PickupQuery, CD_Dro
     CDDP.SwitchMaterialGlow(PickupQuery);
 }
 
+public function vector GetFootLocation()
+{
+    return Location - CylinderComponent.CollisionHeight * vect(0, 0, 1);
+}
+
 defaultproperties
 {
     //  Berserker

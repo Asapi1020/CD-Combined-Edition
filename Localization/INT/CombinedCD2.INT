@@ -305,6 +305,17 @@ AlertUnusualSettingsToolTip="Alert when not server default settings are applied.
 DisplayCDTipsToolTip="Display CD tips on the lobby menu."
 ShowPickupInfoToolTip="Show Dropped weapons info during trader time"
 UseVanillaScoreboardToolTip="Use Vanilla Scoreboard instead of CD custom one."
+SparesButtonText="Spare Weapons"
+OtherSettingsButtonText="Other Settings"
+
+[xUI_ClientMenu_Spares]
+WeaponNameHeader="Name"
+PossessionsNumHeader="Count"
+SellAll="Sell all weapons"
+AllTeleportHere="Teleport all weapons here"
+MagazineAmmoCountString="Magazine"
+SpareAmmoCountString="Spare Ammo"
+TeleportHere="Teleport this weapon here"
 
 [xUI_ConsoleMenu]
 Title="Console Menu"

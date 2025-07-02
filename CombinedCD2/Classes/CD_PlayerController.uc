@@ -1,4 +1,5 @@
 class CD_PlayerController extends KFPlayerController
+	DependsOn(CD_Domain)
 	config( CombinedCD_LocalData );
 
 `include(CD_Log.uci)
@@ -133,6 +134,11 @@ function CD_PlayerReplicationInfo GetCDPRI()
 function CD_GameReplicationInfo GetCDGRI()
 {
 	return CD_GameReplicationInfo(WorldInfo.GRI);
+}
+
+function CD_Pawn_Human GetCDPawn()
+{
+	return CD_Pawn_Human(Pawn);
 }
 
 public function CD_RPCHandler GetRPCHandler()
@@ -524,7 +530,7 @@ function JudgePlayers()
 {
 	local Weapon CurWeapon;
 
-	if( PlayerReplicationinfo != none &&
+	if( PlayerReplicationInfo != none &&
 		(!PlayerReplicationInfo.bWaitingPlayer || PlayerReplicationInfo.bReadyToPlay) )
 		RestrictPlayer();
 
@@ -744,6 +750,11 @@ function RestrictWeapon(Weapon Weap)
 	if( bWeapRest )
 	{
 		KFAPH = GetPurchaseHelper();
+
+		if (KFAPH.OwnedItemList.length == 0)
+		{
+			KFAPH.InitializeOwnedItemList();
+		}
 
 		for(i=0; i<KFAPH.OwnedItemList.length; ++i)
 		{
@@ -1051,6 +1062,36 @@ reliable server function OpenMapVote()
 	CD_Survival(WorldInfo.Game).xMut.ShowMapVote('MapVote', Self);
 }
 
+reliable server simulated function RequestPickupInfo()
+{
+	GetRPCHandler().RequestPickupInfo();
+}
+
+reliable server function ReceivePickup(CD_DroppedPickup Pickup, optional bool bFinishDownload = false)
+{
+	GetRPCHandler().ReceiveInfoFromPickup(Pickup, bFinishDownload);
+}
+
+reliable server simulated function SellSpareWeapon(int PickupIndex)
+{
+	GetRPCHandler().RequestSellSpareWeapon(PickupIndex);
+}
+
+reliable server simulated function SellAllSpareWeapons(string WeaponName)
+{
+	GetRPCHandler().RequestSellAllSpareWeapons(WeaponName);
+}
+
+reliable server simulated function RequestTeleportSpareWeapon(int PickupIndex)
+{
+	GetRPCHandler().RequestTeleportSpareWeapon(PickupIndex);
+}
+
+reliable server simulated function RequestTeleportAllSpareWeapons(string WeaponName)
+{
+	GetRPCHandler().RequestTeleportAllSpareWeapons(WeaponName);
+}
+
 unreliable server simulated function AssignAdmin()
 {
 	CD_Survival(WorldInfo.Game).ServerAssignAdmin(self);
@@ -1203,6 +1244,11 @@ reliable client simulated function OpenCustomMenu(class<KFGUI_Page> MenuClass)
 	{
 		GUIController.CloseMenu(ConsoleMenuClass);
 	}
+}
+
+reliable client function RemoveSparePickup(int index)
+{
+	GetRPCHandler().RemoveSparePickup(index);
 }
 
 reliable client simulated function ShowReadyButton()
