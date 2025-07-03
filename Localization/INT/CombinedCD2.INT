@@ -371,7 +371,7 @@ TrashKillsString="Trash"
 StatsString="Stats"
 CategoryString="Category"
 DeathsString="Deaths"
-GameModeLableString="Game Mode："
+GameModeLableString="Game Mode: "
 GameModeToolTip="Slect a game mode to vote"
 
 [xUI_MenuBase]
