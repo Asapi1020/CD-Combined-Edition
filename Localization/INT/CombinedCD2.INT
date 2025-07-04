@@ -317,6 +317,12 @@ MagazineAmmoCountString="Magazine"
 SpareAmmoCountString="Spare Ammo"
 TeleportHere="Teleport this weapon here"
 
+[xUI_ClientMenu_Others]
+SamplePlayButtonText="Play Sample"
+SamplePlayToolTip="Play a sound only on your machine"
+VolumeString="Volume:"
+VolumeToolTip="0 is default. 1 means 100%. Hit enter to apply your volume change"
+
 [xUI_ConsoleMenu]
 Title="Console Menu"
 
