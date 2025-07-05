@@ -6,16 +6,19 @@ enum PageState
 {
 	RPW,
 	Authority,
-	CustomPlayerStart
+	CustomPlayerStart,
+	OtherSettings
 };
 
 var KFGUI_Button RPWB;
 var KFGUI_Button AuthorityB;
 var KFGUI_Button PlayerStartButton;
+var KFGUI_Button OtherSettingsButton;
 
-var private xUI_AdminMenu_RPW RPWComponents;
-var private xUI_AdminMenu_Authority AuthorityComponents;
-var private xUI_AdminMenu_PlayerStart PlayerStartComponents;
+var protected xUI_AdminMenu_RPW RPWComponents;
+var protected xUI_AdminMenu_Authority AuthorityComponents;
+var protected xUI_AdminMenu_PlayerStart PlayerStartComponents;
+var protected xUI_AdminMenu_Others OthersComponents;
 
 var PageState CurState;
 var bool bListUpdate;
@@ -28,6 +31,7 @@ var localized string MaxUpgradeString;
 var localized string RPWButtonText;
 var localized string AuthorityButtonText;
 var localized string PlayerStartButtonText;
+var localized string OtherSettingsButtonText;
 var localized string LevelRequirementString;
 var localized string AntiOvercapString;
 var localized string WeaponHeader;
@@ -52,43 +56,26 @@ function InitMenu()
 
 	RPWComponents = new(self) class'xUI_AdminMenu_RPW';
 	AddComponent(RPWComponents);
-	RPWComponents.InitComponents();
 
 	AuthorityComponents = new(self) class'xUI_AdminMenu_Authority';
 	AddComponent(AuthorityComponents);
-	AuthorityComponents.InitComponents();
 
 	PlayerStartComponents = new(self) class'xUI_AdminMenu_PlayerStart';
 	AddComponent(PlayerStartComponents);
-	PlayerStartComponents.InitComponents();
+
+	OthersComponents = new(self) class'xUI_AdminMenu_Others';
+	AddComponent(OthersComponents);
 }
 
 function DrawMenu()
 {
-//	Setup
-	local float XL, YL, FontScalar;
+	if (!GetCDPC().hasAdminLevel())
+	{
+		DoClose();
+		return;
+	}
 
 	Super.DrawMenu();
-
-	Canvas.Font = Owner.CurrentStyle.PickFont(FontScalar);
-	Canvas.TextSize("ABC", XL, YL, FontScalar, FontScalar);
-
-	switch(CurState)
-	{
-		case RPW:
-			RPWComponents.DrawComponents(XL, YL, FontScalar);
-			break;
-		case Authority:
-			AuthorityComponents.DrawComponents();
-			break;
-		case CustomPlayerStart:
-			PlayerStartComponents.DrawComponents();
-			break;
-		default:
-			`cdlog("invalid cur state");
-			CurState = RPW;
-			break;
-	}
 
 	if(!bListUpdate)
 	{
@@ -98,6 +85,7 @@ function DrawMenu()
 	RPWComponents.bVisible = CurState == RPW;
 	AuthorityComponents.bVisible = CurState == Authority;
 	PlayerStartComponents.bVisible = CurState == CustomPlayerStart;
+	OthersComponents.bVisible = CurState == OtherSettings;
 
 	RPWB = KFGUI_Button(FindComponentID('RPW'));
 	RPWB.ButtonText = RPWButtonText;
@@ -110,6 +98,10 @@ function DrawMenu()
 	PlayerStartButton = KFGUI_Button(FindComponentID('CustomPlayerStart'));
 	PlayerStartButton.ButtonText = PlayerStartButtonText;
 	PlayerStartButton.bDisabled = CurState == CustomPlayerStart;
+
+	OtherSettingsButton = KFGUI_Button(FindComponentID('OtherSettings'));
+	OtherSettingsButton.ButtonText = OtherSettingsButtonText;
+	OtherSettingsButton.bDisabled = CurState == OtherSettings;
 }
 
 private final function UpdateList()
@@ -125,9 +117,10 @@ private final function UpdateList()
 		case(CustomPlayerStart):
 			PlayerStartComponents.OnUpdatePlayerStartList();
 			break;
+		case(OtherSettings):
+			break;
 		default:
 			`cdlog("invalid cur state");
-			CurState = RPW;
 			return;
 	}
 
@@ -155,12 +148,28 @@ private function ButtonClicked(KFGUI_Button Sender)
 			CurState = CustomPlayerStart;
 			bListUpdate = false;
 			break;
+		case 'OtherSettings':
+			CurState = OtherSettings;
+			break;
+		default:
+			`cdlog("xUI_AdminMenu: ButtonClicked: Unknown button clicked: " $ Sender.ID);
+			return;
 	}
 }
 
 public function ReceiveDisableCustomStarts( bool bDisable )
 {
 	PlayerStartComponents.bServerDisableCustomStarts = bDisable;
+}
+
+public function ReceiveDisableCDRecordOnline( bool bDisable )
+{
+	OthersComponents.bDisableCDRecordOnline = bDisable;
+}
+
+public function ReceiveDisableCustomPostGameMenu( bool bDisable )
+{
+	OthersComponents.bDisableCustomPostGameMenu = bDisable;
 }
 
 defaultproperties
@@ -202,4 +211,15 @@ defaultproperties
 		TextColor=(R=255, G=255, B=255, A=255)
 	End Object
 	Components.Add(CustomPlayerStart)
+
+	Begin Object Class=KFGUI_Button Name=OtherSettings
+		XPosition=0.52
+		YPosition=0.925
+		XSize=0.14
+		YSize=0.05
+		ID="OtherSettings"
+		OnClickLeft=ButtonClicked
+		TextColor=(R=255, G=255, B=255, A=255)
+	End Object
+	Components.Add(OtherSettings)
 }

@@ -1231,6 +1231,26 @@ reliable server function CheckPlayerStart()
 	CD.xMut.CheckPlayerStart(self);
 }
 
+reliable server simulated function GetDisableCDRecordOnline()
+{
+	GetRPCHandler().GetDisableCDRecordOnline();
+}
+
+reliable server simulated function SetDisableCDRecordOnline(bool bDisable)
+{
+	GetRPCHandler().SetDisableCDRecordOnline(bDisable);
+}
+
+reliable server simulated function GetDisableCustomPostGameMenu()
+{
+	GetRPCHandler().GetDisableCustomPostGameMenu();
+}
+
+reliable server simulated function SetDisableCustomPostGameMenu(bool bDisable)
+{
+	GetRPCHandler().SetDisableCustomPostGameMenu(bDisable);
+}
+
 /* ==============================================================================================================================
  *	Client functions
  * ============================================================================================================================== */
