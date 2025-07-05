@@ -48,25 +48,6 @@ static function CheckAvatar(KFPlayerReplicationInfo KFPRI, KFPlayerController PC
 	}
 }
 
-delegate bool InOrder(KFPlayerReplicationInfo P1, KFPlayerReplicationInfo P2)
-{
-	if (P1 == None || P2 == None)
-		return true;
-
-	if (P1.GetTeamNum() < P2.GetTeamNum())
-		return false;
-
-	if (P1.Kills == P2.Kills)
-	{
-		if (P1.Assists == P2.Assists)
-			return true;
-
-		return P1.Assists < P2.Assists;
-	}
-
-	return P1.Kills < P2.Kills;
-}
-
 function string WaveText()
 {
 	local int CurrentWaveNum;

@@ -9,29 +9,29 @@ var transient Font TextFont;
 var Canvas.FontRenderInfo TextFontInfo;
 
 var(Lable) float LableWidth;
-var(Lable) string LableString;
+var(Lable) string LabelString;
 var(Lable) color LableColor; // Label text color.
 var(Lable) byte FontScale;
 var(Lable) bool bScaleByFontSize; // Scale this component height by font height.
 
 function InitMenu()
 {
-	if (LableString == "")
+	if (LabelString == "")
 		TextLable = None;
 	else
 	{
-		TextLable.SetText(LableString);
+		TextLable.SetText(LabelString);
 		TextLable.FontScale = FontScale;
-		TextLable.XPosition = XPosition;
+		TextLable.XPosition = default.XPosition;
 		TextLable.YPosition = YPosition;
-		TextLable.XSize = (XSize*LableWidth*0.975);
+		TextLable.XSize = (default.XSize * LableWidth * 0.975);
 		TextLable.YSize = YSize;
 		TextLable.Owner = Owner;
 		TextLable.TextColor = LableColor;
 		TextLable.ParentComponent = Self;
 		TextLable.InitMenu();
-		XPosition+=(XSize*LableWidth);
-		XSize*=(1.f-LableWidth);
+		XPosition = default.XPosition + (default.XSize * LableWidth);
+		XSize = default.XSize * (1.f-LableWidth);
 	}
 	Super.InitMenu();
 	bClickable = !bDisabled;

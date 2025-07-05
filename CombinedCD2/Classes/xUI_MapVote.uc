@@ -25,7 +25,7 @@ var localized string MatchResultButtonText;
 var localized string ResultButtonToolTip;
 var localized string VoteMapString;
 var localized string AdminForceString;
-var localized string GameModeLableString;
+var localized string GameModeLabelString;
 var localized string GameModeToolTip;
 
 //	Result
@@ -64,7 +64,7 @@ var localized string DeathsString;
 function InitMenu()
 {
 	GameModeCombo = KFGUI_ComboBox(FindComponentID('Filter'));
-	GameModeCombo.LableString = GameModeLableString;
+	GameModeCombo.LabelString = GameModeLabelString;
 	GameModeCombo.ToolTip = GameModeToolTip;
 
 	Super.InitMenu();
@@ -508,25 +508,6 @@ final function UpdateList()
 	local float V;
 	local KFGUI_ListItem Item,SItem;
 
-	//	GameModeList
-	/*
-	if (GameModeList.Columns.Length!=RepInfo.GameModes.Length)
-	{
-		GameModeList.Columns.Length = RepInfo.GameModes.Length;
-		for (i=0; i<GameModeList.Columns.Length; ++i)
-		{
-			GameModeList.AddLine(RepInfo.GameModes[i].GameName);
-		}
-		if (!bFirstTime)
-		{
-			bFirstTime = true;
-			SelectedModeIndex = RepInfo.ClientCurrentGame;
-		}
-		ChangeToMaplist(SelectedModeIndex);
-	}
-	GameModeList.SelectedRowIndex = SelectedModeIndex;
-	*/
-
 	if (GameModeCombo.Values.Length!=RepInfo.GameModes.Length)
 	{
 		GameModeCombo.Values.Length = RepInfo.GameModes.Length;
@@ -762,8 +743,6 @@ defaultproperties
 		YSize=0.073
 		OnComboChanged=ModeChanged
 		ID="Filter"
-	//	LableString="Game mode:"
-		//ToolTip="Select game mode to vote for."
 	End Object
 	
 //	Button
