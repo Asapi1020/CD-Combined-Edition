@@ -126,17 +126,45 @@ final function ComputeCoords()
 
 function bool CaptureMouse()
 {
-	/* NOTE:
-	 * Invisible KFGUI_MultiComponents do not render their components even if their bVisible is true.
-	 * Prevent mouse capture if the parent component is not visible
-	 * but this does not recursively check all parent components for safety.
-	 */
-	if(ParentComponent != None && !ParentComponent.bVisible)
+	if(SomeAncestorIsInvisible())
 	{
 		return false;
 	}
 
 	return bVisible && ( Owner.MousePosition.X >= CompPos[0] && Owner.MousePosition.Y >= CompPos[1] && Owner.MousePosition.X <= (CompPos[0]+CompPos[2]) && Owner.MousePosition.Y <= (CompPos[1]+CompPos[3]));
+}
+
+/**
+ * Invisible KFGUI_MultiComponents do not render their components even if their bVisible is true.
+ * Prevent mouse capture if the parent component is not visible
+ */
+protected function bool SomeAncestorIsInvisible()
+{
+	local array<KFGUI_Base> Ancestors;
+	local KFGUI_Base Parent;
+	local int count;
+
+	Parent = ParentComponent;
+
+	while (Parent != None && Parent != Self && Ancestors.Find(Parent) == INDEX_NONE)
+	{
+		if (!Parent.bVisible)
+		{
+			return true;
+		}
+
+		Ancestors.AddItem(Parent);
+		Parent = Parent.ParentComponent;
+
+		count++;
+		if (count > 100)
+		{
+			`warning("KFGUI_Base::SomeAncestorIsInvisible: Too many ancestors, breaking loop.");
+			break;
+		}
+	}
+
+	return false;
 }
 
 final function KFGUI_Base GetMouseFocus()

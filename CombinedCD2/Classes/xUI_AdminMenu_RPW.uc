@@ -34,10 +34,12 @@ var KFGUI_CheckBox SkillRestriction9;
 var class<KFWeaponDefinition> SelectedWeap;
 var array< class<KFWeaponDefinition> > CurWeapDef;
 
-public function InitComponents()
+public function InitMenu()
 {
 	local int i, BanLevel;
 	local string s;
+
+	Super.InitMenu();
 
 	WeaponRestrictionsList = KFGUI_ColumnList(FindComponentID('WeaponRestrictionsList'));
 	WeaponRestrictionsList.Columns.AddItem(newFColumnItem(WeaponHeader, 0.5f));
@@ -60,10 +62,16 @@ public function InitComponents()
 	WeapRightClick.ItemRows[BanLevel + 1].Text = ToggleBossOnlyString;
 }
 
-public function DrawComponents(float XL, float YL, float FontScalar)
+public function DrawMenu()
 {
+	local float XL, YL, FontScalar;
 	local int index, PerkAuthorityLevel;
 	local string S;
+
+	Super.DrawMenu();
+
+	Canvas.Font = Owner.CurrentStyle.PickFont(FontScalar);
+	Canvas.TextSize("ABC", XL, YL, FontScalar, FontScalar);
 
 	CommandoB = KFGUI_Button(FindComponentID('Commando'));
 	CommandoB.bDisabled = GetCDPC().WeapUIInfo.Perk == class'KFPerk_Commando';

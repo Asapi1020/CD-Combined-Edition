@@ -342,6 +342,62 @@ public reliable server simulated function RequestTeleportAllSpareWeapons(string 
 	}
 }
 
+public reliable server simulated function GetDisableCDRecordOnline()
+{
+	ReceiveDisableCDRecordOnline(GetCD().bDisableCDRecordOnline);
+}
+
+protected reliable client simulated function ReceiveDisableCDRecordOnline(bool bDisable)
+{
+	local KFGUI_Page FoundMenu;
+	local xUI_AdminMenu AdminMenu;
+
+	FoundMenu = GetCDPC().GetGUIController().FindActiveMenu('AdminMenu');
+	AdminMenu = xUI_AdminMenu(FoundMenu);
+
+	if ( AdminMenu != None )
+	{
+		AdminMenu.ReceiveDisableCDRecordOnline(bDisable);
+		return;
+	}
+
+	`cdlog("Admin Menu Others is not active");
+}
+
+public reliable server simulated function SetDisableCDRecordOnline(bool bDisable)
+{
+	GetCD().bDisableCDRecordOnline = bDisable;
+	GetCD().SaveConfig();
+}
+
+public reliable server simulated function GetDisableCustomPostGameMenu()
+{
+	ReceiveDisableCustomPostGameMenu(GetCD().bDisableCustomPostGameMenu);
+}
+
+protected reliable client simulated function ReceiveDisableCustomPostGameMenu(bool bDisable)
+{
+	local KFGUI_Page FoundMenu;
+	local xUI_AdminMenu AdminMenu;
+
+	FoundMenu = GetCDPC().GetGUIController().FindActiveMenu('AdminMenu');
+	AdminMenu = xUI_AdminMenu(FoundMenu);
+
+	if ( AdminMenu != None )
+	{
+		AdminMenu.ReceiveDisableCustomPostGameMenu(bDisable);
+		return;
+	}
+
+	`cdlog("Admin Menu Others is not active");
+}
+
+public reliable server simulated function SetDisableCustomPostGameMenu(bool bDisable)
+{
+	GetCD().bDisableCustomPostGameMenu = bDisable;
+	GetCD().SaveConfig();
+}
+
 defaultproperties
 {
 	bAlwaysRelevant=false
