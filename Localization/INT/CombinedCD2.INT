@@ -322,6 +322,8 @@ SamplePlayButtonText="Play Sample"
 SamplePlayToolTip="Play a sound only on your machine"
 VolumeString="Volume:"
 VolumeToolTip="0 is default. 1 means 100%. Hit enter to apply your volume change"
+ScoreboardSortLabelString="Scoreboard Sort:"
+ScoreboardSortToolTip="Change sort order for CD custom scoreboard"
 
 [xUI_ConsoleMenu]
 Title="Console Menu"
@@ -377,7 +379,7 @@ TrashKillsString="Trash"
 StatsString="Stats"
 CategoryString="Category"
 DeathsString="Deaths"
-GameModeLableString="Game Mode: "
+GameModeLabelString="Game Mode: "
 GameModeToolTip="Slect a game mode to vote"
 
 [xUI_MenuBase]

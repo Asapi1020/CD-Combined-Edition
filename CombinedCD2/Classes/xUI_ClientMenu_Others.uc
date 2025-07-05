@@ -29,13 +29,21 @@ var KFGUI_EditBox LargeKillSoundVolumeEditBox;
 var KFGUI_EditBox MeowSoundVolumeEditBox;
 var editinline export KFGUI_TextLabel VolumeTextLabel_0, VolumeTextLabel_1, VolumeTextLabel_2;
 
+var KFGUI_ComboBox ScoreboardSortComboBox;
+
 var localized string SamplePlayButtonText;
 var localized string SamplePlayToolTip;
 var localized string VolumeString;
 var localized string VolumeToolTip;
+var localized string ScoreboardSortLabelString;
+var localized string ScoreboardSortToolTip;
 
 function InitMenu()
 {
+	ScoreboardSortComboBox = KFGUI_ComboBox(FindComponentID('ScoreboardSort'));
+	ScoreboardSortComboBox.LabelString = ScoreboardSortLabelString;
+	ScoreboardSortComboBox.ToolTip = ScoreboardSortToolTip;
+
 	Super.InitMenu();
 
 	PlayerDeathSoundVolumeEditBox = KFGUI_EditBox(FindComponentID('PlayerDeathSoundVolume'));
@@ -56,6 +64,28 @@ function InitMenu()
 	AddComponent(VolumeTextLabel_1);
 	VolumeTextLabel_2.SetText(VolumeString);
 	AddComponent(VolumeTextLabel_2);
+
+	InitScoreboardComboBox();
+}
+
+protected function InitScoreboardComboBox()
+{
+	local class<KFScoreboard> ScoreboardClass;
+
+	ScoreboardClass = CD_GFxHudWrapper(GetCDPC().myHUD).ScoreboardClass;
+	if (ScoreboardClass == None)
+	{
+		ScoreboardClass = class'KFScoreboard';
+	}
+
+	if (ScoreboardSortComboBox.Values.length != 2)
+	{
+		ScoreboardSortComboBox.Values.length = 0;
+		ScoreboardSortComboBox.Values.AddItem(ScoreboardClass.default.Kills);
+		ScoreboardSortComboBox.Values.AddItem(ScoreboardClass.default.DamageDealt);
+	}
+
+	ScoreboardSortComboBox.SelectedIndex = ScoreboardClass.default.PlayerSortOrder;
 }
 
 function DrawMenu()
@@ -245,6 +275,30 @@ protected function PlayerHitEnter(KFGUI_EditBox Sender, string inputString)
 	}
 
 	CDPC.SaveConfig();
+}
+
+protected function ComboChanged(KFGUI_ComboBox Sender)
+{
+	local KFScoreboard Scoreboard;
+
+	switch(Sender.ID)
+	{
+		case'ScoreboardSort':
+			Scoreboard = CD_GFxHudWrapper(GetCDPC().myHUD).Scoreboard;
+			
+			if (Scoreboard == None)
+			{
+				`cdlog("xUI_ClientMenu_Others.ComboChanged: Scoreboard is None!");
+				return;
+			}
+
+			Scoreboard.PlayerSortOrder = Sender.SelectedIndex;
+			Scoreboard.SaveConfig();
+			break;
+		default:
+			`cdlog("xUI_ClientMenu_Others.ComboChanged: Unknown sender ID: " $ Sender.ID);
+			return;
+	}
 }
 
 defaultproperties
@@ -474,4 +528,14 @@ defaultproperties
 		OnCheckChange=ToggleCheckBox
 	End Object
 	Components.Add(UseVanillaScoreboard)
+
+	Begin Object Class=KFGUI_ComboBox Name=ScoreboardSort
+		XPosition=0.55
+		YPosition=0.60
+		XSize=0.350
+		YSize=0.073
+		OnComboChanged=ComboChanged
+		ID="ScoreboardSort"
+	End Object
+	Components.Add(ScoreboardSort)
 }
