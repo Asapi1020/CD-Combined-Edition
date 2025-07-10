@@ -278,7 +278,7 @@ reliable server function ServerSynchServerIP(string ServerIP){
 reliable client function SetupCycleList()
 {
 	SpawnCycleCatalog = new class'CD_SpawnCycleCatalog';
-	SpawnCycleCatalog.ClientSetup(self);
+	SpawnCycleCatalog.ClientSetup();
 }
 
 reliable client function ShowHelpHint()

@@ -339,6 +339,12 @@ AnalyzeWaveString="Analyze wave %s"
 AnalyzeMatchString="Analyze entire match"
 AuthorHeader="Author"
 DateHeader="Pub Date"
+PresetButtonText="Presets"
+AnalyzerButtonText="Analyze"
+
+[xUI_CycleMenu_Analyzer]
+CountHeader="Count"
+AnalyzeButtonText="Analyze"
 
 [xUI_MapVote]
 Title="Map Vote"

@@ -35,6 +35,11 @@ function SetLogging( bool b )
 	EnableLogging = b;
 }
 
+public function array< class< KFPawn_Monster > > GetAIClassList()
+{
+	return AIClassList;
+}
+
 /*
  * Resolve a SpawnCycle preset name, check that it is defined
  * under the supplied GameLength, and then parse it and copy
@@ -292,20 +297,9 @@ private function InitSpawnCyclePresetList()
 	}
 }
 
-function ClientSetup(CD_PlayerController CDPC)
+function ClientSetup()
 {
-	//local CD_SpawnCycle_Preset SCP;
 	InitSpawnCyclePresetList();
-	/*
-	CycleOverviews.length = 0;
-	foreach SpawnCyclePresetList(SCP)
-	{
-		CycleOverviews.CycleName = SCP.GetName();
-		CycleOverviews.Author = SCP.GetAuthor();
-		CycleOverviews.PubDate = SCP.GetDate();
-		CDPC.AnalyzeSpawnCycle(SCP,4,12,0);
-	}
-	*/
 }
 
 /*

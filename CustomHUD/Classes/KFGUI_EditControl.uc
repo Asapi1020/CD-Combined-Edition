@@ -8,7 +8,7 @@ var transient float TextHeight, TextScale;
 var transient Font TextFont;
 var Canvas.FontRenderInfo TextFontInfo;
 
-var(Lable) float LableWidth;
+var(Lable) float LabelWidth;
 var(Lable) string LabelString;
 var(Lable) color LableColor; // Label text color.
 var(Lable) byte FontScale;
@@ -24,14 +24,14 @@ function InitMenu()
 		TextLable.FontScale = FontScale;
 		TextLable.XPosition = default.XPosition;
 		TextLable.YPosition = YPosition;
-		TextLable.XSize = (default.XSize * LableWidth * 0.975);
+		TextLable.XSize = (default.XSize * LabelWidth * 0.975);
 		TextLable.YSize = YSize;
 		TextLable.Owner = Owner;
 		TextLable.TextColor = LableColor;
 		TextLable.ParentComponent = Self;
 		TextLable.InitMenu();
-		XPosition = default.XPosition + (default.XSize * LableWidth);
-		XSize = default.XSize * (1.f-LableWidth);
+		XPosition = default.XPosition + (default.XSize * LabelWidth);
+		XSize = default.XSize * (1.f-LabelWidth);
 	}
 	Super.InitMenu();
 	bClickable = !bDisabled;
@@ -92,7 +92,7 @@ defaultproperties
 {
 	LableColor=(R=255, G=255, B=255, A=255)
 	FontScale=1
-	LableWidth=0.5
+	LabelWidth=0.5
 	bScaleByFontSize=true
 	TextFontInfo=(bClipText=true, bEnableShadow=true)
 
