@@ -52,7 +52,7 @@ function InitMenu()
 
 	LargeKillSoundVolumeEditBox = KFGUI_EditBox(FindComponentID('LargeKillSoundVolume'));
 	LargeKillSoundVolumeEditBox.SetText(string(GetCDPC().LargeKillSoundVolumeMultiplier));
-	LargeKillSoundVolumeEditBox.ToolTip = VolumeToolTip;	
+	LargeKillSoundVolumeEditBox.ToolTip = VolumeToolTip;
 
 	MeowSoundVolumeEditBox = KFGUI_EditBox(FindComponentID('MeowSoundVolume'));
 	MeowSoundVolumeEditBox.SetText(string(GetCDPC().MeowSoundVolumeMultiplier));

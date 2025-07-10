@@ -1,23 +1,32 @@
 class xUI_CycleMenu extends xUI_MenuBase
 	config(CombinedCD_LocalData);
 
-`include(CD_UTF16LE.uci)
+`include(CD_Log.uci)
 
-var KFGUI_CheckBox FavoriteFilter;
-var KFGUI_ColumnList CycleList;
-var KFGUI_RightClickMenu CycleRClicker;
-var editinline export KFGUI_RightClickMenu CycleRightClick;
+enum CycleMenuState
+{
+	CMS_Preset,
+	CMS_Analyzer
+};
+
+var CycleMenuState CurState;
+
+var protected xUI_CycleMenu_Preset PresetPage;
+var protected xUI_CycleMenu_Analyzer AnalyzerPage;
+
+var KFGUI_Button PresetButton;
+var KFGUI_Button AnalyzerButton;
 
 var config array<string> FavoriteCycles;
 var config bool bFiltered;
-
-var int SelectedCycleIndex;
 
 var localized string FavoriteFilterString;
 var localized string FavoriteFilterToolTip;
 var localized string AddToFavorites, RemoveFromFavorites;
 var localized string AnalyzeWaveString, AnalyzeMatchString;
 var localized string AuthorHeader, DateHeader;
+
+var localized string PresetButtonText, AnalyzerButtonText;
 
 function SetWindowDrag(bool bDrag)
 {
@@ -26,156 +35,86 @@ function SetWindowDrag(bool bDrag)
 
 function InitMenu()
 {
-	local int i;
-
 	super.InitMenu();
 
-	CycleList = KFGUI_ColumnList(FindComponentID('Cycle'));
-	CycleList.Columns.AddItem(newFColumnItem("", 0.025f));
-	CycleList.Columns.AddItem(newFColumnItem(class'xUI_AdminMenu'.default.NameHeader, 0.475f));
-	CycleList.Columns.AddItem(newFColumnItem(AuthorHeader, 0.30f));
-	CycleList.Columns.AddItem(newFColumnItem(DateHeader, 0.20f));
-	CycleRClicker = KFGUI_RightClickMenu(FindComponentID('CycleRClicker'));
+	PresetPage = new(self) class'xUI_CycleMenu_Preset';
+	AddComponent(PresetPage);
 
-	CycleRightClick.ItemRows.Add(12);
-	CycleRightClick.ItemRows[0].Text = AddToFavorites;
-	for(i=1; i<11; i++)
-	{
-		CycleRightClick.ItemRows[i].Text = Repl(AnalyzeWaveString, "%s", string(i));
-	}
-	CycleRightClick.ItemRows[11].Text = AnalyzeMatchString;
+	AnalyzerPage = new(self) class'xUI_CycleMenu_Analyzer';
+	AddComponent(AnalyzerPage);
 }
 
 function DrawMenu()
 {
-	local int i, skipped;
-	local string S;
-	local bool bFavorite;
-	local CD_SpawnCycle_Preset SpawnCyclePreset;
-
 	super.DrawMenu();
 
-	FavoriteFilter = KFGUI_CheckBox(FindComponentID('FavoriteFilter'));
-	FavoriteFilter.ToolTip=FavoriteFilterToolTip;
-	FavoriteFilter.bChecked = bFiltered;
-	DrawBoxDescription(FavoriteFilterString, FavoriteFilter, 0.4);
+	PresetButton = KFGUI_Button(FindComponentID('CyclePreset'));
+	PresetButton.ButtonText = PresetButtonText;
+	PresetButton.bDisabled = CurState == CMS_Preset;
 
-	if(CycleList.ListCount != GetCDPC().SpawnCycleCatalog.SpawnCyclePresetList.length)
-	{
-		CycleList.EmptyList();
-		for(i=0; i<GetCDPC().SpawnCycleCatalog.SpawnCyclePresetList.length; i++)
-		{
-			SpawnCyclePreset = GetCDPC().SpawnCycleCatalog.SpawnCyclePresetList[i];
-			S = SpawnCyclePreset.GetName();
-			bFavorite = (FavoriteCycles.Find(S) != INDEX_NONE);
-			if(FavoriteFilter.bChecked && !bFavorite)
-			{
-				++skipped;
-				continue;
-			}
-			S = (bFavorite ? `HEART_EMOJI : "") $ "\n" $ S;
-			S $= "\n" $ SpawnCyclePreset.GetAuthor();
-			S $= "\n" $ SpawnCyclePreset.GetDate();
-			CycleList.AddLine(S);
-		}
-	}
-	//CycleList.SelectedRowIndex = SelectedCycleIndex;
+	AnalyzerButton = KFGUI_Button(FindComponentID('CycleAnalyzer'));
+	AnalyzerButton.ButtonText = AnalyzerButtonText;
+	AnalyzerButton.bDisabled = CurState == CMS_Analyzer;
+
+	PresetPage.bVisible = CurState == CMS_Preset;
+	AnalyzerPage.bVisible = CurState == CMS_Analyzer;
 }
 
-function SelectedCycleRow(KFGUI_ListItem Item, int Row, bool bRight, bool bDblClick)
+protected function ButtonClicked(KFGUI_Button Sender)
 {
-	local string CycleName;
-
-	if(Row < 0) return;
-
-	SelectedCycleIndex = Row;
-	CycleName = CycleList.GetFromIndex(Row).GetDisplayStr(1);
-
-	if(bDblClick)
+	switch(Sender.ID)
 	{
-		GetCDPC().SetSpawnCycle(CycleName);
-	}
-	else if(bRight)
-	{
-		CycleRightClick.ItemRows[0].Text = (FavoriteCycles.Find(CycleName) == INDEX_NONE) ? AddToFavorites : RemoveFromFavorites;
-		CycleRightClick.OpenMenu(Self);
-	}
-}
-
-function ClickedRow(int Row)
-{
-	local string CycleName;
-	CycleName = CycleList.GetFromIndex(SelectedCycleIndex).GetDisplayStr(1);
-
-	if(Row == 0)
-	{
-		ToggleFavorite(CycleName);
-	}
-	else if(Row < 11)
-	{
-		GetCDPC().RunCDChatCommand("!cdsca" @ CycleName @ "wave" $ string(Row) @ "wsf12");
-	}
-	else if(Row == 11)
-	{
-		GetCDPC().RunCDChatCommand("!cdsca" @ CycleName @ "wsf12");
-	}
-}
-
-function ToggleFavorite(string CycleName)
-{
-	if(FavoriteCycles.Find(CycleName) != INDEX_NONE)
-	{
-		FavoriteCycles.RemoveItem(CycleName);
-	}
-	else if(CycleName != "")
-	{
-		FavoriteCycles.AddItem(CycleName);
-	}
-	SaveConfig();
-	CycleList.EmptyList();
-}
-
-function ToggleCheckBox(KFGUI_CheckBox Sender)
-{
-	switch (Sender.ID)
-	{
-		case 'FavoriteFilter':
-			CycleList.EmptyList();
-			bFiltered = Sender.bChecked;
-			SaveConfig();
+		case 'CyclePreset':
+			CurState = CMS_Preset;
 			break;
+		case 'CycleAnalyzer':
+			CurState = CMS_Analyzer;
+			break;
+		default:
+			`cdlog("xUI_CycleMenu: ButtonClicked: Unknown button clicked: " $ Sender.ID);
+			return;
 	}
+}
+
+public function SetAnalyzeOptions(string SpawnCycleName, int WaveNumInt, int WaveSizeFakesInt)
+{
+	AnalyzerPage.SetSpawnCycle(SpawnCycleName);
+	AnalyzerPage.WaveNum = WaveNumInt;
+	AnalyzerPage.SetWaveSizeFakes(WaveSizeFakesInt);
+}
+
+public function RunAnalyze()
+{
+	CurState = CMS_Analyzer;
+	AnalyzerPage.Analyze();
 }
 
 defaultproperties
 {
 	ID="CycleMenu"
-	Version="2.0.1"
+	Version="3.0.0"
 
-	Begin Object Class=KFGUI_CheckBox Name=FavoriteFilter
-		XPosition=0.05
-		YPosition=0.10
-		ID="FavoriteFilter"
-		OnCheckChange=ToggleCheckBox
+	CurState=CMS_Preset;
+
+	Begin Object Class=KFGUI_Button Name=CyclePreset
+		XPosition=0.025
+		YPosition=0.925
+		XSize=0.14
+		YSize=0.05
+		ID="CyclePreset"
+		OnClickLeft=ButtonClicked
+		TextColor=(R=255, G=255, B=255, A=255)
 	End Object
+	Components.Add(CyclePreset)
 
-	Begin Object Class=KFGUI_ColumnList Name=Cycle
-		XPosition=0.05
-		YPosition=0.15
-		XSize=0.90
-		YSize=0.80
-		ID="Cycle"
-		OnSelectedRow=SelectedCycleRow
-		bCanSortColumn=true
-		bOpaque=true
+	Begin Object Class=KFGUI_Button Name=CycleAnalyzer
+		XPosition=0.190
+		YPosition=0.925
+		XSize=0.14
+		YSize=0.05
+		ID="CycleAnalyzer"
+		OnClickLeft=ButtonClicked
+		TextColor=(R=255, G=255, B=255, A=255)
 	End Object
-
-	Components.Add(Cycle)
-	Components.Add(FavoriteFilter)
-
-	Begin Object Class=KFGUI_RightClickMenu Name=CycleRClicker
-		ID="RClick"
-		OnSelectedItem=ClickedRow
-	End Object
-	CycleRightClick=CycleRClicker
+	Components.Add(CycleAnalyzer)
 }

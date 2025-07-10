@@ -468,123 +468,60 @@ private function SetupSenderCommand( const string CmdName, const string SecondNa
 		return Result;
 	}
 
-	private function string GetCDWhoChatString()
-	{
-		local KFPlayerController KFPC;
-		local string Result, Code;
-		local int TotalCount;
-		local name GameStateName;
-		
-
-		Result = "";
-		GameStateName = Outer.GetStateName();
-
-	        foreach WorldInfo.AllControllers(class'KFPlayerController', KFPC)
-			{
-				Code = "";
-
-				if ( !KFPC.bIsPlayer || KFPC.bDemoOwner )
-				{
-					continue;
-				}
-
-				if ( KFPC.PlayerReplicationInfo.bOnlySpectator )
-				{
-					Code = "S";
-				}
-			
-				if ( GameStateName == 'TraderOpen' )
-				{
-					if ( !KFPC.PlayerReplicationInfo.bOnlySpectator )
-					{
-						Code = CD_PlayerReplicationInfo(KFPC.PlayerReplicationInfo).bIsReadyForNextWave ? "R" : "  ";
-					}
-				}
-			
-				if ( GameStateName == 'PendingMatch' )
-				{
-					if ( !KFPC.PlayerReplicationInfo.bOnlySpectator )
-					{
-						Code = KFPC.PlayerReplicationInfo.bReadyToPlay ? "R" : "  ";
-					}
-				}
-			
-				else if ( GameStateName == 'PlayingWave' && !KFPC.PlayerReplicationInfo.bOnlySpectator )
-				{
-					Code = KFPC.Pawn.IsAliveAndWell() ? "L" : "D";
-				}
-			
-				if ( 0 < TotalCount )
-				{
-					Result $= "\n";
-				}
-
-				if ( Code != "" )
-				{
-					Result $= "["$ Code $"] ";
-				}
-
-				Result $= KFPC.PlayerReplicationInfo.PlayerName;
-
-				TotalCount++;		
-	        }
-			
-		return Result;
-	}
-
-	private function string SCPCommand( const out array<string> params)
-	{
-		if(params.length == 0)
-		{
-			return GetSCP("main");
-		}
-
-		return GetSCP( params[0] );
-	}
-
-	function string GetSCP( const string key )
-	{
-		local string Result;
-		local int i;
-
-		Result = "";	
-		
-		if(key == "full")
-		{
-			for(i=0; i<SpawnCycleCatalog.SpawnCyclePresetList.length; i++)
-				Result $= SpawnCycleCatalog.SpawnCyclePresetList[i].GetName() $ "\n";
-		}
-
-		else if(key == "main")
-		{
-			Result $= "asp_v3" $"\n"$
-					  "asp_fp_v2" $"\n"$
-					  "ts_mig_v3" $"\n"$
-					  "doom_v2_plus_rmk" $"\n"$
-					  "asp_v2" $"\n"$
-					  "ts_mig_v2" $"\n"$
-					  "osffi_v1" $"\n"$
-					  "dtf_pm" $"\n"$
-					  "ts_mig_v1" $"\n"$
-					  "bl_v2" $"\n"$
-					  "asp_v1" $"\n"$
-					  "bl_light" $"\n"$
-					  "nam_pro_v5" $"\n"$
-					  "nam_pro_v3" $"\n"$
-					  "(Type \"!cdscp full\" to print in detail)";
-		}
-
-		return Result;
-	}
-
 	private function string SCACommand( const out array<string> params)
 	{
-		local string CycleName;
+		local CD_SpawnCycle_Preset SCP;
+		local SpawnCycleAnalysis Analysis;
+		local string CycleName, option;
 		local int TargetWave, TargetWSF;
 
-		SpawnCycleAnalyzer.SetSCAOption(params, CycleName, TargetWave, TargetWSF);
-		SpawnCycleAnalyzer.TrySCACore(CycleName, TargetWave, TargetWSF);
+		foreach params(option)
+		{
+			if (Left(option, 4) == "wave")
+			{
+				TargetWave = Clamp(int(Mid(option, 4)), 0, 11);
+			}
+			else if (Left(option, 3) == "wsf")
+			{
+				TargetWSF = Max(int(Mid(option, 3)), 1);
+			}
+			else if (SpawnCycleCatalog.ExistThisCycle(option, SCP))
+			{
+				CycleName = option;
+			}
+		}
+
+		if (CycleName == "")
+		{
+			CycleName = SpawnCycle;
+		}
+
+		if (TargetWSF == 0)
+		{
+			TargetWSF = Max(1, WaveSizeFakesInt);
+		}
+
+		Analysis = SpawnCycleAnalyzer.Analyze(CycleName, TargetWave, TargetWSF, GameLength, GameDifficulty);
+		BroadcastAnalysis(Analysis);
 		return "";
+	}
+
+	public function BroadcastAnalysis(SpawnCycleAnalysis Analysis)
+	{
+		if (Analysis.bFailed)
+		{
+			BroadcastLocalizedEcho(Analysis.ErrorMessage);
+			return;
+		}
+
+		if (Analysis.MediumMessage != "")
+			BroadcastCDEcho(Analysis.MediumMessage);
+
+		if (Analysis.LongMessage != "")
+			BroadcastCDEcho(Analysis.LongMessage);
+
+		if (Analysis.AdditionalMessage != "")
+			BroadcastCDEcho(Analysis.AdditionalMessage);
 	}
 
 	private function string DisplayPlayerInfo()
