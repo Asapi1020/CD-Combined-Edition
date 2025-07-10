@@ -36,6 +36,10 @@ var config bool LargeKillSound;
 var config bool DisableMeowSound;
 var config bool LargeKillTicker;
 
+var config float PlayerDeathSoundVolumeMultiplier;
+var config float LargeKillSoundVolumeMultiplier;
+var config float MeowSoundVolumeMultiplier;
+
 var config bool HideDualPistol;
 var config bool DropItem;
 
@@ -274,7 +278,7 @@ reliable server function ServerSynchServerIP(string ServerIP){
 reliable client function SetupCycleList()
 {
 	SpawnCycleCatalog = new class'CD_SpawnCycleCatalog';
-	SpawnCycleCatalog.ClientSetup(self);
+	SpawnCycleCatalog.ClientSetup();
 }
 
 reliable client function ShowHelpHint()
@@ -1227,6 +1231,26 @@ reliable server function CheckPlayerStart()
 	CD.xMut.CheckPlayerStart(self);
 }
 
+reliable server simulated function GetDisableCDRecordOnline()
+{
+	GetRPCHandler().GetDisableCDRecordOnline();
+}
+
+reliable server simulated function SetDisableCDRecordOnline(bool bDisable)
+{
+	GetRPCHandler().SetDisableCDRecordOnline(bDisable);
+}
+
+reliable server simulated function GetDisableCustomPostGameMenu()
+{
+	GetRPCHandler().GetDisableCustomPostGameMenu();
+}
+
+reliable server simulated function SetDisableCustomPostGameMenu(bool bDisable)
+{
+	GetRPCHandler().SetDisableCustomPostGameMenu(bDisable);
+}
+
 /* ==============================================================================================================================
  *	Client functions
  * ============================================================================================================================== */
@@ -1264,19 +1288,35 @@ reliable client simulated function PrintConsole(string Msg)
 unreliable client simulated function PlayLargeKillSound()
 {
 	if(LargeKillSound)
-		ClientPlaySound(SoundCue'CombinedSound.LargeKillSoundCue');
+		DynamicClientPlaySound( "CombinedSound.LargeKillSoundCue", LargeKillSoundVolumeMultiplier );
 }
 
 unreliable client simulated function PlayPlayerDeathSound()
 {
 	if(PlayerDeathSound)
-		ClientPlaySound(SoundCue'CombinedSound.DeathSound');
+		DynamicClientPlaySound( "CombinedSound.DeathSound", PlayerDeathSoundVolumeMultiplier );
 }
 
 unreliable client simulated function PlayMeowSound()
 {
 	if(!DisableMeowSound)
-		ClientPlaySound( SoundCue'CombinedSound.MeowSound' );
+		DynamicClientPlaySound( "CombinedSound.MeowSound", MeowSoundVolumeMultiplier );
+}
+
+public unreliable client simulated function DynamicClientPlaySound(string SoundCuePath, optional float VolumeMultiplier)
+{
+	local SoundCue PlaySound;
+
+	PlaySound = SoundCue( class'CD_Object'.static.SafeLoadObject(SoundCuePath, class'SoundCue') );
+	
+	if (PlaySound == none)
+	{
+		`cdlog("CD_PlayerController.DynamicClientPlaySound: Failed to load sound " $ SoundCuePath);
+		return;
+	}
+
+	PlaySound.VolumeMultiplier = VolumeMultiplier > 0.f ? VolumeMultiplier : class'SoundCue'.default.VolumeMultiplier;
+	ClientPlaySound(PlaySound);
 }
 
 unreliable client simulated function ReceiveLargeKillTicker(PlayerReplicationinfo Killer, KFPawn_Monster KFPM)

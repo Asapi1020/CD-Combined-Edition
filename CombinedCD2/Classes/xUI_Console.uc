@@ -291,14 +291,20 @@ function bool InputChar(int ControllerId, string Unicode)
         {
             return true;
         }
+
+        return false;
     }
+
+    if (!Controller.bForceConsoleInput && Controller.ReceivedInputChar(ControllerId, Unicode))
+    {
+        return true;
+    }
+
     return false;   
 }
 
 function bool InputAxis(int ControllerId, name Key, float Delta, float DeltaTime, optional bool bGamepad)
 {
-//	local int i;
-
     if(bCaptureKeyInput)
     {
         if(ConsoleMenu.NotifyInputAxis(ControllerId, Key, Delta, DeltaTime, bGamepad))
@@ -306,20 +312,6 @@ function bool InputAxis(int ControllerId, name Key, float Delta, float DeltaTime
             return true;
         }
     }
-	/*
-    for(i=0; i<Controller.ActiveMenus.length; i++)
-    {
-    	if (xUI_ConsoleMenu(Controller.ActiveMenus[i]) != none)
-    	{
-    		continue;
-    	}
-
-    	if (Controller.ActiveMenus[i].NotifyInputAxis(ControllerId, Key, Delta, DeltaTime, bGamepad))
-    	{
-    		return true;
-    	}
-    }
-    */
 
     return false; 
 }

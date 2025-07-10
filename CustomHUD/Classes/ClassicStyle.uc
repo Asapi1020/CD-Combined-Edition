@@ -239,7 +239,11 @@ function RenderComboList(KFGUI_ComboSelector C)
 	C.CurrentRow = -1;
 
 	Canvas.PushMaskRegion(Canvas.OrgX, Canvas.OrgY, Canvas.ClipX, Canvas.ClipY);
-	for (i=0; i < C.Combo.Values.Length; ++i)
+	for (
+		i = C.ScrollBar.CurrentScroll;
+		i < Min(C.ScrollBar.CurrentScroll + C.PerPage, C.Combo.Values.Length);
+		++i
+	)
 	{
 		if (bCheckMouse && Y >= YP && Y <= (YP+YL))
 		{

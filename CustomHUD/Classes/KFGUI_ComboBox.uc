@@ -24,6 +24,7 @@ function UpdateSizes()
 function DrawMenu()
 {
 	Owner.CurrentStyle.RenderComboBox(Self);
+	bSelectionStretched = Owner.InputFocus == Selection;
 }
 
 function HandleMouseClick(bool bRight)
@@ -40,10 +41,34 @@ function HandleMouseClick(bool bRight)
 	Selection.YPosition = (CompPos[1]+CompPos[3]) / Owner.ScreenSize.Y;
 	Selection.XSize = CompPos[2] / Owner.ScreenSize.X;
 	Selection.YSize = (TextHeight / Owner.ScreenSize.Y) * Values.Length + ((BorderSize*2) / Owner.ScreenSize.Y);
-	if ((Selection.YPosition+Selection.YSize) > 1.f)
-		Selection.YPosition -= ((Selection.YPosition+Selection.YSize)-1.f);
+
+	Selection.ScrollBar.bHideScrollBar = true;
+
+	if (Selection.YSize > 1.f)
+	{
+		if (Selection.YPosition > 0.5f)
+		{
+			Selection.PerPage = ((YPosition * Owner.ScreenSize.Y) - (BorderSize * 2)) / TextHeight;
+			Selection.YSize = (TextHeight / Owner.ScreenSize.Y) * Selection.PerPage + ((BorderSize*2) / Owner.ScreenSize.Y);
+			Selection.YPosition = YPosition - Selection.YSize;
+		}
+		else
+		{
+			Selection.PerPage = ((1.f - Selection.YPosition) * Owner.ScreenSize.Y - BorderSize * 2) / TextHeight;
+			Selection.YSize = (TextHeight / Owner.ScreenSize.Y) * Selection.PerPage + ((BorderSize*2) / Owner.ScreenSize.Y);
+		}
+
+		Selection.UpdateScrollSize();
+	}
+	else
+	{
+		Selection.PerPage = Values.Length;
+		Selection.ScrollBar.SetDisabled(true);
+
+		if ((Selection.YPosition+Selection.YSize) > 1.f)
+			Selection.YPosition -= ((Selection.YPosition+Selection.YSize)-1.f);
+	}
 	Selection.GetInputFocus();
-	bSelectionStretched = true;
 }
 final function string GetCurrent()
 {

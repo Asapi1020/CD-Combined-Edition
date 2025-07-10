@@ -30,5 +30,5 @@ Delegate OnCheckChange(KFGUI_CheckBox Sender);
 defaultproperties
 {
 	bForceUniform=true
-	LableWidth=0.85
+	LabelWidth=0.85
 }

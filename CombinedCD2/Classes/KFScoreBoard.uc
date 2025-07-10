@@ -1,5 +1,16 @@
 class KFScoreBoard extends KFScoreboard_Base
-	dependson(Types);
+	DependsOn(Types)
+	config( CombinedCD_LocalData );
+
+`include(CD_Log.uci)
+
+enum SortOrder
+{
+	SO_Kill,
+	SO_Damage,
+};
+
+var config int PlayerSortOrder;
 
 var transient float RankXPos, LevelXPos, PerkXPos, PlayerXPos, HealthXPos, TimeXPos, KillsXPos, AssistXPos, CashXPos, DeathXPos, PingXPos, AccXPos, HuXPos;
 var transient float SCXPos, MMXPos, WSFXPos, CSXPos, SPXPos, SMXPos, SCWBox, MMWBox, WSFWBox, CSWBox, SPWBox, SMWBox;
@@ -763,6 +774,54 @@ final function DrawPingBars(Canvas C, float YOffset, float XOffset, float W, flo
 		C.SetDrawColor(80, 80, 80, 255);
 		Owner.CurrentStyle.DrawBoxHollow(XPos, YPos, BarW, BarH, 1);
 	}
+}
+
+delegate bool InOrder(KFPlayerReplicationInfo P1, KFPlayerReplicationInfo P2)
+{
+	if (P1 == None || P2 == None)
+		return true;
+
+	if (P1.GetTeamNum() < P2.GetTeamNum())
+		return false;
+
+	switch(PlayerSortOrder)
+	{
+		case SO_Kill:
+			return InOrderByKills(P1, P2);
+		case SO_Damage:
+			return InOrderByDamage(P1, P2);
+		default:
+			`cdlog("KFScoreboard_Base.InOrder: Unknown PlayerSortOrder: " $ PlayerSortOrder);
+			return InOrderByKills(P1, P2);
+	}
+}
+
+protected function bool InOrderByKills(KFPlayerReplicationInfo P1, KFPlayerReplicationInfo P2)
+{
+	if (P1.Kills == P2.Kills)
+	{
+		if (P1.Assists == P2.Assists)
+			return true;
+
+		return P1.Assists < P2.Assists;
+	}
+
+	return P1.Kills < P2.Kills;
+}
+
+protected function bool InOrderByDamage(KFPlayerReplicationInfo P1, KFPlayerReplicationInfo P2)
+{
+	local CD_PlayerReplicationInfo CDPRI_1, CDPRI_2;
+
+	CDPRI_1 = CD_PlayerReplicationInfo(P1);
+	CDPRI_2 = CD_PlayerReplicationInfo(P2);
+
+	if (CDPRI_1 == NONE || CDPRI_2 == NONE)
+	{
+		return InOrderByKills(P1, P2);
+	}
+
+	return CDPRI_1.DmgD <= CDPRI_2.DmgD;
 }
 
 defaultproperties

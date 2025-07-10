@@ -6,7 +6,8 @@ var localized string CloseButtonText;
 var protected string Version;
 var protected bool bHideNavigation;
 
-var private xUI_Navigation Navigation;
+var protected xUI_Navigation Navigation;
+var protected xUI_Navigation_Right RightNavigation;
 
 function InitMenu()
 {
@@ -15,8 +16,9 @@ function InitMenu()
 	if(!bHideNavigation)
 	{
 		Navigation = new(self) class'xUI_Navigation';
+		RightNavigation = new(self) class'xUI_Navigation_Right';
 		AddComponent(Navigation);
-		Navigation.InitComponents();
+		AddComponent(RightNavigation);
 	}
 }
 
@@ -24,11 +26,6 @@ function DrawMenu()
 {
 	Super.DrawMenu();
 	WindowTitle = Title @ "v" $ Version;
-	
-	if(!bHideNavigation)
-	{
-		Navigation.DrawComponents();
-	}
 }
 
 function CD_PlayerController GetCDPC()

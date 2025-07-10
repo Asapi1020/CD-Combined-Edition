@@ -9,10 +9,12 @@ var UserInfo SelectedUser;
 var array<UserInfo> CurUserInfo;
 var array<string> ColumnText;
 
-public function InitComponents()
+public function InitMenu()
 {
 	local int i, AdminLevel;
 	local string s;
+
+	Super.InitMenu();
 
 	AuthList = KFGUI_ColumnList(FindComponentID('AuthList'));
 	AuthList.Columns.AddItem(newFColumnItem(NameHeader, 0.5f));
@@ -34,8 +36,6 @@ public function InitComponents()
 	UserRightClick.ItemRows[AdminLevel].Text @= class'KFGame.KFLocalMessage'.default.AdminString;
 	UserRightClick.ItemRows[AdminLevel + 1].Text = RemoveString;
 }
-
-public function DrawComponents();
 
 public function UpdateAuthorityList()
 {

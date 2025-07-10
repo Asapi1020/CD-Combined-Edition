@@ -29,8 +29,10 @@ var localized string EveryoneGoToPlayerStartString;
 var localized string AddCustomStartString;
 var localized string DisableCustomStartsString;
 
-public function InitComponents()
+public function InitMenu()
 {
+	Super.InitMenu();
+
 	InitPlayerStartList();
 
 	AddCustomStartEditBox = KFGUI_EditBox(FindComponentID('AddCustomStartEditBox'));
@@ -40,9 +42,11 @@ public function InitComponents()
 	GetCDPC().GetDisableCustomStarts();
 }
 
-public function DrawComponents()
+public function DrawMenu()
 {
 	local float RightEnd;
+
+	Super.DrawMenu();
 
 	TogglePathNodesIndexButton = KFGUI_Button(FindComponentID('TogglePathNodesIndex'));
 	TogglePathNodesIndexButton.ButtonText = TogglePathNodesIndexButtonText;

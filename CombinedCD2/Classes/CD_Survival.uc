@@ -5,7 +5,8 @@
 //=============================================================================
 
 class CD_Survival extends KFGameInfo_Survival
-	config( CombinedCD );
+	config( CombinedCD )
+	DependsOn(CD_Domain);
 
 `include(CD_BuildInfo.uci)
 `include(CD_Log.uci)
@@ -2103,14 +2104,19 @@ function BroadcastDifferentEcho( coerce string Lower, coerce string Higher, int 
 	}
 }
 
-function DisplayCycleAnalisis()
-{
-	SpawnCycleAnalyzer.TrySCACore(SpawnCycle, WaveNum, WaveSizeFakesInt, false);
-}
-
 function BriefCycleAnalisis()
 {
-	SpawnCycleAnalyzer.TrySCACore(SpawnCycle, WaveNum, WaveSizeFakesInt, true);
+	local SpawnCycleAnalysis Analysis;
+
+	Analysis = SpawnCycleAnalyzer.Analyze(SpawnCycle, WaveNum, WaveSizeFakesInt, GameLength, GameDifficulty, true);
+	
+	if( Analysis.bFailed )
+	{
+		BroadcastLocalizedEcho(Analysis.ErrorMessage, 'Console');
+		return;
+	}
+
+	DisplayCycleAnalisisInHUD(SpawnCycle, Analysis.ShortMessage);
 }
 
 private function string GetCDVersionChatString()
@@ -2135,7 +2141,9 @@ exec function logControlledDifficulty( bool enabled )
 
 exec function AnalyzeVanillaCycle(int WaveIdx, int PlayerCount, optional int TryNum=1)
 {
-	SpawnCycleAnalyzer.VanillaAnalyze(WaveIdx, PlayerCount, TryNum);
+	local SpawnCycleAnalysis Analysis;
+	Analysis = SpawnCycleAnalyzer.VanillaAnalyze(WaveIdx, PlayerCount, GameLength, GameDifficulty, TryNum);
+	ChatCommander.BroadcastAnalysis(Analysis);
 }
 
 /* --------------------------------------------------------------------------------------------------------------------------------- */
@@ -2939,7 +2947,7 @@ function CheckUnglowPickupForPlayer(CD_Pawn_Human Player)
 
 exec function ShowCycleOrder(string CycleName)
 {
-	GameInfo_CDCP.Print( SpawnCycleAnalyzer.SpawnOrderOverview(CycleName) );
+	GameInfo_CDCP.Print( SpawnCycleAnalyzer.SpawnOrderOverview(CycleName, GameLength, GameDifficulty) );
 }
 
 exec function TestConnection(){

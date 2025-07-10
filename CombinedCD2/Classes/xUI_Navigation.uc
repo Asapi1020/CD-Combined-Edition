@@ -7,13 +7,14 @@ var KFGUI_Button ClientMenuButton;
 var KFGUI_Button AutoTraderMenuButton;
 var KFGUI_Button CycleMenuButton;
 var KFGUI_Button PlayersMenuButton;
-var KFGUI_Button MapVoteMenuButton;
 var KFGUI_Button AdminMenuButton;
 var KFGUI_Button CloseButton;
 
-public function InitComponents()
+public function InitMenu()
 {
 	local float XPos, Width;
+
+	Super.InitMenu();
 
 	Width = Outer.XPosition / Outer.XSize;
 	XPos = Width * -1;
@@ -21,9 +22,11 @@ public function InitComponents()
 	Self.XSize = Width;
 }
 
-public function DrawComponents()
+public function DrawMenu()
 {
 	local CD_PlayerController CDPC;
+
+	Super.DrawMenu();
 
 	CDPC = GetCDPC();
 
@@ -42,10 +45,6 @@ public function DrawComponents()
 	PlayersMenuButton = KFGUI_Button(FindComponentID('PlayersMenuButton'));
 	PlayersMenuButton.ButtonText = CDPC.default.PlayersMenuClass.default.Title;
 	PlayersMenuButton.bDisabled = isThisMenu(CDPC.default.PlayersMenuClass);
-
-	MapVoteMenuButton = KFGUI_Button(FindComponentID('MapVoteMenuButton'));
-	MapVoteMenuButton.ButtonText = CDPC.default.MapVoteMenuClass.default.Title;
-	MapVoteMenuButton.bDisabled = isThisMenu(CDPC.default.MapVoteMenuClass);
 
 	AdminMenuButton = KFGUI_Button(FindComponentID('AdminMenuButton'));
 	AdminMenuButton.ButtonText = CDPC.default.AdminMenuClass.default.Title;
@@ -96,13 +95,6 @@ private function ButtonClicked(KFGUI_Button Sender)
 			if(CDPC.hasAdminLevel() && !isThisMenu(CDPC.default.AdminMenuClass))
 			{
 				Owner.OpenMenu(CDPC.default.AdminMenuClass, true);
-				DoClose();
-			}
-			break;
-		case('MapVoteMenuButton'):
-			if(!isThisMenu(CDPC.default.MapVoteMenuClass))
-			{
-				CDPC.OpenMapVote();
 				DoClose();
 			}
 			break;
@@ -168,20 +160,9 @@ defaultproperties
 	End Object
 	Components.Add(PlayersMenu)
 
-	Begin Object Class=KFGUI_Button Name=MapVoteMenu
-		XPosition=0.10
-		YPosition=0.33
-		XSize=0.800
-		YSize=0.06
-		ID="MapVoteMenuButton"
-		OnClickLeft=ButtonClicked
-		TextColor=(R=255, G=255, B=255, A=255)
-	End Object
-	Components.Add(MapVoteMenu)
-
 	Begin Object Class=KFGUI_Button Name=AdminMenu
 		XPosition=0.10
-		YPosition=0.40
+		YPosition=0.33
 		XSize=0.800
 		YSize=0.06
 		ID="AdminMenuButton"
@@ -192,7 +173,7 @@ defaultproperties
 
 	Begin Object Class=KFGUI_Button Name=CloseButton
 		XPosition=0.10
-		YPosition=0.94
+		YPosition=0.925
 		XSize=0.800
 		YSize=0.06
 		ID="CloseButton"

@@ -1,6 +1,6 @@
 class CD_SpawnCycleAnalyzer extends Object
-	within CD_Survival
-	DependsOn(CD_Survival);
+	within Actor
+	DependsOn(CD_Domain);
 
 `include(CD_Log.uci)
 
@@ -8,6 +8,7 @@ var array< class<KFPawn_Monster> > CDZedClass;
 var array<int> Count;
 var array<float> WSMulti, DMod;
 var int TrashAmount, MediumAmount, LargeAmount;
+var CD_SpawnCycleCatalog SpawnCycleCatalog;
 
 struct BZNum
 {
@@ -15,65 +16,70 @@ struct BZNum
 };
 var array<BZNum> BZNumArray;
 
-function TrySCA(string s, optional bool bBrief)
+/**
+ * Analyzes a spawn cycle.
+ * @param CycleName The name of the spawn cycle to analyze.
+ * @param TargetWave The specific wave to analyze (0 for all waves).
+ * @param TargetWSF The target wave size fakes (number of players).
+ * @param GameLength The length of the game (0-Short, 1-Normal, 2-Long).
+ * @param Messages Output array for messages.
+ * @param bBrief If true, prints a brief analysis.
+ * @return struct SpawnCycleAnalysis with analysis results. @ref CD_Domain.SpawnCycleAnalysis
+ */
+public function SpawnCycleAnalysis Analyze(string CycleName, int TargetWave, int TargetWSF, int GameLength, int GameDifficulty, optional bool bBrief, optional bool bForList)
 {
-	//	s = "!cdsca cyclename wavex wsfxx"
-	local array<string> splitbuf;
-	local string CycleName;
-	local int TargetWave, TargetWSF;
-	
-	ParseStringIntoArray(s, splitbuf, " ", true);
-	SetSCAOption(splitbuf, CycleName, TargetWave, TargetWSF);
-	TrySCACore(CycleName, TargetWave, TargetWSF, bBrief);
-}
-
-function SetSCAOption(array<string> options, out string cycle, out int wave, out int wsf)
-{
-	local string option;
+	local SpawnCycleAnalysis Analysis;
 	local CD_SpawnCycle_Preset SCP;
+	local int wave;
 
-	foreach options(option)
+	if (SpawnCycleCatalog == None)
 	{
-		if (Left(option, 4) == "wave") wave = Clamp(int(Mid(option, 4)), 0, 11);
-		else if (Left(option, 3) == "wsf") wsf = Max(int(Mid(option, 3)), 1);
-		else if (SpawnCycleCatalog.ExistThisCycle(option, SCP)) cycle = option;
+		SpawnCycleCatalog = new class'CD_SpawnCycleCatalog';
+		SpawnCycleCatalog.ClientSetup();
 	}
-
-	if(cycle == "") cycle = SpawnCycle;
-	if(wsf < 1) wsf = Max(1, WaveSizeFakesInt);
-}
-
-function TrySCACore(string CycleName, int TargetWave, int TargetWSF, optional bool bBrief)
-{
-	local CD_SpawnCycle_Preset SCP;
 
 	if(!(SpawnCycleCatalog.ExistThisCycle(CycleName, SCP)))
 	{
-		BroadcastLocalizedEcho("<local>CD_SpawnCycleAnalyzer.MissCycleMsg</local>");
-		return;
+		Analysis.ErrorMessage = "<local>CD_SpawnCycleAnalyzer.MissCycleMsg</local>";
+		Analysis.bFailed = true;
+		return Analysis;
 	}
-
-	AnalyzeSpawnCycle(SCP, TargetWave, TargetWSF, GameLength);
-	PrintAnalisis(CycleName, TargetWave, TargetWSF, bBrief);
-}
-
-function AnalyzeSpawnCycle(CD_SpawnCycle_Preset SCP, int TargetWave, int TargetWSF, int GL)
-{
-	local int i;
 
 	Count.length=0;
 	Count.length=default.CDZedClass.Length;
-	if(TargetWave > 0) CycleAnalyzePerWave(SCP, TargetWave-1, TargetWSF);
+
+	if(TargetWave > 0)
+	{
+		Analysis = AnalyzeWave(SCP, TargetWave-1, TargetWSF, GameLength, GameDifficulty);
+
+		if (Analysis.bFailed)
+		{
+			return Analysis;
+		}
+	}
 	else if(TargetWave == 0)
 	{
-		for(i=0; i<((GL*3)+4); i++) CycleAnalyzePerWave(SCP, i, TargetWSF);
+		for(wave=0; wave < ((GameLength * 3) + 4); wave++)
+		{
+			Analysis = AnalyzeWave(SCP, wave, TargetWSF, GameLength, GameDifficulty);
+
+			if (Analysis.bFailed)
+			{
+				return Analysis;
+			}
+		}
 	}
+
+	return bForList
+		? GenerateAnalysisForList(CycleName, TargetWave, TargetWSF)
+		: GenerateAnalysis(CycleName, TargetWave, TargetWSF, bBrief);
 }
 
-function PrintAnalisis(string Cycle, int Wave, int WSF, optional bool bBrief)
+protected function SpawnCycleAnalysis GenerateAnalysis(string Cycle, int Wave, int WSF, optional bool bBrief)
 {
 	local int Total, i, Large, Medium, Trash, Bosses, T, M, L;
-	local string s, s1, s2;
+	local string Header, LargeDetails, LargeBrief, MediumBrief, TrashBrief;
+	local SpawnCycleAnalysis Analysis;
 
 	T = TrashAmount;
 	M = T + MediumAmount;
@@ -88,66 +94,188 @@ function PrintAnalisis(string Cycle, int Wave, int WSF, optional bool bBrief)
 		else Bosses += Count[i];
 	}
 
-	s = "SC=" $ string(Count[M]) $ " | FP=" $ string(Count[M+3] + Count[M+4]) $ " | QP=" $ string(Count[M+1] + Count[M+2]) $ "\n" $ 
-		"Large(" $ string(Round(Large*100/Total)) $ "%)";
-	s1 = "Medium(" $ string(Round(Medium*100/Total)) $ "%)";
-	s2 = "Trash(" $ string(Round(Trash*100/Total)) $ "%)";
+	LargeDetails = "SC=" $ string(Count[M]) $ " | FP=" $ string(Count[M+3] + Count[M+4]) $ " | QP=" $ string(Count[M+1] + Count[M+2]);
+	LargeBrief = "Large(" $ string(Round(Large*100/Total)) $ "%)";
+	MediumBrief = "Medium(" $ string(Round(Medium*100/Total)) $ "%)";
 
 	if(bBrief)
 	{
-		DisplayCycleAnalisisInHUD(Cycle, s @ s1);
-		return;
+		Analysis.ShortMessage = LargeDetails $ "\n" $ LargeBrief @ MediumBrief;
+		return Analysis;
 	}
+	
+	TrashBrief = "Trash(" $ string(Round(Trash*100/Total)) $ "%)";
 
-	s = "[" $ Cycle  $ ( (Wave==0) ? "" : (" Wave" $ string(Wave)) ) $ " WSF" $ string(WSF) $ "]\n" $
-		s $ "\n" $ s1 $ "\n" $ s2;
+	Header = "[" $ Cycle  $ ( (Wave==0) ? "" : (" Wave" $ string(Wave)) ) $ " WSF" $ string(WSF) $ "]";
 
-	BroadcastCDEcho(s);
-	BroadcastCDEcho( "------------------------------------" $ "\n" $ 
-					 "[" $ Cycle $  ( (Wave==0) ? "" : (" Wave" $ string(Wave)) ) $ " WSF" $ string(WSF) $ "]\n" $
-					 "------------------------------------" $ "\n" $ 
-					 "Large=" $ string(Large) $ "(" $ string(Large*100/Total) $ "%)\n" $
-					 "Medium=" $ string(Medium) $ "(" $ string(Medium*100/Total) $ "%)\n" $
-					 "Trash=" $ string(Trash) $ "(" $ string(Trash*100/Total) $ "%)\n" $
-					 "------------------------------------" $ "\n" $ 
-					 "Fleshpound=" $ string(Count[M+3] + Count[M+4]) $ "(" $ string((Count[M+3] + Count[M+4])*100/Total) $ "%)\n" $
-					 "--RagedSpawn(" $ string( (Count[M+4]*100)/(Count[M+3] + Count[M+4]) ) $ "%)\n" $
-					 "Quarterpound=" $ string(Count[M+1] + Count[M+2]) $ "(" $ string((Count[M+1] + Count[M+2])*100/Total) $ "%)\n" $
-					 "--RagedSpawn(" $ string( (Count[M+2]*100)/(Count[M+1] + Count[M+2]) ) $ "%)\n" $
-					 "Scrake=" $ string(Count[M]) $ "(" $ string(Count[M]*100/Total) $ "%)\n" $
-					 "------------------------------------" $ "\n" $ 
-					 "Bloat=" $ string(Count[T]) $ "(" $ string(Count[T]*100/Total) $ "%)\n" $
-					 "Siren=" $ string(Count[T+1]) $ "(" $ string(Count[T+1]*100/Total) $ "%)\n" $
-					 "Husk=" $ string(Count[T+2]) $ "(" $ string(Count[T+2]*100/Total) $ "%)\n" $
-					 "EDARTrapper=" $ string(Count[T+3]) $ "(" $ string(Count[T+3]*100/Total) $ "%)\n" $
-					 "EDARBlaster=" $ string(Count[T+4]) $ "(" $ string(Count[T+4]*100/Total) $ "%)\n" $
-					 "EDARBomber=" $ string(Count[T+5]) $ "(" $ string(Count[T+5]*100/Total) $ "%)\n" $
-					 "EDARRandom=" $ string(Count[T+6]+Count[T+7]) $ "(" $ string((Count[T+6]+Count[T+7])*100/Total) $ "%)\n" $
-					 "------------------------------------" $ "\n" $ 
-					 "Cyst=" $ string(Count[0]) $ "(" $ string(Count[0]*100/Total) $ "%)\n" $
-					 "AlphaClot=" $ string(Count[1]) $ "(" $ string(Count[1]*100/Total) $ "%)\n" $
-					 "Slasher=" $ string(Count[2]) $ "(" $ string(Count[2]*100/Total) $ "%)\n" $
-					 "Rioter=" $ string(Count[3]) $ "(" $ string(Count[3]*100/Total) $ "%)\n" $
-					 "Gorefast=" $ string(Count[4]) $ "(" $ string(Count[4]*100/Total) $ "%)\n" $
-					 "Gorefiend=" $ string(Count[5]) $ "(" $ string(Count[5]*100/Total) $ "%)\n" $
-					 "Crawler=" $ string(Count[6]) $ "(" $ string(Count[6]*100/Total) $ "%)\n" $
-					 "EliteCrawler=" $ string(Count[7]) $ "(" $ string(Count[7]*100/Total) $ "%)\n" $
-					 "Stalker=" $ string(Count[8]) $ "(" $ string(Count[8]*100/Total) $ "%)\n" $
-					 "------------------------------------");
-	if(Bosses>0)
+	Analysis.MediumMessage = Header $ "\n" $ LargeBrief $ "\n" $ MediumBrief $ "\n" $ TrashBrief;
+	Analysis.LongMessage = (
+		"------------------------------------" $ "\n" $ 
+		Header $ "\n" $ 
+		"------------------------------------" $ "\n" $ 
+		"Large=" $ string(Large) $ "(" $ string(Large*100/Total) $ "%)\n" $
+		"Medium=" $ string(Medium) $ "(" $ string(Medium*100/Total) $ "%)\n" $
+		"Trash=" $ string(Trash) $ "(" $ string(Trash*100/Total) $ "%)\n" $
+		"------------------------------------" $ "\n" $ 
+		"Fleshpound=" $ string(Count[M+3] + Count[M+4]) $ "(" $ string((Count[M+3] + Count[M+4])*100/Total) $ "%)\n" $
+		"--RagedSpawn(" $ string( (Count[M+4]*100)/(Count[M+3] + Count[M+4]) ) $ "%)\n" $
+		"Quarterpound=" $ string(Count[M+1] + Count[M+2]) $ "(" $ string((Count[M+1] + Count[M+2])*100/Total) $ "%)\n" $
+		"--RagedSpawn(" $ string( (Count[M+2]*100)/(Count[M+1] + Count[M+2]) ) $ "%)\n" $
+		"Scrake=" $ string(Count[M]) $ "(" $ string(Count[M]*100/Total) $ "%)\n" $
+		"------------------------------------" $ "\n" $ 
+		"Bloat=" $ string(Count[T]) $ "(" $ string(Count[T]*100/Total) $ "%)\n" $
+		"Siren=" $ string(Count[T+1]) $ "(" $ string(Count[T+1]*100/Total) $ "%)\n" $
+		"Husk=" $ string(Count[T+2]) $ "(" $ string(Count[T+2]*100/Total) $ "%)\n" $
+		"EDARTrapper=" $ string(Count[T+3]) $ "(" $ string(Count[T+3]*100/Total) $ "%)\n" $
+		"EDARBlaster=" $ string(Count[T+4]) $ "(" $ string(Count[T+4]*100/Total) $ "%)\n" $
+		"EDARBomber=" $ string(Count[T+5]) $ "(" $ string(Count[T+5]*100/Total) $ "%)\n" $
+		"EDARRandom=" $ string(Count[T+6]+Count[T+7]) $ "(" $ string((Count[T+6]+Count[T+7])*100/Total) $ "%)\n" $
+		"------------------------------------" $ "\n" $ 
+		"Cyst=" $ string(Count[0]) $ "(" $ string(Count[0]*100/Total) $ "%)\n" $
+		"AlphaClot=" $ string(Count[1]) $ "(" $ string(Count[1]*100/Total) $ "%)\n" $
+		"Slasher=" $ string(Count[2]) $ "(" $ string(Count[2]*100/Total) $ "%)\n" $
+		"Rioter=" $ string(Count[3]) $ "(" $ string(Count[3]*100/Total) $ "%)\n" $
+		"Gorefast=" $ string(Count[4]) $ "(" $ string(Count[4]*100/Total) $ "%)\n" $
+		"Gorefiend=" $ string(Count[5]) $ "(" $ string(Count[5]*100/Total) $ "%)\n" $
+		"Crawler=" $ string(Count[6]) $ "(" $ string(Count[6]*100/Total) $ "%)\n" $
+		"EliteCrawler=" $ string(Count[7]) $ "(" $ string(Count[7]*100/Total) $ "%)\n" $
+		"Stalker=" $ string(Count[8]) $ "(" $ string(Count[8]*100/Total) $ "%)\n" $
+		"------------------------------------"
+	);
+
+	if(Bosses > 0)
 	{
-		BroadcastCDEcho("Boss=" $ string(Bosses) $ "(" $ string(Bosses*100/Total) $ "%)\n" $
-						"AbominationSpawn=" $ string(Count[L]) $ "(" $ string(Count[L]*100/Total) $ "%)\n" $
-						"Dr.HansVolter=" $ string(Count[L+1]) $ "(" $ string(Count[L+1]*100/Total) $ "%)\n" $
-						"Patriarch=" $ string(Count[L+2]) $ "(" $ string(Count[L+2]*100/Total) $ "%)\n" $
-						"KingFleshpound=" $ string(Count[L+3]) $ "(" $ string(Count[L+3]*100/Total) $ "%)\n" $
-						"Abomination=" $ string(Count[L+4]) $ "(" $ string(Count[L+4]*100/Total) $ "%)\n" $
-						"Matriarch=" $ string(Count[L+5]) $ "(" $ string(Count[L+5]*100/Total) $ "%)\n" $
-						"------------------------------------");
+		Analysis.AdditionalMessage = (
+			"Boss=" $ string(Bosses) $ "(" $ string(Bosses*100/Total) $ "%)\n" $
+			"AbominationSpawn=" $ string(Count[L]) $ "(" $ string(Count[L]*100/Total) $ "%)\n" $
+			"Dr.HansVolter=" $ string(Count[L+1]) $ "(" $ string(Count[L+1]*100/Total) $ "%)\n" $
+			"Patriarch=" $ string(Count[L+2]) $ "(" $ string(Count[L+2]*100/Total) $ "%)\n" $
+			"KingFleshpound=" $ string(Count[L+3]) $ "(" $ string(Count[L+3]*100/Total) $ "%)\n" $
+			"Abomination=" $ string(Count[L+4]) $ "(" $ string(Count[L+4]*100/Total) $ "%)\n" $
+			"Matriarch=" $ string(Count[L+5]) $ "(" $ string(Count[L+5]*100/Total) $ "%)\n" $
+			"------------------------------------"
+		);
 	}
+
+	return Analysis;
 }
 
-function AnalyzeDef(string Def, int WaveSize)
+protected function SpawnCycleAnalysis GenerateAnalysisForList(string Cycle, int Wave, int WSF)
+{
+	local int ClotsNum, GorefastsNum, CrawlersAndStalkersNum, ScrakesNum, PoundsNum, AlbinoNum, RobotsNum, BossesNum, OthersNum;
+	local int TrashNum, MediumNum, LargeNum, TotalNum;
+	local int RandomEDARNum, QPNum, FPNum;
+	local SpawnCycleAnalysis Analysis;
+
+	ClotsNum = Count[0] + Count[1] + Count[2] + Count[3];
+	GorefastsNum = Count[4] + Count[5];
+	CrawlersAndStalkersNum = Count[6] + Count[7] + Count[8];
+	ScrakesNum = Count[17];
+	QPNum = Count[18] + Count[19];
+	FPNum = Count[20] + Count[21];
+	PoundsNum = QPNum + FPNum;
+	AlbinoNum = Count[3] + Count[5] + Count[7];
+	RandomEDARNum = Count[15] + Count[16];
+	RobotsNum = Count[12] + Count[13] + Count[14] + RandomEDARNum;
+	BossesNum = Count[22] + Count[23] + Count[24] + Count[25] + Count[26] + Count[27];
+	OthersNum = Count[9] + Count[10] + Count[11];
+
+	TrashNum = ClotsNum + GorefastsNum + CrawlersAndStalkersNum;
+	MediumNum = OthersNum + RobotsNum;
+	LargeNum = ScrakesNum + PoundsNum;
+	TotalNum = TrashNum + MediumNum + LargeNum + BossesNum;
+
+	if (TotalNum == 0)
+	{
+		return Analysis;
+	}
+
+	Analysis.Categories.AddItem("Trash" $ "\n" $ string(TrashNum) $ "\n" $ CalcPercent(TrashNum, TotalNum));
+	Analysis.Categories.AddItem("Medium" $ "\n" $ string(MediumNum) $ "\n" $ CalcPercent(MediumNum, TotalNum));
+	Analysis.Categories.AddItem("Large" $ "\n" $ string(LargeNum) $ "\n" $ CalcPercent(LargeNum, TotalNum));
+	if (BossesNum > 0)
+	{
+		Analysis.Categories.AddItem("Bosses" $ "\n" $ string(BossesNum) $ "\n" $ CalcPercent(BossesNum, TotalNum));
+	}
+	Analysis.Categories.AddItem("Total" $ "\n" $ string(TotalNum) $ "\n" $ "100%");
+
+	Analysis.Groups.AddItem("Clots" $ "\n" $ string(ClotsNum) $ "\n" $ CalcPercent(ClotsNum, TotalNum));
+	Analysis.Groups.AddItem("Gorefasts" $ "\n" $ string(GorefastsNum) $ "\n" $ CalcPercent(GorefastsNum, TotalNum));
+	Analysis.Groups.AddItem("Crawlers / Stalkers" $ "\n" $ string(CrawlersAndStalkersNum) $ "\n" $ CalcPercent(CrawlersAndStalkersNum, TotalNum));
+	Analysis.Groups.AddItem("Scrakes" $ "\n" $ string(ScrakesNum) $ "\n" $ CalcPercent(ScrakesNum, TotalNum));
+	Analysis.Groups.AddItem("Fleshpounds" $ "\n" $ string(PoundsNum) $ "\n" $ CalcPercent(PoundsNum, TotalNum));
+	Analysis.Groups.AddItem("Albino" $ "\n" $ string(AlbinoNum) $ "\n" $ CalcPercent(AlbinoNum, TotalNum));
+	if (RobotsNum > 0)
+	{
+		Analysis.Groups.AddItem("Robots" $ "\n" $ string(RobotsNum) $ "\n" $ CalcPercent(RobotsNum, TotalNum));
+	}
+	if (BossesNum > 0)
+	{
+		Analysis.Groups.AddItem("Bosses" $ "\n" $ string(BossesNum) $ "\n" $ CalcPercent(BossesNum, TotalNum));
+	}
+	Analysis.Groups.AddItem("Others" $ "\n" $ string(OthersNum) $ "\n" $ CalcPercent(OthersNum, TotalNum));
+
+	Analysis.Types.AddItem("Cyst" $ "\n" $ string(Count[0]) $ "\n" $ CalcPercent(Count[0], TotalNum));
+	Analysis.Types.AddItem("AlphaClot" $ "\n" $ string(Count[1]) $ "\n" $ CalcPercent(Count[1], TotalNum));
+	Analysis.Types.AddItem("Slasher" $ "\n" $ string(Count[2]) $ "\n" $ CalcPercent(Count[2], TotalNum));
+	Analysis.Types.AddItem("Rioter" $ "\n" $ string(Count[3]) $ "\n" $ CalcPercent(Count[3], TotalNum));
+	Analysis.Types.AddItem("Gorefast" $ "\n" $ string(Count[4]) $ "\n" $ CalcPercent(Count[4], TotalNum));
+	Analysis.Types.AddItem("Gorefiend" $ "\n" $ string(Count[5]) $ "\n" $ CalcPercent(Count[5], TotalNum));
+	Analysis.Types.AddItem("Crawler" $ "\n" $ string(Count[6]) $ "\n" $ CalcPercent(Count[6], TotalNum));
+	Analysis.Types.AddItem("EliteCrawler" $ "\n" $ string(Count[7]) $ "\n" $ CalcPercent(Count[7], TotalNum));
+	Analysis.Types.AddItem("Stalker" $ "\n" $ string(Count[8]) $ "\n" $ CalcPercent(Count[8], TotalNum));
+	Analysis.Types.AddItem("Bloat" $ "\n" $ string(Count[9]) $ "\n" $ CalcPercent(Count[9], TotalNum));
+	Analysis.Types.AddItem("Siren" $ "\n" $ string(Count[10]) $ "\n" $ CalcPercent(Count[10], TotalNum));
+	Analysis.Types.AddItem("Husk" $ "\n" $ string(Count[11]) $ "\n" $ CalcPercent(Count[11], TotalNum));
+	if (Count[12] > 0)
+	{
+		Analysis.Types.AddItem("EDARTrapper" $ "\n" $ string(Count[12]) $ "\n" $ CalcPercent(Count[12], TotalNum));
+	}
+	if (Count[13] > 0)
+	{
+		Analysis.Types.AddItem("EDARBlaster" $ "\n" $ string(Count[13]) $ "\n" $ CalcPercent(Count[13], TotalNum));
+	}
+	if (Count[14] > 0)
+	{
+		Analysis.Types.AddItem("EDARBomber" $ "\n" $ string(Count[14]) $ "\n" $ CalcPercent(Count[14], TotalNum));
+	}
+	if (RandomEDARNum > 0)
+	{
+		Analysis.Types.AddItem("EDARRandom" $ "\n" $ string(RandomEDARNum) $ "\n" $ CalcPercent(RandomEDARNum, TotalNum));
+	}
+	Analysis.Types.AddItem("Scrake" $ "\n" $ string(Count[17]) $ "\n" $ CalcPercent(Count[17], TotalNum));
+	Analysis.Types.AddItem("Quarterpound" $ "\n" $ string(QPNum) $ "\n" $ CalcPercent(QPNum, TotalNum));
+	Analysis.Types.AddItem("Fleshpound" $ "\n" $ string(FPNum) $ "\n" $ CalcPercent(FPNum, TotalNum));
+	if (BossesNum > 0)
+	{
+		Analysis.Types.AddItem("AbominationSpawn" $ "\n" $ string(Count[22]) $ "\n" $ CalcPercent(Count[22], TotalNum));
+		Analysis.Types.AddItem("Dr.HansVolter" $ "\n" $ string(Count[23]) $ "\n" $ CalcPercent(Count[23], TotalNum));
+		Analysis.Types.AddItem("Patriarch" $ "\n" $ string(Count[24]) $ "\n" $ CalcPercent(Count[24], TotalNum));
+		Analysis.Types.AddItem("KingFleshpound" $ "\n" $ string(Count[25]) $ "\n" $ CalcPercent(Count[25], TotalNum));
+		Analysis.Types.AddItem("Abomination" $ "\n" $ string(Count[26]) $ "\n" $ CalcPercent(Count[26], TotalNum));
+		Analysis.Types.AddItem("Matriarch" $ "\n" $ string(Count[27]) $ "\n" $ CalcPercent(Count[27], TotalNum));
+		Analysis.Types.AddItem("BossesTotal" $ "\n" $ string(BossesNum) $ "\n" $ CalcPercent(BossesNum, TotalNum));
+	}
+	Analysis.Types.AddItem("Total" $ "\n" $ string(TotalNum) $ "\n" $ "100%");
+
+	return Analysis;
+}
+
+private function string CalcPercent(int TargetCount, int Total)
+{
+	local float Percent, FixedPercent;
+
+	Percent = (float(TargetCount) / float(Total)) * 100.f;
+	FixedPercent = Round(Percent * 100.f) / 100.f;
+	return string(FixedPercent) $ "%";
+}
+
+/**
+ * Analyzes a spawn cycle definition and stores the counts in the global count array.
+ * @param Def The spawn cycle definition string. e.g. "2SC_1CY,3SC_2CY,1SC_3CY"
+ * @param WaveSize The total amount of zeds in a wave to analyze.
+ */
+protected function AnalyzeDef(string Def, int WaveSize)
 {
 	local int i, j, k, ElemCount, TotalCount;
 	local array<string> SquadDefs, Group;
@@ -166,7 +294,7 @@ function AnalyzeDef(string Def, int WaveSize)
 			ParseStringIntoArray(SquadDefs[i], Group, "_", true);
 			for(j=0; j<Group.length; j++)
 			{
-				//	Amout of zeds in this group
+				//	Amount of zeds in this group
 				ElemCount = GetNumber(Group[j], ZedName);
 
 				//	Check if zeds count is fewer than wave size
@@ -174,7 +302,7 @@ function AnalyzeDef(string Def, int WaveSize)
 					ElemCount = WaveSize - TotalCount;
 				TotalCount += ElemCount;
 
-				//	Handle speciality
+				//	Handle specialty
 				bSpecial = HandleZedMod(ZedName, "*");
 				bRage = (!bSpecial && HandleZedMod(ZedName, "!"));
 				
@@ -193,12 +321,13 @@ function AnalyzeDef(string Def, int WaveSize)
 	}until(TotalCount >= WaveSize);
 }
 
-function CycleAnalyzePerWave(CD_SpawnCycle_Preset SCP, int WaveIdx, int PlayerCount)
+protected function SpawnCycleAnalysis AnalyzeWave(CD_SpawnCycle_Preset SCP, int WaveIdx, int PlayerCount, int GameLength, int GameDifficulty)
 {
+	local SpawnCycleAnalysis Analysis;
 	local int WaveSize;
 	local array<string> CycleDefs;
 
-	WaveSize = GetWaveSize(WaveIdx, PlayerCount);
+	WaveSize = GetWaveSize(WaveIdx, PlayerCount, GameLength, GameDifficulty);
 
 	switch( GameLength )
 	{
@@ -209,14 +338,18 @@ function CycleAnalyzePerWave(CD_SpawnCycle_Preset SCP, int WaveIdx, int PlayerCo
 
 	if ( 0 == CycleDefs.length )
 	{
-		BroadcastLocalizedEcho("<local>CD_SpawnCycleAnalyzer.LengthMissMatchMsg</local>");
-		return;
+		Analysis.ErrorMessage = "<local>CD_SpawnCycleAnalyzer.LengthMissMatchMsg</local>";
+		Analysis.bFailed = true;
+		return Analysis;
 	}
 
 	AnalyzeDef(CycleDefs[WaveIdx], WaveSize);
+
+	Analysis.bFailed = false;
+	return Analysis;
 }
 
-function VanillaAnalyze(int WaveIdx, int PlayerCount, optional int TryNum=1)
+public function SpawnCycleAnalysis VanillaAnalyze(int WaveIdx, int PlayerCount, int GameLength, int GameDifficulty, optional int TryNum=1)
 {
 	local int i, j;
 	local float TimeSeconds;
@@ -225,39 +358,39 @@ function VanillaAnalyze(int WaveIdx, int PlayerCount, optional int TryNum=1)
 
 	Count.length=0;
 	Count.length=default.CDZedClass.Length;
-	TimeSeconds = WorldInfo.TimeSeconds;
+	TimeSeconds = Outer.WorldInfo.TimeSeconds;
 
 	for(i=0; i<TryNum; i++)
 	{
 		if(WaveIdx > 0)
 		{
-			VanillaAnalyzePerWave(WaveIdx-1, PlayerCount);
+			VanillaAnalyzePerWave(WaveIdx-1, PlayerCount, GameLength, GameDifficulty);
 		}
 		else if(WaveIdx == 0)
 		{
 			for(j=0; j<((GameLength*3)+4); j++)
 			{
-				VanillaAnalyzePerWave(j, PlayerCount);
+				VanillaAnalyzePerWave(j, PlayerCount, GameLength, GameDifficulty);
 			}
 		}
 		`cdlog("Analyzing..." @ string(100*(float(i)/float(TryNum))) $ "%");
 	}
-	TimeSeconds = WorldInfo.TimeSeconds - TimeSeconds;
+	TimeSeconds = Outer.WorldInfo.TimeSeconds - TimeSeconds;
 	`cdlog("Analysis took" @ string(TimeSeconds) $ "s.");
 
-	PrintAnalisis("vanilla (" $ string(TryNum) $ ")", WaveIdx, PlayerCount, false);
+	return GenerateAnalysis("vanilla (" $ string(TryNum) $ ")", WaveIdx, PlayerCount, false);
 }
 
-function VanillaAnalyzePerWave(int WaveIdx, int PlayerCount)
+function VanillaAnalyzePerWave(int WaveIdx, int PlayerCount, int GameLength, int GameDifficulty)
 {
 	local int WaveSize;
 	local string VanillaCycle;
 
-	VanillaCycle = GetVanillaCycle(WaveIdx, PlayerCount, WaveSize);
+	VanillaCycle = GetVanillaCycle(WaveIdx, PlayerCount, GameLength, GameDifficulty, WaveSize);
 	AnalyzeDef(VanillaCycle, WaveSize);
 }
 
-function string GetVanillaCycle(int WaveIdx, int PlayerCount, out int WaveSize)
+function string GetVanillaCycle(int WaveIdx, int PlayerCount, int GameLength, int GameDifficulty, out int WaveSize)
 {
 	local int LeftSize, NumCycles, NumSpecialRecycles, TotalCount, TotalZedsInSquads;
 	local int i, j, RandNum;
@@ -269,7 +402,7 @@ function string GetVanillaCycle(int WaveIdx, int PlayerCount, out int WaveSize)
 	local string Cycle;
 
 	// Setup Wave Info
-	WaveSize = GetWaveSize(WaveIdx, PlayerCount);
+	WaveSize = GetWaveSize(WaveIdx, PlayerCount, GameLength, GameDifficulty);
 	TotalCount = 0;
 	NumCycles = 0;
 	WaveInfo = class'KFGameInfo_Survival'.default.SpawnManagerClasses[GameLength].default.DifficultyWaveSettings[GameDifficulty].Waves[WaveIdx-1];
@@ -330,7 +463,7 @@ function string GetVanillaCycle(int WaveIdx, int PlayerCount, out int WaveSize)
 			NewSquad.length = LeftSize;
 		}
 
-		Squads.AddItem(GetSquadDefFromPawn(NewSquad));
+		Squads.AddItem(GetSquadDefFromPawn(NewSquad, GameDifficulty));
 		TotalCount += NewSquad.length;
 	}until(TotalCount >= WaveSize);
 
@@ -358,7 +491,7 @@ function GetListFromSquad(byte SquadIdx, out array<KFAISpawnSquad> SquadsList, o
 			}
 			else
 			{
-				TempList.AddItem(GetAISpawnType(Squad.MonsterList[i].Type));
+				TempList.AddItem(SpawnCycleCatalog.GetAIClassList()[Squad.MonsterList[i].Type]);
 			}
 		}
 	}
@@ -372,7 +505,7 @@ function GetListFromSquad(byte SquadIdx, out array<KFAISpawnSquad> SquadsList, o
 	}
 }
 
-function string GetSquadDefFromPawn(out array< class<KFPawn_Monster> > Squad)
+function string GetSquadDefFromPawn(out array< class<KFPawn_Monster> > Squad, int GameDifficulty)
 {
 	local int i, RandNum, GroupSize;
 	local string ZedCode, Def;
@@ -443,7 +576,7 @@ function string GetCycleDef(array<KFAISpawnSquad> SpawnSquads)
 		for(j=0; j<SpawnSquads[i].MonsterList.length; j++)
 		{
 			Elem = SpawnSquads[i].MonsterList[j];
-			ZedClass = Elem.CustomClass == none ? GetAISpawnType(Elem.Type) : Elem.CustomClass;
+			ZedClass = (Elem.CustomClass == None) ? SpawnCycleCatalog.GetAIClassList()[Elem.Type] : Elem.CustomClass;
 			Elems.AddItem(string(Elem.Num) $ "-" $ class'CD_ZedNameUtils'.static.GetCycleNameFromOGClass(ZedClass));
 		}
 		JoinArray(Elems, TempString, "_");
@@ -453,7 +586,7 @@ function string GetCycleDef(array<KFAISpawnSquad> SpawnSquads)
 	return TempString;
 }
 
-function string SpawnOrderOverview(string CycleName)
+function string SpawnOrderOverview(string CycleName, int GameLength, int GameDifficulty)
 {
 	local CD_SpawnCycle_Preset SCP;
 	local array<string> CycleDefs, SquadDefs, Group;
@@ -469,7 +602,7 @@ function string SpawnOrderOverview(string CycleName)
 	SCP.GetLongSpawnCycleDefs( CycleDefs );
 	FinalDef = CycleDefs[9];
 	ParseStringIntoArray(FinalDef, SquadDefs, ",", true);
-	WaveSize = GetWaveSize(9, 12);
+	WaveSize = GetWaveSize(9, 12, GameLength, GameDifficulty);
 	Result = "\n";
 	TotalCount = 0;
 
@@ -546,15 +679,16 @@ function bool HandleZedMod(out string ZedName, string Key)
 	return false;
 }
 
-function int GetWaveSize(int WaveIdx, int PlayerCount)
+static function int GetWaveSize(int WaveIdx, int PlayerCount, int GameLength, int GameDifficulty)
 {
 	local float WaveSizeMulti, BaseZedNum, DifficultyMod;
 
-	if(PlayerCount <= 6) WaveSizeMulti = WSMulti[PlayerCount-1];
-	else WaveSizeMulti = WSMulti[5] + (float(PlayerCount - 6)*0.211718f);
+	WaveSizeMulti = (PlayerCount <= 6)
+		? default.WSMulti[PlayerCount-1]
+		: default.WSMulti[5] + (float(PlayerCount - 6)*0.211718f);
 
-	BaseZedNum = BZNumArray[GameLength].Num[WaveIdx];
-	DifficultyMod = DMod[GameDifficulty];
+	BaseZedNum = default.BZNumArray[GameLength].Num[WaveIdx];
+	DifficultyMod = default.DMod[GameDifficulty];
 
 	return Round(BaseZedNum * DifficultyMod * WaveSizeMulti);
 }
@@ -570,15 +704,6 @@ function int GetNumber(string s, out string ZedName)
 	}
 	ZedName = Mid(s,i);
 	return (i == 0) ? 0 : int(Mid(s, 0, i));
-}
-
-function SyncResults(CD_PlayerController CDPC)
-{
-	local int i;
-	for(i=0; i<Count.length; i++)
-	{
-		CDPC.SyncAnalysis(i, Count[i]);
-	}
 }
 
 defaultproperties
