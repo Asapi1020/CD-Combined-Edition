@@ -114,8 +114,6 @@ function OutputText(coerce string Text)
 function bool InputKey(int ControllerId, name Key, EInputEvent Event, optional float AmountDepressed, optional bool bGamepad)
 {
     local PlayerController PC;
-//	local int i, j;
-//	local bool TempB;
 
     AmountDepressed = 1.0;
     bGamepad = false;
@@ -269,32 +267,11 @@ function bool InputKey(int ControllerId, name Key, EInputEvent Event, optional f
             return true;
         }
     }
-    /*
-    for(i=0; i<Controller.ActiveMenus.length; i++)
+
+    if ( Controller.ReceivedInputKey(ControllerId, Key, Event, AmountDepressed, bGamepad) )
     {
-    	if (xUI_ConsoleMenu(Controller.ActiveMenus[i]) != none)
-    	{
-    		continue;
-    	}
-
-    	for(j=0; j<Controller.ActiveMenus[i].Components.length; j++)
-    	{
-    		if(Controller.ActiveMenus[i].Components[j].NotifyInputKey(ControllerId, Key, Event, AmountDepressed, bGamepad))
-    			return true;
-    	}
-
-    	TempB = Controller.ActiveMenus[i].bForceInput;
-    	Controller.ActiveMenus[i].bForceInput=true;
-
-    	if (Controller.ActiveMenus[i].NotifyInputKey(ControllerId, Key, Event, AmountDepressed, bGamepad))
-    	{
-    		Controller.ActiveMenus[i].bForceInput=TempB;
-    		return true;
-    	}
-
-    	Controller.ActiveMenus[i].bForceInput=TempB;
+        return true;
     }
-    */
 
     return false;  
 }
@@ -314,14 +291,20 @@ function bool InputChar(int ControllerId, string Unicode)
         {
             return true;
         }
+
+        return false;
     }
+
+    if (!Controller.bForceConsoleInput && Controller.ReceivedInputChar(ControllerId, Unicode))
+    {
+        return true;
+    }
+
     return false;   
 }
 
 function bool InputAxis(int ControllerId, name Key, float Delta, float DeltaTime, optional bool bGamepad)
 {
-//	local int i;
-
     if(bCaptureKeyInput)
     {
         if(ConsoleMenu.NotifyInputAxis(ControllerId, Key, Delta, DeltaTime, bGamepad))
@@ -329,20 +312,6 @@ function bool InputAxis(int ControllerId, name Key, float Delta, float DeltaTime
             return true;
         }
     }
-	/*
-    for(i=0; i<Controller.ActiveMenus.length; i++)
-    {
-    	if (xUI_ConsoleMenu(Controller.ActiveMenus[i]) != none)
-    	{
-    		continue;
-    	}
-
-    	if (Controller.ActiveMenus[i].NotifyInputAxis(ControllerId, Key, Delta, DeltaTime, bGamepad))
-    	{
-    		return true;
-    	}
-    }
-    */
 
     return false; 
 }

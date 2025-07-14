@@ -1,22 +1,9 @@
-class CD_DroppedPickupTracker extends Info;
+class CD_DroppedPickupTracker extends Info
+	DependsOn(CD_Domain);
 
-/** Weapon pickup registry entry */
-struct WeaponPickupRegInfo
-{
-	/** PRI of weapon's original owner */
-	var PlayerReplicationInfo OrigOwnerPRI;
-	/** Current carrier of weapon */
-	var PlayerController CurrCarrier;
-	/** Dropped pickup instance */
-	var CD_DroppedPickup KFDP;
-	/** Weapon class */
-	var class<KFWeapon> KFWClass;
-	/** Is allowed others to pick up **/
-	var bool bLocked;
-};
+`include(CD_Log.uci)
 
-/** Weapon pickup registry */
-var array<WeaponPickupRegInfo> WeaponPickupRegistry;
+var array<WeaponPickupRegistryInfo> WeaponPickupRegistry;
 
 function PostBeginPlay()
 {
@@ -58,6 +45,9 @@ function PlayerReplicationInfo RegisterDroppedPickup(CD_DroppedPickup KFDP, Play
 	WeaponPickupRegistry[i].KFDP = KFDP;
 	WeaponPickupRegistry[i].KFWClass = KFWC;
 	WeaponPickupRegistry[i].bLocked = GetLockInfo(WeaponPickupRegistry[i].OrigOwnerPRI);
+
+	CD_PlayerController(DroppedBy).ReceivePickup(KFDP, true);
+
 	return DroppedBy.PlayerReplicationInfo;
 }
 
@@ -73,7 +63,7 @@ function bool GetLockInfo(PlayerReplicationInfo PRI)
 /** When weapon pickup is destroyed, check if this is the original owner */
 function OnDroppedPickupDestroyed(CD_DroppedPickup KFDP, optional PlayerController PickedUpBy)
 {
-	local int Index;
+	local int Index, PickupIndex;
 	local string s;
 
 	Index = WeaponPickupRegistry.Find('KFDP', KFDP);
@@ -81,6 +71,9 @@ function OnDroppedPickupDestroyed(CD_DroppedPickup KFDP, optional PlayerControll
 	// Shouldn't happen, but exit if so
 	if (Index == INDEX_NONE)
 		return;
+	
+	PickupIndex = class'CD_ClassNameUtils'.static.ExtractIndexFromInstance(KFDP, "CD_DroppedPickup");
+	CD_PlayerController(WeaponPickupRegistry[Index].OrigOwnerPRI.Owner).RemoveSparePickup(PickupIndex);
 		
 	// None means that this pickup faded out
 	if (PickedUpBy == None || PickedUpBy.PlayerReplicationInfo == WeaponPickupRegistry[Index].OrigOwnerPRI)
@@ -92,6 +85,25 @@ function OnDroppedPickupDestroyed(CD_DroppedPickup KFDP, optional PlayerControll
 		s = "["$PickedUpBy.PlayerReplicationInfo.PlayerName$"]" @ WeaponPickupRegistry[Index].OrigOwnerPRI.PlayerName$"'s" @ WeaponPickupRegistry[Index].KFWClass.default.ItemName;
 		CD_Survival(Owner).BroadcastSystem(s);
 	}
+}
+
+function OnUpdatePickup(CD_DroppedPickup Pickup)
+{
+	local int RegistryIndex, PickupID;
+	local CD_PlayerController CDPC;
+
+	RegistryIndex = WeaponPickupRegistry.Find('KFDP', Pickup);
+
+	if (RegistryIndex == INDEX_NONE)
+	{
+		`cdlog("CD_DroppedPickupTracker.OnUpdatePickup: Pickup not found in registry");
+		return;
+	}
+
+	CDPC = CD_PlayerController(WeaponPickupRegistry[RegistryIndex].OrigOwnerPRI.Owner);
+	PickupID = class'CD_ClassNameUtils'.static.ExtractIndexFromInstance(Pickup, "CD_DroppedPickup");
+	CDPC.RemoveSparePickup(PickupID);
+	CDPC.ReceivePickup(Pickup, true);
 }
 
 /** Purges entries that are no longer relevant */

@@ -1,4 +1,5 @@
 class CD_PlayerController extends KFPlayerController
+	DependsOn(CD_Domain)
 	config( CombinedCD_LocalData );
 
 `include(CD_Log.uci)
@@ -35,6 +36,10 @@ var config bool LargeKillSound;
 var config bool DisableMeowSound;
 var config bool LargeKillTicker;
 
+var config float PlayerDeathSoundVolumeMultiplier;
+var config float LargeKillSoundVolumeMultiplier;
+var config float MeowSoundVolumeMultiplier;
+
 var config bool HideDualPistol;
 var config bool DropItem;
 
@@ -59,6 +64,17 @@ var string MapVoteMessageColor;
 var CD_ConsolePrinter Client_CDCP;
 var CD_WeaponSkinList Client_CDWSL;
 var CD_SpawnCycleCatalog SpawnCycleCatalog;
+var private CD_RPCHandler RPCHandler;
+
+var class<xUI_MenuBase>
+	CycleMenuClass,
+	AdminMenuClass,
+	ClientMenuClass,
+	PlayersMenuClass,
+	AutoTraderMenuClass,
+	MapVoteMenuClass,
+	ConsoleMenuClass;
+
 var WeaponUIState WeapUIInfo;
 var bool AlphaGlitterBool;
 var bool bDisableDual;
@@ -104,6 +120,12 @@ var localized string BePlayerString;
 var localized string AdminMenuAccessErrorString;
 var localized string SwitchSkillString;
 
+replication
+{
+    if ( bNetOwner && Role == ROLE_Authority )
+        RPCHandler;
+}
+
 /* ==============================================================================================================================
  *	Main functions
  * ============================================================================================================================== */
@@ -116,6 +138,38 @@ function CD_PlayerReplicationInfo GetCDPRI()
 function CD_GameReplicationInfo GetCDGRI()
 {
 	return CD_GameReplicationInfo(WorldInfo.GRI);
+}
+
+function CD_Pawn_Human GetCDPawn()
+{
+	return CD_Pawn_Human(Pawn);
+}
+
+public function CD_RPCHandler GetRPCHandler()
+{
+	if (RPCHandler == None && Role < ROLE_Authority)
+    {
+        foreach DynamicActors(class'CD_RPCHandler', RPCHandler)
+        {
+            if (RPCHandler.Owner == self)
+			{
+				`cdlog("CD_RPCHandler.GetRPCHandler: Found existing RPCHandler for " $ self.name);
+                break;
+			}
+        }
+    }
+
+	return RPCHandler;
+}
+
+public function KF2GUIController GetGUIController()
+{
+	return class'KF2GUIController'.static.GetGUIController(self);
+}
+
+public function bool hasAdminLevel()
+{
+	return WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel >= class'CD_AuthorityHandler'.const.ADMIN_LEVEL;
 }
 
 simulated event PostBeginPlay()
@@ -155,6 +209,11 @@ simulated event PostBeginPlay()
 	{
 		SetTimer(0.5f, false, 'SetupConfig');
 		SetTimer(1.0f, false, 'SendPickupInfo');
+	}
+
+	if (ROLE == ROLE_AUTHORITY)
+	{
+		RPCHandler = Spawn(class'CD_RPCHandler', self);
 	}
 }
 
@@ -219,7 +278,7 @@ reliable server function ServerSynchServerIP(string ServerIP){
 reliable client function SetupCycleList()
 {
 	SpawnCycleCatalog = new class'CD_SpawnCycleCatalog';
-	SpawnCycleCatalog.ClientSetup(self);
+	SpawnCycleCatalog.ClientSetup();
 }
 
 reliable client function ShowHelpHint()
@@ -475,7 +534,7 @@ function JudgePlayers()
 {
 	local Weapon CurWeapon;
 
-	if( PlayerReplicationinfo != none &&
+	if( PlayerReplicationInfo != none &&
 		(!PlayerReplicationInfo.bWaitingPlayer || PlayerReplicationInfo.bReadyToPlay) )
 		RestrictPlayer();
 
@@ -695,6 +754,11 @@ function RestrictWeapon(Weapon Weap)
 	if( bWeapRest )
 	{
 		KFAPH = GetPurchaseHelper();
+
+		if (KFAPH.OwnedItemList.length == 0)
+		{
+			KFAPH.InitializeOwnedItemList();
+		}
 
 		for(i=0; i<KFAPH.OwnedItemList.length; ++i)
 		{
@@ -972,9 +1036,64 @@ function AddHeadHit( int AddedHits )
  *	Server functions
  * ============================================================================================================================== */
 
+reliable server simulated function CheckPlayerStartForCurMap()
+{
+	GetRPCHandler().CheckPlayerStartForCurMap();
+}
+
+reliable server simulated function GotoPathNode(int NodeIndex)
+{
+	GetRPCHandler().GotoPathNode(NodeIndex);
+}
+
+reliable server simulated function RequestEveryoneGotoPathNode(int NodeIndex)
+{
+	GetRPCHandler().RequestEveryoneGotoPathNode(NodeIndex);
+}
+
+reliable server simulated function GetDisableCustomStarts()
+{
+	GetRPCHandler().GetDisableCustomStarts();
+}
+
+reliable server simulated function SetDisableCustomStarts(bool bDisable)
+{
+	GetRPCHandler().SetDisableCustomStarts(bDisable);
+}
+
 reliable server function OpenMapVote()
 {
 	CD_Survival(WorldInfo.Game).xMut.ShowMapVote('MapVote', Self);
+}
+
+reliable server simulated function RequestPickupInfo()
+{
+	GetRPCHandler().RequestPickupInfo();
+}
+
+reliable server function ReceivePickup(CD_DroppedPickup Pickup, optional bool bFinishDownload = false)
+{
+	GetRPCHandler().ReceiveInfoFromPickup(Pickup, bFinishDownload);
+}
+
+reliable server simulated function SellSpareWeapon(int PickupIndex)
+{
+	GetRPCHandler().RequestSellSpareWeapon(PickupIndex);
+}
+
+reliable server simulated function SellAllSpareWeapons(string WeaponName)
+{
+	GetRPCHandler().RequestSellAllSpareWeapons(WeaponName);
+}
+
+reliable server simulated function RequestTeleportSpareWeapon(int PickupIndex)
+{
+	GetRPCHandler().RequestTeleportSpareWeapon(PickupIndex);
+}
+
+reliable server simulated function RequestTeleportAllSpareWeapons(string WeaponName)
+{
+	GetRPCHandler().RequestTeleportAllSpareWeapons(WeaponName);
 }
 
 unreliable server simulated function AssignAdmin()
@@ -985,11 +1104,6 @@ unreliable server simulated function AssignAdmin()
 reliable server simulated function ServerSendPickupInfo(bool bDisableOthers, bool bDropLocked, bool bDisableLow, bool bAOC)
 {
 	CD_Survival(WorldInfo.Game).ReceivePickupInfo(self, bDisableOthers, bDropLocked, bDisableLow, bAOC);
-}
-
-reliable server simulated function PrepareOpenMenu()
-{
-	CD_Survival(WorldInfo.Game).ServerPrepareOpenMenu(self);
 }
 
 reliable server function SetSpawnCycle(string Cycle)
@@ -1117,40 +1231,48 @@ reliable server function CheckPlayerStart()
 	CD.xMut.CheckPlayerStart(self);
 }
 
+reliable server simulated function GetDisableCDRecordOnline()
+{
+	GetRPCHandler().GetDisableCDRecordOnline();
+}
+
+reliable server simulated function SetDisableCDRecordOnline(bool bDisable)
+{
+	GetRPCHandler().SetDisableCDRecordOnline(bDisable);
+}
+
+reliable server simulated function GetDisableCustomPostGameMenu()
+{
+	GetRPCHandler().GetDisableCustomPostGameMenu();
+}
+
+reliable server simulated function SetDisableCustomPostGameMenu(bool bDisable)
+{
+	GetRPCHandler().SetDisableCustomPostGameMenu(bDisable);
+}
+
 /* ==============================================================================================================================
  *	Client functions
  * ============================================================================================================================== */
 
 unreliable client final simulated function ClientOpenURL(string URL){ OnlineSub.OpenURL(URL); }
 
-reliable client simulated function OpenClientMenu()
+reliable client simulated function OpenCustomMenu(class<KFGUI_Page> MenuClass)
 {
-	PrepareOpenMenu();
-//	CancelEating();
-	SetTimer(0.25f, false, 'DelayedOpenClientMenu');
+	local KF2GUIController GUIController;
+
+	GUIController = GetGUIController();
+	GUIController.OpenMenu(MenuClass);
+
+	if ( MenuClass == ConsoleMenuClass &&  GUIController.FindActiveMenu(ConsoleMenuClass.default.ID) != none)
+	{
+		GUIController.CloseMenu(ConsoleMenuClass);
+	}
 }
 
-function CancelEating()
+reliable client function RemoveSparePickup(int index)
 {
-	KFGFxHudWrapper(myHUD).HudMovie.EatMyInput(false);
-}
-
-reliable client simulated function OpenCycleMenu()
-{
-	PrepareOpenMenu();
-	SetTimer(0.25f, false, 'DelayedOpenCycleMenu');
-}
-
-reliable client simulated function OpenAdminMenu()
-{
-	PrepareOpenMenu();
-	SetTimer(0.25f, false, 'DelayedOpenAdminMenu');
-}
-
-reliable client simulated function OpenPlayersMenu()
-{
-	PrepareOpenMenu();
-	SetTimer(0.25f, false, 'DelayedOpenPlayersMenu');
+	GetRPCHandler().RemoveSparePickup(index);
 }
 
 reliable client simulated function ShowReadyButton()
@@ -1166,19 +1288,35 @@ reliable client simulated function PrintConsole(string Msg)
 unreliable client simulated function PlayLargeKillSound()
 {
 	if(LargeKillSound)
-		ClientPlaySound(SoundCue'CombinedSound.LargeKillSoundCue');
+		DynamicClientPlaySound( "CombinedSound.LargeKillSoundCue", LargeKillSoundVolumeMultiplier );
 }
 
 unreliable client simulated function PlayPlayerDeathSound()
 {
 	if(PlayerDeathSound)
-		ClientPlaySound(SoundCue'CombinedSound.DeathSound');
+		DynamicClientPlaySound( "CombinedSound.DeathSound", PlayerDeathSoundVolumeMultiplier );
 }
 
 unreliable client simulated function PlayMeowSound()
 {
 	if(!DisableMeowSound)
-		ClientPlaySound( SoundCue'CombinedSound.MeowSound' );
+		DynamicClientPlaySound( "CombinedSound.MeowSound", MeowSoundVolumeMultiplier );
+}
+
+public unreliable client simulated function DynamicClientPlaySound(string SoundCuePath, optional float VolumeMultiplier)
+{
+	local SoundCue PlaySound;
+
+	PlaySound = SoundCue( class'CD_Object'.static.SafeLoadObject(SoundCuePath, class'SoundCue') );
+	
+	if (PlaySound == none)
+	{
+		`cdlog("CD_PlayerController.DynamicClientPlaySound: Failed to load sound " $ SoundCuePath);
+		return;
+	}
+
+	PlaySound.VolumeMultiplier = VolumeMultiplier > 0.f ? VolumeMultiplier : class'SoundCue'.default.VolumeMultiplier;
+	ClientPlaySound(PlaySound);
 }
 
 unreliable client simulated function ReceiveLargeKillTicker(PlayerReplicationinfo Killer, KFPawn_Monster KFPM)
@@ -1442,26 +1580,6 @@ reliable client function ShowLocalizedPopup(string title, string Msg, optional E
 	ShowConnectionProgressPopup(ProgressType, LocalizeSentence(title), LocalizeSentence(Msg));
 }
 
-simulated function DelayedOpenClientMenu()
-{
-	Class'KF2GUIController'.Static.GetGUIController(self).OpenMenu(class'xUI_ClientMenu');
-}
-
-simulated function DelayedOpenCycleMenu()
-{
-	Class'KF2GUIController'.Static.GetGUIController(self).OpenMenu(class'xUI_CycleMenu');
-}
-
-simulated function DelayedOpenAdminMenu()
-{
-	Class'KF2GUIController'.Static.GetGUIController(self).OpenMenu(class'xUI_AdminMenu');
-}
-
-simulated function DelayedOpenPlayersMenu()
-{
-	Class'KF2GUIController'.Static.GetGUIController(self).OpenMenu(class'xUI_PlayersMenu');
-}
-
 function SendPickupInfo()
 {
 	ServerSendPickupInfo(DisablePickUpOthers, DropLocked, DisablePickUpLowAmmo, ClientAntiOvercap);
@@ -1500,15 +1618,41 @@ reliable server private function RecordEnableCheats(){
 	CD_Survival(WorldInfo.Game).RecordEnableCheats();
 }
 
-exec function ClientOption(){ OpenClientMenu(); }
+exec function ClientOption()
+{
+	SetTimer(0.25f, false, 'DelayedOpenClientMenu');
+}
 
-exec function CycleOption(){ OpenCycleMenu(); }
+private function DelayedOpenClientMenu()
+{
+	OpenCustomMenu(ClientMenuClass);
+}
+
+exec function CycleOption()
+{
+	SetTimer(0.25f, false, 'DelayedOpenCycleMenu');
+}
+
+private function DelayedOpenCycleMenu()
+{
+	OpenCustomMenu(CycleMenuClass);
+}
+
+exec function OpenPlayersMenu()
+{
+	SetTimer(0.25f, false, 'DelayedOpenPlayersMenu');
+}
+
+private function DelayedOpenPlayersMenu()
+{
+	OpenCustomMenu(PlayersMenuClass);
+}
 
 exec function AdminMenu()
 { 
-	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
+	if(hasAdminLevel())
 	{
-		OpenAdminMenu();
+		SetTimer(0.25f, false, 'DelayedOpenAdminMenu');
 	}
 	else
 	{
@@ -1516,17 +1660,22 @@ exec function AdminMenu()
 	}
 }
 
+private function DelayedOpenAdminMenu()
+{
+	OpenCustomMenu(AdminMenuClass);
+}
+
 exec function ImAdmin(){ AssignAdmin(); }
 
 exec function ForceSpawnAI(string ZedName)
 {
-	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
+	if(hasAdminLevel())
 		CD_Survival(WorldInfo.Game).CD_SpawnZed(ZedName, self);
 }
 
 exec function AddAuthorityInfo(string SteamID, int AuthorityLevel, optional string UserName)
 {
-	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
+	if(hasAdminLevel())
 	{
 		ServerAddAuthorityInfo(SteamID, AuthorityLevel, UserName);
 	}
@@ -1534,19 +1683,19 @@ exec function AddAuthorityInfo(string SteamID, int AuthorityLevel, optional stri
 
 exec function AddCustomStart(int index)
 {
-	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
+	if(hasAdminLevel())
 		AddPlayerStart(index);
 }
 
 exec function RemoveCustomStart(int index)
 {
-	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
+	if(hasAdminLevel())
 		RemovePlayerStart(index);
 }
 
 exec function ClearCustomStart()
 {
-	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
+	if(hasAdminLevel())
 		ClearPlayerStart();
 }
 
@@ -1560,7 +1709,7 @@ exec function CheckAuthList()
 	local string s;
 	local int i;
 
-	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
+	if(hasAdminLevel())
 	{
 		s = "\n";
 
@@ -1573,7 +1722,7 @@ exec function CheckAuthList()
 
 exec function ShowPathNodesNum()
 {
-	if(WorldInfo.NetMode == NM_StandAlone || GetCDPRI().AuthorityLevel > 3)
+	if(hasAdminLevel())
 		bShowPathNodes = !bShowPathNodes;
 }
 
@@ -1626,14 +1775,57 @@ exec function testNotify()
 	ShowLevelUpNotify("Title", "Main", "Secondary", "ImagePath", true, 10);
 }
 
-exec function TestID(){
-	PrintConsole(class'OnlineSubsystem'.static.UniqueNetIdToString(PlayerReplicationinfo.UniqueId));
+/**
+ * Debug GUI function to set position and size of a GUI component.
+ * This function is intended for debugging purposes and allows you to modify the position and size of a GUI component
+ * The change does not persist and is only applied during the current session.
+ * @param MenuID The ID of the menu containing the component.
+ * @param ComponentID The ID of the component to modify.
+ */
+exec function DebugGUI(
+	name MenuID,
+	name ComponentID,
+	float XPos,
+	float YPos,
+	float Width,
+	float Height
+){
+	local KF2GUIController GUIController;
+	local KFGUI_Page Page;
+	local KFGUI_Base PageComponent;
+
+	GUIController = class'KF2GUIController'.static.GetGUIController(self);
+	Page = GUIController.FindActiveMenu(MenuID);
+
+	if (Page == none)
+	{
+		`cdlog("DebugGUI: Page not found: " $ string(MenuID));
+		return;
+	}
+
+	PageComponent = Page.FindComponentID(ComponentID);
+
+	if (PageComponent != None)
+	{
+		PageComponent.SetPosition(XPos, YPos, Width, Height);
+		return;
+	}
+
+	`cdlog("DebugGUI: Component not found: " $ string(ComponentID) $ " in " $ string(MenuID));
 }
 
 defaultproperties
 {
 	MatchStatsClass=class'CombinedCD2.CD_EphemeralMatchStats'
 	PurchaseHelperClass=class'CD_AutoPurchaseHelper'
+
+	ConsoleMenuClass=class'xUI_ConsoleMenu'
+	CycleMenuClass=class'xUI_CycleMenu'
+	AdminMenuClass=class'xUI_AdminMenu'
+	ClientMenuClass=class'xUI_ClientMenu'
+	PlayersMenuClass=class'xUI_PlayersMenu'
+	AutoTraderMenuClass=class'xUI_AutoTrader'
+	MapVoteMenuClass=class'xUI_MapVote'
 
 	CDEchoMessageColor="00FF0A"
 	RPWEchoMessageColor="FF20B7"

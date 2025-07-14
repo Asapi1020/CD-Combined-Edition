@@ -239,7 +239,11 @@ function RenderComboList(KFGUI_ComboSelector C)
 	C.CurrentRow = -1;
 
 	Canvas.PushMaskRegion(Canvas.OrgX, Canvas.OrgY, Canvas.ClipX, Canvas.ClipY);
-	for (i=0; i < C.Combo.Values.Length; ++i)
+	for (
+		i = C.ScrollBar.CurrentScroll;
+		i < Min(C.ScrollBar.CurrentScroll + C.PerPage, C.Combo.Values.Length);
+		++i
+	)
 	{
 		if (bCheckMouse && Y >= YP && Y <= (YP+YL))
 		{
@@ -403,7 +407,7 @@ function RenderButton(KFGUI_Button B)
 			ButtonTex = Texture2D(DynamicLoadObject("UI_Controller."$B.GamepadButtonName$"_Asset", class'Texture2D'));
 			if (ButtonTex != None)
 			{
-				B.GetRealtivePos(AX, AY);
+				B.GetRelativePos(AX, AY);
 				while ((Canvas.CurX-(GamepadTexSize*1.25)) < AX)
 				{
 					GamepadTexSize *= 0.95;

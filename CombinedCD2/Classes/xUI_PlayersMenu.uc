@@ -1,6 +1,5 @@
 class xUI_PlayersMenu extends xUI_MenuBase;
 
-var KFGUI_Button CloseB;
 var KFGUI_Button RefreshB;
 var KFGUI_ColumnList PlayersList;
 var KFGUI_ColumnList SpectatorsList;
@@ -28,8 +27,6 @@ function DrawMenu()
 {
 	super.DrawMenu();
 
-	WindowTitle = Title @ "v1.0";
-
 	if(!bListUpdate)
 	{
 		UpdateList();
@@ -37,8 +34,6 @@ function DrawMenu()
 
 	RefreshB = KFGUI_Button(FindComponentID('Refresh'));
 	RefreshB.ButtonText = RefreshButtonText;
-	CloseB = KFGUI_Button(FindComponentID('Close'));
-	CloseB.ButtonText = CloseButtonText;
 }
 
 function InitMenu()
@@ -105,9 +100,6 @@ function ButtonClicked(KFGUI_Button Sender)
 		case 'Refresh':
 			bListUpdate=false;
 			break;
-		case 'Close':
-			DoClose();
-			break;
 	}
 }
 
@@ -145,27 +137,15 @@ function UserClickedRow(int i)
 
 defaultproperties
 {
-	XPosition=0.30
-	YPosition=0.30
-	XSize=0.4
-	YSize=0.4
+	ID="PlayersMenu"
+	Version="1.0.1"
 
 	Begin Object Class=KFGUI_Button Name=Refresh
 		XPosition=0.05
 		YPosition=0.875
 		XSize=0.10
-		YSize=0.1
+		YSize=0.05
 		ID="Refresh"
-		OnClickLeft=ButtonClicked
-		TextColor=(R=255, G=255, B=255, A=255)
-	End Object
-
-	Begin Object Class=KFGUI_Button Name=Close
-		XPosition=0.85
-		YPosition=0.875
-		XSize=0.10
-		YSize=0.1
-		ID="Close"
 		OnClickLeft=ButtonClicked
 		TextColor=(R=255, G=255, B=255, A=255)
 	End Object
@@ -196,7 +176,6 @@ defaultproperties
 	End Object
 
 	Components.Add(Refresh)
-	Components.Add(Close)
 	Components.Add(PlayersList)
 	Components.Add(SpectatorsList)
 	PlayersRightClick=PlayersRClicker

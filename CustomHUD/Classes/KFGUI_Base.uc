@@ -126,7 +126,45 @@ final function ComputeCoords()
 
 function bool CaptureMouse()
 {
+	if(SomeAncestorIsInvisible())
+	{
+		return false;
+	}
+
 	return bVisible && ( Owner.MousePosition.X >= CompPos[0] && Owner.MousePosition.Y >= CompPos[1] && Owner.MousePosition.X <= (CompPos[0]+CompPos[2]) && Owner.MousePosition.Y <= (CompPos[1]+CompPos[3]));
+}
+
+/**
+ * Invisible KFGUI_MultiComponents do not render their components even if their bVisible is true.
+ * Prevent mouse capture if the parent component is not visible
+ */
+protected function bool SomeAncestorIsInvisible()
+{
+	local array<KFGUI_Base> Ancestors;
+	local KFGUI_Base Parent;
+	local int count;
+
+	Parent = ParentComponent;
+
+	while (Parent != None && Parent != Self && Ancestors.Find(Parent) == INDEX_NONE)
+	{
+		if (!Parent.bVisible)
+		{
+			return true;
+		}
+
+		Ancestors.AddItem(Parent);
+		Parent = Parent.ParentComponent;
+
+		count++;
+		if (count > 100)
+		{
+			`warning("KFGUI_Base::SomeAncestorIsInvisible: Too many ancestors, breaking loop.");
+			break;
+		}
+	}
+
+	return false;
 }
 
 final function KFGUI_Base GetMouseFocus()
@@ -274,7 +312,7 @@ final function GetActualPos(out float X, out float Y)
 	X = ((XPosition+X)*InputPos[2]) + InputPos[0];
 	Y = ((YPosition+Y)*InputPos[3]) + InputPos[1];
 }
-final function GetRealtivePos(out float X, out float Y)
+final function GetRelativePos(out float X, out float Y)
 {
 	X = X / CompPos[2];
 	Y = Y / CompPos[2];
@@ -337,6 +375,21 @@ static final function string MakeSortStr(int Value)
 	if (i < 10)
 		return Mid("0000000000", i)$S;
 	return S;
+}
+
+final protected function DrawTexture(Texture2D Tex, float X, float Y, float IconWidth)
+{
+	local float XPos, YPos, ScaledIconWidth, W, H;
+
+	XPos = X * CompPos[2];
+	YPos = Y * CompPos[3];
+	ScaledIconWidth = IconWidth * CompPos[2];
+
+	W = Tex.GetSurfaceWidth();
+	H = Tex.GetSurfaceHeight();
+
+	Canvas.SetPos(XPos, YPos);
+	Canvas.DrawTile(Tex, ScaledIconWidth, ScaledIconWidth * H / W, 0, 0, W, H);
 }
 
 defaultproperties

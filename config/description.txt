@@ -18,8 +18,8 @@ CombinedCD2.int
 [i]Dear mates who joined the Beta:
 Old files possibly cause a bug. Delete the Cache folder "2559459262". Thanks.[/i]
 
-[h1]2024 February Update[/h1]
-[url=https://silly-maple-a31.notion.site/Combined-CD-2024-Feb-Update-b376c58d83af4ece9a6d8a9ba2248c10][img]https://i.imgur.com/oczmH7o.png[/img][/url]
+[h1]2025 Custom Menu Enhancement[/h1]
+[url=https://www.notion.so/2025-Jul-Custom-Menu-Enhancement-23078ed65fc180158cdde4f5e84f3ef4][img]https://i.imgur.com/prxQiKj.png[/img][/url]
 
 [h1]Detail Guide[/h1]
 [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2859078261][img]https://i.imgur.com/m8LYrGU.png[/img][/url]
