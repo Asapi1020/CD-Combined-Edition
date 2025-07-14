@@ -260,7 +260,7 @@ ClearCustomPlayerStartsToolTip="Delete all custom player starts on this map."
 RemovePlayerStartString="Delete"
 GoToPlayerStartString="Teleport to this"
 EveryoneGoToPlayerStartString="Let everyone teleport to this"
-AddCustomStartString="Add custom player start:"
+AddCustomStartString="Add custom player start"
 PlayerStartListTitle="Custom Player Start"
 DisableCustomStartsString="Disable Custom Player Starts"
 
