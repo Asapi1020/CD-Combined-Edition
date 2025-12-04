@@ -39,7 +39,6 @@ struct CustomStart
 };
 
 var config bool DisableCustomStarts;
-var config bool bXmasHat;
 var config array<CustomStart> CustomStarts;
 
 var CD_Survival CD;
@@ -568,16 +567,6 @@ final function ParseCommand(string Cmd, PlayerController PC)
 		CC_ReceiveAmmo(PC, false);
 	else if (Cmd ~= "xnuke")
 		xNukeGrenade(PC);
-	else if (Left(Cmd, 7) ~= "xmashat")
-	{
-		Cmd = Mid(Cmd, 7);
-		if(Cmd != "") 
-		{
-			bXmasHat = bool(Cmd);
-			SaveConfig();
-		}
-		MsgToAll("XmasHat=" $ string(bXmasHat));
-	}
 	else if (Cmd~="Test")
 		Testfuntion(PC);
 	else if (!PC.PlayerReplicationInfo.bAdmin && !PC.IsA('MessagingSpectator'))
@@ -651,22 +640,6 @@ function Testfuntion(PlayerController PC)
 function ShowMapVote(name OpenState, PlayerController PC)
 {
 	local int i;
-	/*
-	local KFPlayerController KFPC;
-	local KFGameInfo_Survival KFGI;
-
-	KFPC = KFPlayerController(PC);
-	KFGI = KFGameInfo_Survival(WorldInfo.Game);
-
-	
-	if(KFPC != None && KFGI != none)
-	{
-		if(KFGI.GetStateName() != 'MatchEnded')
-		{
-			MsgToAll(KFPC.PlayerReplicationInfo.PlayerName $ "<local>xVotingHandler.StartMapVoteString</local>", true);
-		}
-	}
-	*/
 
 	if (bMapvoteHasEnded)
 		return;
@@ -757,23 +730,6 @@ function CC_ReceiveAmmo(PlayerController Sender, bool bAmmo)
 /* ==============================================================================================================================
  *	Overridden functions
  * ============================================================================================================================== */
-
-function ModifyAI( Pawn AIPawn )
-{
-	local KFPawn KFP;
-	local int i;
-
-	super.ModifyAI(AIPawn);
-
-	KFP = KFPawn(AIPawn);
-
-	if( bXmasHat && KFP != none && KFPawn_Monster(KFP) != none && KFPawn_ZedStalker(KFP) == none &&
-		!(KFGameReplicationInfo(KFP.WorldInfo.GRI).bIsWeeklyMode && (class'KFGameEngine'.static.GetWeeklyEventIndexMod() == 12)) )
-	{
-		for (i=0; i<ActiveVoters.Length; i++)
-			ActiveVoters[i].ClientModifyAI(KFP);
-	}
-}
 
 //	Change player starts
 function NavigationPoint FindPlayerStart(Controller Player, optional byte InTeam, optional string incomingName)

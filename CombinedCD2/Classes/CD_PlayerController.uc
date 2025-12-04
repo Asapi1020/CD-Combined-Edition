@@ -54,6 +54,7 @@ var config bool DisplayCDTips;
 var config bool ShowPickupInfo;
 
 var config bool UseVanillaScoreboard;
+var config byte ZedHatType;
 
 var string CDEchoMessageColor;
 var string RPWEchoMessageColor;
@@ -65,6 +66,7 @@ var CD_ConsolePrinter Client_CDCP;
 var CD_WeaponSkinList Client_CDWSL;
 var CD_SpawnCycleCatalog SpawnCycleCatalog;
 var private CD_RPCHandler RPCHandler;
+var protected CD_CosmeticHandler CosmeticHandler;
 
 var class<xUI_MenuBase>
 	CycleMenuClass,
@@ -176,10 +178,12 @@ simulated event PostBeginPlay()
 {
 	SetTimer(JudgeDelay, false, 'StartJudge');
 	SetTimer(JudgeDelay, false, 'StartRegister');
+	SetTimer(2.f, true, 'ModifyAI');
 
 	super.PostBeginPlay();
 
 	OnlineSub = class'GameEngine'.static.GetOnlineSubsystem();
+	CosmeticHandler = new class'CD_CosmeticHandler';
 	Client_CDCP = new class'CD_ConsolePrinter';
 	Client_CDWSL = Spawn(class'CD_WeaponSkinList', self);
 
@@ -1599,6 +1603,30 @@ function SavePerkUseNum(class<KFPerk> Perk)
 	// TODO: HTTP Post
 }
 
+function ModifyAI()
+{
+	local KFPawn_Monster KFPM;
+	local bool bIsStalker, bHasWornHat;
+
+	if(WorldInfo.NetMode != NM_Client || !GetCDGRI().bMatchHasBegun || GetCDGRI().bMatchIsOver || ZedHatType == ZHT_None)
+	{
+		return;
+	}
+
+	foreach WorldInfo.AllActors(class'KFPawn_Monster', KFPM)
+	{
+		bIsStalker = KFPawn_ZedStalker(KFPM) != none;
+		bHasWornHat = KFPM.CharacterMICs.length > 2;
+
+		if(KFPM == none || bIsStalker || !KFPM.IsAliveAndWell() || KFPM.bIsHeadless || bHasWornHat)
+		{
+			continue;
+		}
+
+		CosmeticHandler.AddHatToZed(KFPM, ZedHatType);
+	}
+}
+
 
 /* ==============================================================================================================================
  *	Exec functions
@@ -1773,6 +1801,12 @@ exec function SetExtraCommand(string Key, string Response)
 exec function testNotify()
 {
 	ShowLevelUpNotify("Title", "Main", "Secondary", "ImagePath", true, 10);
+}
+
+exec function setZedHatType(byte HatType)
+{
+	ZedHatType = HatType;
+	SaveConfig();
 }
 
 /**

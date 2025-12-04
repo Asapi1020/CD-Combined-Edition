@@ -39,10 +39,6 @@ var localized string MapVoteHelpString;
 var localized string MapVotePrefix;
 var localized string PleaseWaitMsg;
 
-var string XmasHatPath;
-var transient LinearColor ZC_MonoChromeValue;
-var transient LinearColor ZC_ColorValue;
-
 function PostBeginPlay()
 {
 	PlayerOwner = PlayerController(Owner);
@@ -277,32 +273,6 @@ reliable client simulated function ClientTestFunction()
 		KFPC.MyGFxHUD.HudChatBox.AddChatMessage("[HudChatBox]\n* Test Chat Print *", "00DCCE");
 }
 
-reliable client simulated function ClientModifyAI(KFPawn KFP)
-{
-	local StaticAttachments NewAttachment;
-	local StaticMeshComponent StaticAttachment;
-	local MaterialInstanceConstant NewMIC;
-
-	NewAttachment.StaticAttachment = StaticMesh(DynamicLoadObject(XmasHatPath, class'StaticMesh'));
-	NewAttachment.AttachSocketName = KFPawn_Monster(KFP).ZEDCowboyHatAttachName;
-
-	StaticAttachment = new (KFP) class'StaticMeshComponent';
-	if (StaticAttachment != none)
-	{
-		KFPawn_Monster(KFP).StaticAttachList.AddItem(StaticAttachment);
-		StaticAttachment.SetActorCollision(false, false);
-		StaticAttachment.SetStaticMesh(NewAttachment.StaticAttachment);
-		StaticAttachment.SetShadowParent(KFP.Mesh);
-		StaticAttachment.SetLightingChannels(KFP.PawnLightingChannel);
-		NewMIC = StaticAttachment.CreateAndSetMaterialInstanceConstant(0);
-		NewMIC.SetVectorParameterValue('color_monochrome', ZC_MonoChromeValue);
-		NewMIC.SetVectorParameterValue('Black_White_switcher', ZC_ColorValue);
-		KFP.AttachComponent(StaticAttachment);
-		KFP.Mesh.AttachComponentToSocket(StaticAttachment, NewAttachment.AttachSocketName);
-		KFP.CharacterMICs.AddItem(NewMIC);
-	}
-}
-
 final function LogToConsole()
 {
 
@@ -319,8 +289,4 @@ defaultproperties
 	bOnlyRelevantToOwner=true
 	CurrentVote(0)=-1
 	CurrentVote(1)=-1
-
-	XmasHatPath="CHR_CosmeticSet_XMAS_02_MESH.CHR_Cosmetic_Halloween_Treeyhat"
-	ZC_MonoChromeValue = (R=1.0f,G=0.0f,B=0.0f)
-	ZC_ColorValue = (R=1.0f,G=0.0f,B=0.0f)
 }
