@@ -30,6 +30,7 @@ var KFGUI_EditBox MeowSoundVolumeEditBox;
 var editinline export KFGUI_TextLabel VolumeTextLabel_0, VolumeTextLabel_1, VolumeTextLabel_2;
 
 var KFGUI_ComboBox ScoreboardSortComboBox;
+var KFGUI_ComboBox ZedHatTypeComboBox;
 
 var localized string SamplePlayButtonText;
 var localized string SamplePlayToolTip;
@@ -37,12 +38,18 @@ var localized string VolumeString;
 var localized string VolumeToolTip;
 var localized string ScoreboardSortLabelString;
 var localized string ScoreboardSortToolTip;
+var localized string ZedHatTypeLabelString;
+var localized string ZedHatTypeToolTip;
 
 function InitMenu()
 {
 	ScoreboardSortComboBox = KFGUI_ComboBox(FindComponentID('ScoreboardSort'));
 	ScoreboardSortComboBox.LabelString = ScoreboardSortLabelString;
 	ScoreboardSortComboBox.ToolTip = ScoreboardSortToolTip;
+
+	ZedHatTypeComboBox = KFGUI_ComboBox(FindComponentID('ZedHatType'));
+	ZedHatTypeComboBox.LabelString = ZedHatTypeLabelString;
+	ZedHatTypeComboBox.ToolTip = ZedHatTypeToolTip;
 
 	Super.InitMenu();
 
@@ -66,6 +73,7 @@ function InitMenu()
 	AddComponent(VolumeTextLabel_2);
 
 	InitScoreboardComboBox();
+	InitZedHatTypeComboBox();
 }
 
 protected function InitScoreboardComboBox()
@@ -86,6 +94,18 @@ protected function InitScoreboardComboBox()
 	}
 
 	ScoreboardSortComboBox.SelectedIndex = ScoreboardClass.default.PlayerSortOrder;
+}
+
+protected function InitZedHatTypeComboBox()
+{
+	ZedHatTypeComboBox.Values.length = 0;
+	ZedHatTypeComboBox.Values.AddItem("None");
+	ZedHatTypeComboBox.Values.AddItem("Cowboy");
+	ZedHatTypeComboBox.Values.AddItem("Xmas");
+	ZedHatTypeComboBox.Values.AddItem("Halloween");
+	ZedHatTypeComboBox.Values.AddItem("Random");
+
+	ZedHatTypeComboBox.SelectedIndex = GetCDPC().ZedHatType;
 }
 
 function DrawMenu()
@@ -294,6 +314,10 @@ protected function ComboChanged(KFGUI_ComboBox Sender)
 
 			Scoreboard.PlayerSortOrder = Sender.SelectedIndex;
 			Scoreboard.SaveConfig();
+			break;
+		case'ZedHatType':
+			GetCDPC().ZedHatType = Sender.SelectedIndex;
+			GetCDPC().SaveConfig();
 			break;
 		default:
 			`cdlog("xUI_ClientMenu_Others.ComboChanged: Unknown sender ID: " $ Sender.ID);
@@ -538,4 +562,14 @@ defaultproperties
 		ID="ScoreboardSort"
 	End Object
 	Components.Add(ScoreboardSort)
+
+	Begin Object Class=KFGUI_ComboBox Name=ZedHatType
+		XPosition=0.55
+		YPosition=0.65
+		XSize=0.350
+		YSize=0.073
+		OnComboChanged=ComboChanged
+		ID="ZedHatType"
+	End Object
+	Components.Add(ZedHatType)
 }

@@ -325,6 +325,8 @@ VolumeString="Volume:"
 VolumeToolTip="0 is default. 1 means 100%. Hit enter to apply your volume change"
 ScoreboardSortLabelString="Scoreboard Sort:"
 ScoreboardSortToolTip="Change sort order for CD custom scoreboard"
+ZedHatTypeLabelString="Zed Hat Type:"
+ZedHatTypeToolTip="Let zeds wear a hat."
 
 [xUI_ConsoleMenu]
 Title="Console Menu"

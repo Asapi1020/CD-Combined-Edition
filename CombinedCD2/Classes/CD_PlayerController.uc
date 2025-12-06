@@ -178,7 +178,6 @@ simulated event PostBeginPlay()
 {
 	SetTimer(JudgeDelay, false, 'StartJudge');
 	SetTimer(JudgeDelay, false, 'StartRegister');
-	SetTimer(2.f, true, 'ModifyAI');
 
 	super.PostBeginPlay();
 
@@ -213,6 +212,7 @@ simulated event PostBeginPlay()
 	{
 		SetTimer(0.5f, false, 'SetupConfig');
 		SetTimer(1.0f, false, 'SendPickupInfo');
+		SetTimer(2.f, true, 'ModifyAI');
 	}
 
 	if (ROLE == ROLE_AUTHORITY)
@@ -1606,22 +1606,17 @@ function SavePerkUseNum(class<KFPerk> Perk)
 function ModifyAI()
 {
 	local KFPawn_Monster KFPM;
-	local bool bIsStalker, bHasWornHat;
+	local bool bIsStalker;
 
-	if(WorldInfo.NetMode != NM_Client || !GetCDGRI().bMatchHasBegun || GetCDGRI().bMatchIsOver || ZedHatType == ZHT_None)
-	{
+	if(!GetCDGRI().bMatchHasBegun || GetCDGRI().bMatchIsOver || ZedHatType == ZHT_None)
 		return;
-	}
 
-	foreach WorldInfo.AllActors(class'KFPawn_Monster', KFPM)
+	foreach WorldInfo.AllPawns(class'KFPawn_Monster', KFPM)
 	{
 		bIsStalker = KFPawn_ZedStalker(KFPM) != none;
-		bHasWornHat = KFPM.CharacterMICs.length > 2;
 
-		if(KFPM == none || bIsStalker || !KFPM.IsAliveAndWell() || KFPM.bIsHeadless || bHasWornHat)
-		{
+		if(KFPM == none || bIsStalker || !KFPM.IsAliveAndWell() || KFPM.bIsHeadless)
 			continue;
-		}
 
 		CosmeticHandler.AddHatToZed(KFPM, ZedHatType);
 	}
@@ -1801,12 +1796,6 @@ exec function SetExtraCommand(string Key, string Response)
 exec function testNotify()
 {
 	ShowLevelUpNotify("Title", "Main", "Secondary", "ImagePath", true, 10);
-}
-
-exec function setZedHatType(byte HatType)
-{
-	ZedHatType = HatType;
-	SaveConfig();
 }
 
 /**

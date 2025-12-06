@@ -4,12 +4,17 @@ class CD_CosmeticHandler extends Object
 var protected array<string> HatMeshPaths;
 var protected transient LinearColor ZC_MonoChromeValue, ZC_ColorValue;
 
+var protected transient array<KFPawn_Monster> HatWearingZeds;
+
 public simulated function AddHatToZed(KFPawn_Monster KFPM, byte ZedHatType)
 {
 	local StaticAttachments NewAttachment;
 	local StaticMeshComponent StaticAttachment;
 	local MaterialInstanceConstant NewMIC;
 	local string HatPath;
+
+	if (HatWearingZeds.Find(KFPM) != INDEX_NONE)
+		return;
 
 	HatPath = ChooseHatMeshPath(ZedHatType);
 	if (HatPath == "")
@@ -32,6 +37,8 @@ public simulated function AddHatToZed(KFPawn_Monster KFPM, byte ZedHatType)
 		KFPM.AttachComponent(StaticAttachment);
 		KFPM.Mesh.AttachComponentToSocket(StaticAttachment, NewAttachment.AttachSocketName);
 		KFPM.CharacterMICs.AddItem(NewMIC);
+
+		HatWearingZeds.AddItem(KFPM);
 	}
 }
 
