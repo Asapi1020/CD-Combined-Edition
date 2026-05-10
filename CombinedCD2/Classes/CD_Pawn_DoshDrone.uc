@@ -65,6 +65,57 @@ function UpdateReadyToUse(bool bReady)
 	return;
 }
 
+simulated function bool TargetValidWithGeometry(Actor Target, vector MuzzleLoc, vector ReferencePosition)
+{
+    local vector HitLocation, HitNormal;
+    local Actor HitActor;
+    local vector DistanceToTarget, DistanceToTrader;
+    local KFTraderTrigger TestTrader;
+    local float ModuloDistanceToTrader, DotValue;
+    local bool bTraderFound;
+    local int IteratorTrader;
+
+    SetCollisionType(COLLIDE_CustomDefault);
+    HitActor = Trace(HitLocation, HitNormal, ReferencePosition, MuzzleLoc,,,,TRACEFLAG_Bullet);
+    SetCollisionType(COLLIDE_NoCollision);
+
+    if (HitActor == none || KFPawn_Human(HitActor) == none) // modified line
+    {
+        return false;
+    }
+
+    DistanceToTarget = Target.Location - MuzzleLoc;
+
+    bTraderFound = false;
+
+    for (IteratorTrader=0; IteratorTrader < KFGameInfo(WorldInfo.Game).TraderList.Length; ++ IteratorTrader)
+    {
+        TestTrader = KFGameInfo(WorldInfo.Game).TraderList[IteratorTrader];
+
+        DistanceToTrader = TestTrader.Location - MuzzleLoc;
+
+        ModuloDistanceToTrader = VSize(DistanceToTrader);
+
+        if (ModuloDistanceToTrader < VSize(DistanceToTarget))
+        {
+            DotValue = Normal(DistanceToTrader) Dot Normal(DistanceToTarget);
+
+            if (DotValue > 0.2f)
+            {
+                bTraderFound = true;
+                break;
+            }
+        }
+    }
+
+    if (bTraderFound)
+    {
+        return false;
+    }   
+
+    return true;
+}
+
 simulated state Combat
 {
 	simulated event Tick( float DeltaTime )
@@ -72,11 +123,6 @@ simulated state Combat
         local vector MuzzleLoc;
         local rotator MuzzleRot;
         local rotator DesiredRotationRot;
-        local rotator NewRotationRate;
-
-        local vector HitLocation, HitNormal;
-        local TraceHitInfo HitInfo;
-        local Actor HitActor;
 
         local float NewAmmoPercentage;
 
@@ -107,12 +153,10 @@ simulated state Combat
         if (MateTarget != none)
         {
             if (Role == ROLE_Authority)
-            {
-                HitActor = Trace(HitLocation, HitNormal, MateTarget.Mesh.GetBoneLocation('Spine1'), MuzzleLoc,,,,TRACEFLAG_Bullet);
-                
+            {                
                 if (!MateTarget.IsAliveAndWell()
                     || VSizeSq(MateTarget.Location - Location) > EffectiveRadius * EffectiveRadius
-                    || (HitActor != none && HitActor.bWorldGeometry && KFFracturedMeshGlass(HitActor) == None))
+                    || TargetValidWithGeometry(MateTarget, MuzzleLoc, MateTarget.Mesh.GetBoneLocation('Spine1')))
                 {
                     MateTarget = none;
                     CheckForTargets();
@@ -130,24 +174,21 @@ simulated state Combat
 
             RotateBySpeed(DesiredRotationRot);
 
-            if (Role == ROLE_Authority && ReachedRotation())
+            if (Role == ROLE_Authority &&
+                ReachedRotation() &&
+                DroneWeapon != none &&
+                TargetValidWithGeometry(MateTarget, MuzzleLoc, MateTarget.Mesh.GetBoneLocation('Spine1')))
             {
-                HitActor = Trace(HitLocation, HitNormal, MuzzleLoc + vector(Rotation) * EffectiveRadius, MuzzleLoc, , , HitInfo, TRACEFLAG_Bullet);
-
-                if (DroneWeapon != none && HitActor != none && HitActor.bWorldGeometry == false)
+                DroneWeapon.MateTarget = MateTarget;
+                DroneWeapon.Fire();
+                
+                if (!DroneWeapon.HasAmmo(0))
                 {
-                    DroneWeapon.MateTarget = MateTarget;
-                    DroneWeapon.Fire();
-                    
-                    if (!DroneWeapon.HasAmmo(0))
-                    {
-                        SetTurretState(ETS_Empty);
-                    }
+                    SetTurretState(ETS_Empty);
                 }
             }
         }
 
-        RotationRate = NewRotationRate;
         if(bRotating)
         {
             UpdateRotation(DeltaTime);
@@ -242,13 +283,6 @@ simulated state Detonate
             // Revert to original
             ExplosionToUse.DamageRadius = OriginalDamageRadiusDroneExplosion;
         }
-
-        //  spawn dosh effect
-        if(WorldInfo.NetMode != NM_DedicatedServer)
-        {
-            //WorldInfo.MyEmitterPool.SpawnEmitter(ParticleSystem'FX_Headshot_Alt_EMIT.FX_Headshot_Alt_Dosh_01', Location);
-            class'KFPawn_Monster'.default.HeadShotAkComponent.PlayEvent(AkEvent'WW_Headshot_Packs.Play_WEP_Dosh_Headshot', true, true);
-        }
 		
         Destroy();
     }
@@ -265,9 +299,6 @@ function CheckForTargets()
     local vector MuzzleLoc;
     local rotator MuzzleRot;
 
-	local vector HitLocation, HitNormal;
-    local Actor HitActor;
-
     if (MateTarget != none)
     {
         CurrentDistance = VSizeSq(Location - MateTarget.Location);
@@ -278,6 +309,8 @@ function CheckForTargets()
     }
 
     DroneWeapon.GetMuzzleLocAndRot(MuzzleLoc, MuzzleRot);
+
+    SetCollisionType(COLLIDE_CustomDefault);
     
     foreach CollidingActors(class'KFPawn_Human', Target, EffectiveRadius, Location, true,, HitInfo)
     {
@@ -286,9 +319,7 @@ function CheckForTargets()
             continue;
         }
 
-        HitActor = Trace(HitLocation, HitNormal, Target.Mesh.GetBoneLocation('Spine1'), MuzzleLoc,,,,TRACEFLAG_Bullet);
-
-        if (HitActor == none || (HitActor.bWorldGeometry && KFFracturedMeshGlass(HitActor) == None))
+        if (TargetValidWithGeometry(Target, MuzzleLoc, Target.Mesh.GetBoneLocation('Spine1')) == false)
         {
             continue;
         }
@@ -306,6 +337,8 @@ function CheckForTargets()
             CurrentDistance = Distance;
         }
     }
+
+    SetCollisionType(COLLIDE_NoCollision);
 
     if (MateTarget != none)
     {
