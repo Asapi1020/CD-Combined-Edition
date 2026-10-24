@@ -294,6 +294,8 @@ private function InitSpawnCyclePresetList()
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ge_hotpot_plus');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ge_hotpot_hell');
 		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ge_niubi');
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ge_niubi_v1');
+		SpawnCyclePresetList.AddItem(new class'SpawnCycle.ge_niubi_v2');
 	}
 }
 
