@@ -43,3 +43,12 @@ enum DownloadStage
 	DS_Downloaded,
 	DS_Completed
 };
+
+enum ZedHatType
+{
+	ZHT_None,
+	ZHT_Cowboy,
+	ZHT_Xmas,
+	ZHT_Halloween,
+	ZHT_Random
+};

@@ -1,6 +1,11 @@
 class Custom_Proj_Dosh extends KFProj_Dosh
 	hidedropdown;
 
+var transient AkEvent DoshShotEvent;
+var transient string DoshShotEventPath;
+var transient ParticleSystem DoshShotFX;
+var transient string DoshShotFXPath;
+
 simulated function SetupDetonationTimer(float FuseTime)
 {
 	if (FuseTime > 0)
@@ -44,7 +49,47 @@ function SpawnDosh(Actor BouncedOff)
 
 	if(WorldInfo.NetMode != NM_DedicatedServer)
 	{
-		//WorldInfo.MyEmitterPool.SpawnEmitter(ParticleSystem'FX_Headshot_Alt_EMIT.FX_Headshot_Alt_Dosh_01', Location);
-        class'KFPawn_Monster'.default.HeadShotAkComponent.PlayEvent(AkEvent'WW_Headshot_Packs.Play_WEP_Dosh_Headshot', true, true);
+		WorldInfo.MyEmitterPool.SpawnEmitter(GetDoshShotFX(), Location);
+		class'KFPawn_Monster'.default.HeadShotAkComponent.PlayEvent(GetDoshShotEvent(), true, true);
 	}
+}
+
+protected function ParticleSystem GetDoshShotFX()
+{
+    if (DoshShotFX != none)
+    {
+        return DoshShotFX;
+    }
+
+    DoshShotFX = ParticleSystem( class'CD_Object'.static.SafeLoadObject(DoshShotFXPath, class'ParticleSystem') );
+
+    if (DoshShotFX == none)
+    {
+        `Log("CD_Pawn_DoshDrone::GetDoshShotFX: Failed to load DoshShotFX from path: " $ DoshShotFXPath);
+    }
+
+    return DoshShotFX;
+}
+
+protected function AkEvent GetDoshShotEvent()
+{
+    if (DoshShotEvent != none)
+    {
+        return DoshShotEvent;
+    }
+
+    DoshShotEvent = AkEvent( class'CD_Object'.static.SafeLoadObject(DoshShotEventPath, class'AkEvent') );
+
+    if (DoshShotEvent == none)
+    {
+        `Log("CD_Pawn_DoshDrone::GetDoshShotEvent: Failed to load DoshShotEvent from path: " $ DoshShotEventPath);
+    }
+
+    return DoshShotEvent;
+}
+
+defaultproperties
+{
+	DoshShotEventPath="WW_Headshot_Packs.Play_WEP_Dosh_Headshot"
+    DoshShotFXPath="FX_Headshot_Alt_EMIT.FX_Headshot_Alt_Dosh_01"
 }
